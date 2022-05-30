@@ -1,24 +1,30 @@
-cmake_minimum_required(VERSION 3.18)
-project(ArcanePython LANGUAGES NONE)
+cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
+
+project(ArcaneBenchs VERSION 1.0 LANGUAGES CXX)
+
+# Il ne faut pas compiler la ou se trouve les sources
+if(CMAKE_BINARY_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+  message(FATAL_ERROR "You can not do in-source compilation. You have to build in a directory distinct from the source directory")
+endif()
+
+enable_testing()
+
+# ----------------------------------------------------------------------------
+
+# Shared libraries are mandatory
+set (BUILD_SHARED_LIBS TRUE)
+
+# ----------------------------------------------------------------------------
 
 find_package(Arcane REQUIRED)
 
-message(STATUS "ARCANE_PREFIX_DIR ${ARCANE_PREFIX_DIR}")
-set(ARCANE_DOTNET_DLLS_DIR "${ARCANE_PREFIX_DIR}/lib")
-file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/ArcanePython")
-configure_file(ArcanePython/__init__.py.in ArcanePython/__init__.py @ONLY)
-configure_file(ArcanePython/app.runtime.json ArcanePython COPYONLY)
+# ----------------------------------------------------------------------------
 
-install(FILES
-  "${CMAKE_CURRENT_BINARY_DIR}/ArcanePython/__init__.py"
-  ArcanePython/app.runtime.json
-  DESTINATION "ArcanePython")
-install(DIRECTORY tests DESTINATION . USE_SOURCE_PERMISSIONS)
-enable_testing()
+if (NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
-# Crée un script pour lancer python avec le bon pythonpath
-# TODO: Faire windows
-configure_file(python_wrapper.sh.in python_wrapper.sh @ONLY)
+# ----------------------------------------------------------------------------
+# Add CSVExample
 
-add_test(NAME test1 COMMAND ./python_wrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/test1.py)
-add_test(NAME test4 COMMAND ./python_wrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/test4.py)
+add_subdirectory(src)

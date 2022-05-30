@@ -1,34 +1,26 @@
-Wrapping Python
+CSV Service
 ---------------
 
-ATTENTION: Ce support est très expérimental
+### How to use it?
 
-Installation
-============
+Build and Install Arcane.
 
-Ce wrapper utilise le wrapping C# généré par Arcane et le rend
-accessible en python via l'outil
-[Pythonnet](https://pythonnet.github.io).
+And:
 
-Il est nécessaire d'utiliser la version 3.6+ de Arcane.
+```sh
+ARCANE_INSTALL_PATH= # your install path.
 
-La procédure d'installation est la suivante:
+CSV_BUILD_TYPE=Release # or Debug
+CSV_SOURCE_DIR=framework-lab # your src path
+CSV_BUILD_DIR=build_lab # build dir
 
-- Compiler et Installer Arcane dans le répertoire
-  ${ARCANE_INSTALL_PATH}
-- Installer PythonNet en suivante la procédure spécifiée dans la
-  [documentation](https://github.com/pythonnet/pythonnet/wiki/Installation):
-  `pip install git+https://github.com/pythonnet/pythonnet`.
-- configurer le wrapper:
-~~~{sh}
-cmake -S /path/to/sources -B build_dir -DCMAKE_PREFIX_PATH=${ARCANE_INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=/path/to/wrapping
-cmake --build build_dir --target install
-~~~
+CSV_EXE=${CSV_BUILD_DIR}/src/csv
+CSV_ARC=${CSV_SOURCE_DIR}/tests/Test.arc
+mkdir -p ${CSV_BUILD_DIR}
+cd ${CSV_BUILD_DIR}
 
-Une fois installé dans `/path/to/wrapping`, il est possible de lancer
-les tests en positionnant le PYTHONPATH à ce chemin:
+cmake -S ${CSV_SOURCE_DIR} -B ${CSV_BUILD_DIR} -DCMAKE_PREFIX_PATH=${ARCANE_INSTALL_PATH} -DCMAKE_BUILD_TYPE=${CSV_BUILD_TYPE}
+make
 
-~~~{.sh}
-PYTHONPATH=/path/to/wrapping python3 /path/to/wrapping/tests/test4.py
-~~~
-
+${CSV_EXE} ${CSV_ARC}
+```
