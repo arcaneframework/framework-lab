@@ -2,7 +2,7 @@
 <service name="CsvOutput" version="1.0" singleton="true">
 
   <description>Jeu de données du service CsvOutput</description>
-  <interface name="ISimpleOutput" />
+  <interface name="ISimpleTableOutput" />
 
 	<variables>
   </variables>

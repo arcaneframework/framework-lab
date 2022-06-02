@@ -13,7 +13,7 @@
 
   <options>
 
-    <service-instance name="csv-output" type="ISimpleOutput">
+    <service-instance name="csv-output" type="ISimpleTableOutput">
       <description>Service CSV</description>
     </service-instance>
 

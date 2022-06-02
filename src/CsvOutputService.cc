@@ -19,72 +19,95 @@
 using namespace Arcane;
 
 void CsvOutputService::
+init()
+{
+  m_separator = ";";
+  m_name_tab = "";
+}
+
+void CsvOutputService::
+init(String name_csv)
+{
+  m_separator = ";";
+  m_name_tab = name_csv;
+}
+
+void CsvOutputService::
 init(String name_csv, String separator_csv)
 {
   m_separator = separator_csv;
-  m_rows[0] = name_csv + m_separator;
-  m_size_rows.add(1);
-  m_size_columns.add(1);
+  m_name_tab = name_csv;
 }
 
 Integer CsvOutputService::
 addRow(String name_row, bool fill_start)
 {
-  m_name_rows.add(name_row);
-  String new_line = name_row + m_separator;
+  Integer pos = m_values_csv.dim1Size();
+  m_values_csv.resize(pos+1);
 
+  m_name_rows.add(name_row);
   if(fill_start) {
-    for(Integer i = 1; i < m_size_rows[0]; i++) {
-      new_line = new_line + m_separator;
-    }
-    m_size_rows.add(m_size_columns[0]);
+    m_size_rows.add(m_values_csv.dim2Size());
   }
   else{
     m_size_rows.add(0);
   }
 
-  m_rows.add(new_line);
-  return m_size_columns[0]++;
+  return pos;
 }
 
 Integer CsvOutputService::
-addRow(String name_row, ConstArrayView<Real>& elems)
+addRow(String name_row, ConstArrayView<Real> elems)
 {
+  Integer pos = m_values_csv.dim1Size();
+  m_values_csv.resize(pos+1);
+
+  ArrayView<Real> view = m_values_csv[pos];
+  Integer min_size = (elems.size() < view.size() ? elems.size() : view.size());
+
+  for(Integer i = 0; i < min_size; i++) {
+    view[i] = elems[i];
+  }
+    
   m_name_rows.add(name_row);
-  String new_line = name_row + m_separator;
+  m_size_rows.add(min_size);
 
-  m_size_rows.add(0);
-
-  m_rows.add(new_line);
-  addElemsRow(m_size_columns[0], elems);
-  return m_size_columns[0]++;
+  return pos;
 }
 
 bool CsvOutputService::
-addElemsRow(Integer pos, ConstArrayView<Real>& elems)
+addElemsRow(Integer pos, ConstArrayView<Real> elems)
 {
-  if(elems.size() + m_size_rows[pos] > m_size_rows[0]) warning() << "Attention, tous les élements ne seront pas mis.";
+  if(pos < 0 || pos >= m_values_csv.dim1Size()) return false;
 
-  String real_string;
+  ArrayView<Real> view = m_values_csv[pos];
+  Integer size_row = m_size_rows[pos];
+  Integer min_size = (elems.size() < view.size()-size_row ? elems.size() : view.size()-size_row);
 
-  for(Integer i = 0; i < m_size_rows[0] && i < elems.size(); i++) {
-    real_string = real_string + String::fromNumber(elems[i]) + m_separator;
-    m_size_rows[pos]++;
+  for(Integer i = 0; i < min_size; i++) {
+    view[i+size_row] = elems[i];
+    m_size_columns[i+size_row]++;
   }
-  m_rows[pos] = m_rows[pos] + real_string;
+  m_size_rows[pos] += min_size;
+
   return true;
 }
 
 bool CsvOutputService::
 addElemRow(Integer pos, Real elem)
 {
-  if(pos >= m_size_columns[0]) {
-    error() << "Mauvaise pos";
-    return false;
-  }
+  if(pos < 0 || pos >= m_values_csv.dim1Size()) return false;
 
-  m_rows[pos] = m_rows[pos] + String::fromNumber(elem) + m_separator;
+  ArrayView<Real> view = m_values_csv[pos];
+  Integer size_row = m_size_rows[pos];
+
+  if(view.size() < size_row + 1) return false;
+
+  view[size_row] = elem;
+
   m_size_rows[pos]++;
+  m_size_columns[size_row]++;
+
   return true;
 }
 
@@ -93,45 +116,87 @@ addElemRow(String name_row, Real elem, bool create_if_not_exist)
 {
   std::optional<Integer> pos = m_name_rows.span().findFirst(name_row);
 
-  if(pos)                       return addElemRow(pos.value()+1, elem);
+  if(pos)                       return addElemRow(pos.value(), elem);
   else if(create_if_not_exist)  return addElemRow(addRow(name_row, false), elem);
+  else                          return false;
+}
+
+bool CsvOutputService::
+addElemColumn(Integer pos, Real elem)
+{
+  if(pos < 0 || pos >= m_values_csv.dim2Size()) return false;
+
+  Integer size_column = m_size_columns[pos];
+
+  if(m_values_csv.dim2Size() < size_column + 1) return false;
+
+  m_values_csv[size_column][pos] = elem;
+
+  m_size_columns[pos]++;
+  m_size_rows[size_column]++;
+
+  return true;
+}
+
+bool CsvOutputService::
+addElemColumn(String name_column, Real elem, bool create_if_not_exist)
+{
+  std::optional<Integer> pos = m_name_columns.span().findFirst(name_column);
+
+  if(pos)                       return addElemColumn(pos.value(), elem);
+  else if(create_if_not_exist)  return addElemColumn(addColumn(name_column, false), elem);
   else                          return false;
 }
 
 Integer CsvOutputService::
 addColumn(String name_column, bool fill_start)
 {
+  Integer pos = m_values_csv.dim2Size();
+  m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
+
   m_name_columns.add(name_column);
-  String new_column = name_column + m_separator;
+  if(fill_start) {
+    m_size_columns.add(m_values_csv.dim1Size());
+  }
+  else{
+    m_size_columns.add(0);
+  }
 
-  m_size_columns.add(1);
-
-  m_rows[0] = m_rows[0] + new_column;
-  return m_size_rows[0]++;
+  return pos;
 }
 
 Integer CsvOutputService::
-addColumn(String name_column, ConstArrayView<Real>& elems)
+addColumn(String name_column, ConstArrayView<Real> elems)
 {
+  Integer pos = m_values_csv.dim2Size();
+  m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
+
+  Integer min_size = (elems.size() < m_values_csv.dim1Size() ? elems.size() : m_values_csv.dim1Size());
+
+  for(Integer i = 0; i < min_size; i++) {
+    m_values_csv[i][pos] = elems[i];
+  }
+    
   m_name_columns.add(name_column);
-  String new_column = name_column + m_separator;
+  m_size_columns.add(min_size);
 
-  m_size_columns.add(1);
-
-  m_rows[0] = m_rows[0] + new_column;
-  addElemsColumn(m_size_rows[0], elems);
-  return m_size_rows[0]++;
+  return pos;
 }
 
 bool CsvOutputService::
-addElemsColumn(Integer pos, ConstArrayView<Real>& elems)
+addElemsColumn(Integer pos, ConstArrayView<Real> elems)
 {
-  if(elems.size() + m_size_columns[pos] > m_size_columns[0]) warning() << "Attention, tous les élements ne seront pas mis.";
+  if(pos < 0 || pos >= m_values_csv.dim2Size()) return false;
 
-  for(Integer i = m_size_columns[pos], j = 0; i < m_size_columns[0] && j < elems.size(); i++, j++) {
-    m_rows[i] = m_rows[i] + String::fromNumber(elems[j]) + m_separator;
-    m_size_columns[pos]++;
+  Integer size_column = m_size_columns[pos];
+  Integer min_size = (elems.size() < m_values_csv.dim1Size()-size_column ? elems.size() : m_values_csv.dim1Size()-size_column);
+
+  for(Integer i = 0; i < min_size; i++) {
+    m_values_csv[i+size_column][pos] = elems[i];
+    m_size_rows[i+size_column]++;
   }
+  m_size_columns[pos] += min_size;
+
   return true;
 }
 
@@ -181,9 +246,24 @@ print(bool only_P0)
   computePathName();
   if(only_P0 && mesh()->parallelMng()->commRank() != 0) return;
   pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Ecriture du .csv dans la sortie standard :";
-  for(Integer i = 0; i < m_rows.size(); i++) {
-    std::cout << m_rows[i] << std::endl;
+  
+  std::cout << m_name_tab << m_separator;
+
+  for(Integer j = 0; j < m_name_columns.size(); j++) {
+    std::cout << m_name_columns[j] << m_separator;
   }
+  std::cout << std::endl;
+
+  for(Integer i = 0; i < m_values_csv.dim1Size(); i++) {
+    if(m_name_rows.size() > i) std::cout << m_name_rows[i];
+    std::cout << m_separator;
+    ConstArrayView<Real> view = m_values_csv[i];
+    for(Integer j = 0; j < m_values_csv.dim2Size(); j++) {
+      std::cout << view[j] << m_separator;
+    }
+    std::cout << std::endl;
+  }
+
   pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Fin écriture .csv";
 }
 
@@ -195,9 +275,24 @@ writeFile()
 
   std::ofstream ofile(m_path_name.localstr());
   if(ofile.fail()) return false;
-  for(Integer i = 0; i < m_rows.size(); i++) {
-    ofile << m_rows[i] << std::endl;
+
+  ofile << m_name_tab << m_separator;
+
+  for(Integer j = 0; j < m_name_columns.size(); j++) {
+    ofile << m_name_columns[j] << m_separator;
   }
+  ofile << std::endl;
+
+  for(Integer i = 0; i < m_values_csv.dim1Size(); i++) {
+    if(m_name_rows.size() > i) ofile << m_name_rows;
+    ofile << m_separator;
+    ConstArrayView<Real> view = m_values_csv[i];
+    for(Integer j = 0; j < m_values_csv.dim2Size(); j++) {
+      ofile << view[j] << m_separator;
+    }
+    ofile << std::endl;
+  }
+
   ofile.close();
   return true;
 }
@@ -208,4 +303,31 @@ writeFile(String path_file)
   m_path_name = path_file;
   m_name_computed = false;
   return writeFile();
+}
+
+bool CsvOutputService::
+editElem(Integer posX, Integer posY, Real elem)
+{
+  if(posX < 0 || posX >= m_values_csv.dim2Size() 
+  || posY < 0 || posY >= m_values_csv.dim1Size()) 
+    return false;
+
+  m_values_csv[posY][posX] = elem;
+  return true;
+}
+
+Integer CsvOutputService::
+addAverageColumn(String name_column)
+{
+  Integer pos = addColumn(name_column, false);
+  for(Integer i = 0; i < m_values_csv.dim1Size(); i++) {
+    Real avg = 0.0;
+    ConstArrayView<Real> view = m_values_csv[i];
+    for(Integer j = 0; j < view.size()-1; j++) {
+      avg += view[j];
+    }
+    avg /= view.size()-1;
+    addElemColumn(pos, avg);
+  }
+  return pos;
 }
