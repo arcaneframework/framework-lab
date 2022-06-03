@@ -33,6 +33,8 @@ public:
     , m_name_columns(0)
     , m_name_computed(false)
     , m_only_P0(true)
+    , m_last_row(-1)
+    , m_last_column(-1)
     {
       if(sbi.creationType() == ST_CaseOption) {
         m_path_name = options()->getFile();
@@ -55,11 +57,22 @@ public:
   Integer addColumn(String name_column, bool fill_start) override;
   Integer addColumn(String name_column, ConstArrayView<Real> elems) override;
   
+
   bool addElemRow(Integer pos, Real elem) override;
   bool addElemRow(String name_row, Real elem, bool create_if_not_exist) override;
+  bool addElemNextRow(Real elem) override;
+  bool addElemsNextRow(ConstArrayView<Real> elems) override;
+
+  bool addElemsRow(Integer pos, ConstArrayView<Real> elems) override;
+
 
   bool addElemColumn(Integer pos, Real elem) override;
   bool addElemColumn(String name_column, Real elem, bool create_if_not_exist) override;
+  bool addElemNextColumn(Real elem) override;
+  bool addElemsNextColumn(ConstArrayView<Real> elems) override;
+
+  bool addElemsColumn(Integer pos, ConstArrayView<Real> elems) override;
+
 
   void print(bool only_P0) override;
   bool writeFile() override;
@@ -69,29 +82,31 @@ public:
 
   Integer addAverageColumn(String name_column) override;
 
+
 private:
-  bool addElemsRow(Integer pos, ConstArrayView<Real> elems);
-  bool addElemsColumn(Integer pos, ConstArrayView<Real> elems);
   void computePathName();
 
 private:
+  UniqueArray2<Real> m_values_csv;
 
   String m_path_name;
   bool m_name_computed;
   bool m_only_P0;
 
-
-
-  UniqueArray2<Real> m_values_csv;
-
   String m_name_tab;
   String m_separator;
 
   UniqueArray<String> m_name_rows;
-  UniqueArray<Integer> m_size_rows;
-
   UniqueArray<String> m_name_columns;
+
+  // Tailles des lignes/colonnes 
+  // (et pas le nombre d'éléments, on compte les "trous" ici).
+  UniqueArray<Integer> m_size_rows;
   UniqueArray<Integer> m_size_columns;
+
+  // Dernier élement ajouté.
+  Integer m_last_row;
+  Integer m_last_column;
 };
 
 #endif

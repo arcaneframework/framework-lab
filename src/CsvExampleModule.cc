@@ -63,6 +63,15 @@ endModule()
   csv->editElem(3, 1, 86);
 
   csv->addAverageColumn("Moyenne");
+  csv->print();
+
+  csv->addColumn("Colonne 5");
+  csv->addElemRow("Ligne 1", 25);
+  //csv->addElemRow("Ligne 2", 26);
+  //csv->addElemRow("Ligne 3", 27);
+  csv->addElemNextRow(26);
+  csv->addElemNextRow(27);
+
 
   info() << "Affichage du csv";
   csv->print();

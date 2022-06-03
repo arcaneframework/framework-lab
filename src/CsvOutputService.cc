@@ -39,6 +39,7 @@ init(String name_csv, String separator_csv)
   m_name_tab = name_csv;
 }
 
+
 Integer CsvOutputService::
 addRow(String name_row, bool fill_start)
 {
@@ -53,6 +54,8 @@ addRow(String name_row, bool fill_start)
     m_size_rows.add(0);
   }
 
+  m_last_row = pos;
+
   return pos;
 }
 
@@ -61,36 +64,13 @@ addRow(String name_row, ConstArrayView<Real> elems)
 {
   Integer pos = m_values_csv.dim1Size();
   m_values_csv.resize(pos+1);
-
-  ArrayView<Real> view = m_values_csv[pos];
-  Integer min_size = (elems.size() < view.size() ? elems.size() : view.size());
-
-  for(Integer i = 0; i < min_size; i++) {
-    view[i] = elems[i];
-  }
     
   m_name_rows.add(name_row);
-  m_size_rows.add(min_size);
+  m_size_rows.add(0);
+
+  addElemsRow(pos, elems);
 
   return pos;
-}
-
-bool CsvOutputService::
-addElemsRow(Integer pos, ConstArrayView<Real> elems)
-{
-  if(pos < 0 || pos >= m_values_csv.dim1Size()) return false;
-
-  ArrayView<Real> view = m_values_csv[pos];
-  Integer size_row = m_size_rows[pos];
-  Integer min_size = (elems.size() < view.size()-size_row ? elems.size() : view.size()-size_row);
-
-  for(Integer i = 0; i < min_size; i++) {
-    view[i+size_row] = elems[i];
-    m_size_columns[i+size_row]++;
-  }
-  m_size_rows[pos] += min_size;
-
-  return true;
 }
 
 bool CsvOutputService::
@@ -105,8 +85,18 @@ addElemRow(Integer pos, Real elem)
 
   view[size_row] = elem;
 
+  m_last_row = pos;
+  m_last_column = size_row;
+
   m_size_rows[pos]++;
-  m_size_columns[size_row]++;
+  // Il peut y avoir des élements sur la ligne d'après à la même colonne.
+  // Exemple : addElemRow(pos=L01, elem=NEW):
+  // aaa|C00|C01|C02
+  // L00|123|456|789
+  // L01|147|NEW|
+  // L02|159|753|852
+  // Il y a 753 donc la taille de la colonne reste égale à 3.
+  m_size_columns[size_row] = std::max(pos+1, m_size_columns[size_row]);
 
   return true;
 }
@@ -122,31 +112,40 @@ addElemRow(String name_row, Real elem, bool create_if_not_exist)
 }
 
 bool CsvOutputService::
-addElemColumn(Integer pos, Real elem)
+addElemNextRow(Real elem)
 {
-  if(pos < 0 || pos >= m_values_csv.dim2Size()) return false;
+  if(m_last_row == -1 || m_last_column == -1) return false;
+  return addElemRow(m_last_row+1, elem);
+}
 
-  Integer size_column = m_size_columns[pos];
+bool CsvOutputService::
+addElemsNextRow(ConstArrayView<Real> elems)
+{
+  if(m_last_row == -1 || m_last_column == -1) return false;
+  return addElemsRow(m_last_row+1, elems);
+}
 
-  if(m_values_csv.dim2Size() < size_column + 1) return false;
+bool CsvOutputService::
+addElemsRow(Integer pos, ConstArrayView<Real> elems)
+{
+  if(pos < 0 || pos >= m_values_csv.dim1Size()) return false;
 
-  m_values_csv[size_column][pos] = elem;
+  ArrayView<Real> view = m_values_csv[pos];
+  Integer size_row = m_size_rows[pos];
+  Integer min_size = (elems.size() < view.size()-size_row ? elems.size() : view.size()-size_row);
 
-  m_size_columns[pos]++;
-  m_size_rows[size_column]++;
+  for(Integer i = 0; i < min_size; i++) {
+    view[i+size_row] = elems[i];
+    m_size_columns[i+size_row] = std::max(pos+1, m_size_columns[i+size_row]);
+  }
+  m_size_rows[pos] += min_size;
+
+  m_last_row = pos;
+  m_last_column = m_size_rows[pos]-1;
 
   return true;
 }
 
-bool CsvOutputService::
-addElemColumn(String name_column, Real elem, bool create_if_not_exist)
-{
-  std::optional<Integer> pos = m_name_columns.span().findFirst(name_column);
-
-  if(pos)                       return addElemColumn(pos.value(), elem);
-  else if(create_if_not_exist)  return addElemColumn(addColumn(name_column, false), elem);
-  else                          return false;
-}
 
 Integer CsvOutputService::
 addColumn(String name_column, bool fill_start)
@@ -162,6 +161,8 @@ addColumn(String name_column, bool fill_start)
     m_size_columns.add(0);
   }
 
+  m_last_column = pos;
+
   return pos;
 }
 
@@ -171,16 +172,42 @@ addColumn(String name_column, ConstArrayView<Real> elems)
   Integer pos = m_values_csv.dim2Size();
   m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
 
-  Integer min_size = (elems.size() < m_values_csv.dim1Size() ? elems.size() : m_values_csv.dim1Size());
-
-  for(Integer i = 0; i < min_size; i++) {
-    m_values_csv[i][pos] = elems[i];
-  }
-    
   m_name_columns.add(name_column);
-  m_size_columns.add(min_size);
+  m_size_columns.add(0);
+
+  addElemsColumn(pos, elems);
 
   return pos;
+}
+
+bool CsvOutputService::
+addElemColumn(Integer pos, Real elem)
+{
+  if(pos < 0 || pos >= m_values_csv.dim2Size()) return false;
+
+  Integer size_column = m_size_columns[pos];
+
+  if(m_values_csv.dim2Size() < size_column + 1) return false;
+
+  m_values_csv[size_column][pos] = elem;
+
+  m_last_column = pos;
+  m_last_row = size_column;
+
+  m_size_columns[pos]++;
+  m_size_rows[size_column] = std::max(pos+1, m_size_rows[size_column]);
+
+  return true;
+}
+
+bool CsvOutputService::
+addElemColumn(String name_column, Real elem, bool create_if_not_exist)
+{
+  std::optional<Integer> pos = m_name_columns.span().findFirst(name_column);
+
+  if(pos)                       return addElemColumn(pos.value(), elem);
+  else if(create_if_not_exist)  return addElemColumn(addColumn(name_column, false), elem);
+  else                          return false;
 }
 
 bool CsvOutputService::
@@ -193,12 +220,31 @@ addElemsColumn(Integer pos, ConstArrayView<Real> elems)
 
   for(Integer i = 0; i < min_size; i++) {
     m_values_csv[i+size_column][pos] = elems[i];
-    m_size_rows[i+size_column]++;
+    m_size_rows[i+size_column] = std::max(pos+1, m_size_rows[i+size_column]);
+    info() << m_size_rows[i+size_column] << " " << pos;
   }
   m_size_columns[pos] += min_size;
 
+  m_last_column = pos;
+  m_last_row = m_size_columns[pos] - 1;
+
   return true;
 }
+
+bool CsvOutputService::
+addElemNextColumn(Real elem)
+{
+  if(m_last_row == -1 || m_last_column == -1) return false;
+  return addElemColumn(m_last_column+1, elem);
+}
+
+bool CsvOutputService::
+addElemsNextColumn(ConstArrayView<Real> elems)
+{
+  if(m_last_row == -1 || m_last_column == -1) return false;
+  return addElemsColumn(m_last_column+1, elems);
+}
+
 
 void CsvOutputService::
 computePathName()
@@ -311,6 +357,11 @@ editElem(Integer posX, Integer posY, Real elem)
   if(posX < 0 || posX >= m_values_csv.dim2Size() 
   || posY < 0 || posY >= m_values_csv.dim1Size()) 
     return false;
+
+
+  if(m_size_columns[posX] <= posY) m_size_columns[posX] = posY+1;
+  if(m_size_rows[posY] <= posX) m_size_rows[posY] = posX+1;
+
 
   m_values_csv[posY][posX] = elem;
   return true;
