@@ -31,16 +31,18 @@ public:
     , m_size_columns(0)
     , m_name_rows(0)
     , m_name_columns(0)
-    , m_name_computed(false)
-    , m_only_P0(true)
+    , m_path_computed(false)
+    , m_name_tab_computed(false)
+    , m_path_only_P0(true)
+    , m_name_tab_only_P0(true)
     , m_last_row(-1)
     , m_last_column(-1)
     {
       if(sbi.creationType() == ST_CaseOption) {
-        m_path_name = options()->getFile();
+        m_path = options()->getPath();
       }
       else {
-        m_path_name = "./output.csv";
+        m_path = "./";
       }
     }
   
@@ -60,6 +62,7 @@ public:
 
   bool addElemRow(Integer pos, Real elem) override;
   bool addElemRow(String name_row, Real elem, bool create_if_not_exist) override;
+  
   bool addElemNextRow(Real elem) override;
   bool addElemsNextRow(ConstArrayView<Real> elems) override;
 
@@ -68,6 +71,7 @@ public:
 
   bool addElemColumn(Integer pos, Real elem) override;
   bool addElemColumn(String name_column, Real elem, bool create_if_not_exist) override;
+
   bool addElemNextColumn(Real elem) override;
   bool addElemsNextColumn(ConstArrayView<Real> elems) override;
 
@@ -75,25 +79,34 @@ public:
 
 
   void print(bool only_P0) override;
-  bool writeFile() override;
-  bool writeFile(String path_file) override;
+  void print(Integer only_proc) override;
+  bool writeFile(bool only_P0) override;
+  bool writeFile(String path, bool only_P0) override;
 
   bool editElem(Integer posX, Integer posY, Real elem) override;
+  Real getElem(Integer posX, Integer posY) override;
+  Integer getNumRows() override;
+  Integer getNumColumns() override;
 
   Integer addAverageColumn(String name_column) override;
 
 
 private:
-  void computePathName();
+  String _computeAt(String name, bool& only_P0);
+  String _computeFinalPath();
+  void _print(std::ostream& stream);
 
 private:
   UniqueArray2<Real> m_values_csv;
 
-  String m_path_name;
-  bool m_name_computed;
-  bool m_only_P0;
+  String m_path;
+  bool m_path_computed;
+  bool m_path_only_P0;
 
   String m_name_tab;
+  bool m_name_tab_computed;
+  bool m_name_tab_only_P0;
+
   String m_separator;
 
   UniqueArray<String> m_name_rows;

@@ -17,7 +17,7 @@
       <description>Service CSV</description>
     </service-instance>
 
-    <simple name="csvFile" type="string" default="">
+    <simple name="csvPath" type="string" default="">
       <description>
         Path and name for csv file (example: ./example.csv ).
       </description>

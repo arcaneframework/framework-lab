@@ -53,12 +53,16 @@ public:
 
 
   virtual bool editElem(Integer posX, Integer posY, Real elem) = 0;
+  virtual Real getElem(Integer posX, Integer posY) = 0;
+  virtual Integer getNumRows() = 0;
+  virtual Integer getNumColumns() = 0;
   
   virtual Integer addAverageColumn(String name_column) = 0;
 
   virtual void print(bool only_P0 = true) = 0;
-  virtual bool writeFile() = 0;
-  virtual bool writeFile(String path_file) = 0;
+  virtual void print(Integer only_proc) = 0;
+  virtual bool writeFile(bool only_P0 = false) = 0;
+  virtual bool writeFile(String path, bool only_P0 = false) = 0;
 };
 
 #endif

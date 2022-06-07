@@ -8,9 +8,9 @@
   </variables>
 
 	<options>
-    <simple name="file" type="string" default="./output.csv">
+    <simple name="path" type="string" default="./">
       <description>
-        Emplacement fichier .csv
+        Emplacement pour fichiers .csv
       </description>
     </simple>
 	</options>

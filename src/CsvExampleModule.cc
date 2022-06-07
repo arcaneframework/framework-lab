@@ -75,9 +75,9 @@ endModule()
 
   info() << "Affichage du csv";
   csv->print();
-  if(options()->getCsvFile() != "") {
+  if(options()->getCsvPath() != "") {
     info() << "Ecriture du csv dans un fichier";
-    csv->writeFile(options()->getCsvFile());
+    csv->writeFile(options()->getCsvPath());
   }
 }
 

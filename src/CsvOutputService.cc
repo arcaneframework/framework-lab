@@ -22,21 +22,24 @@ void CsvOutputService::
 init()
 {
   m_separator = ";";
-  m_name_tab = "";
+  m_name_tab = _computeAt("Table_%proc_id%", m_name_tab_only_P0);
+  m_name_tab_computed = true;
 }
 
 void CsvOutputService::
 init(String name_csv)
 {
   m_separator = ";";
-  m_name_tab = name_csv;
+  m_name_tab = _computeAt(name_csv, m_name_tab_only_P0);
+  m_name_tab_computed = true;
 }
 
 void CsvOutputService::
 init(String name_csv, String separator_csv)
 {
   m_separator = separator_csv;
-  m_name_tab = name_csv;
+  m_name_tab = _computeAt(name_csv, m_name_tab_only_P0);
+  m_name_tab_computed = true;
 }
 
 
@@ -246,109 +249,118 @@ addElemsNextColumn(ConstArrayView<Real> elems)
 }
 
 
-void CsvOutputService::
-computePathName()
+String CsvOutputService::
+_computeFinalPath()
 {
-  // On ne lit le nom qu'une seule fois.
-  if(m_name_computed) return;
-  m_name_computed = true;
+  if(!m_path_computed) {
+    m_path = _computeAt(m_path, m_path_only_P0);
+    m_path_computed = true;
+  }
+  if(!m_name_tab_computed) {
+    m_name_tab = _computeAt(m_name_tab, m_name_tab_only_P0);
+    m_name_tab_computed = true;
+  }
+  return m_path + m_name_tab + ".csv";
+}
 
+String CsvOutputService::
+_computeAt(String name, bool& only_P0)
+{
   // On découpe la string là où se trouve les @.
   StringUniqueArray string_splited;
-  m_path_name.split(string_splited, '@');
+  name.split(string_splited, '@');
 
   // On traite les mots entre les "@".
-  if(string_splited.size() > 1) {
+  if (string_splited.size() > 1)
+  {
     // On recherche "proc_id" dans le tableau (donc @proc_id@ dans le nom).
     std::optional<Integer> proc_id = string_splited.span().findFirst("proc_id");
     // On remplace "@proc_id@" par l'id du proc.
-    if(proc_id)
+    if (proc_id)
     {
       string_splited[proc_id.value()] = String::fromNumber(mesh()->parallelMng()->commRank());
-      m_only_P0 = false;
+      only_P0 = false;
     }
     // Il n'y a que P0 qui write.
-    else{
-      m_only_P0 = true;
+    else
+    {
+      only_P0 = true;
     }
-  }
-
-  // Autres traitements.
-  if(!m_path_name.endsWith(".csv")) {
-    string_splited.add(".csv");
   }
 
   // On recombine la chaine.
   String combined = "";
-  for(String str : string_splited){
+  for (String str : string_splited)
+  {
     combined = combined + str;
   }
-  m_path_name = combined;
+  return combined;
 }
+
 
 void CsvOutputService::
 print(bool only_P0)
 {
-  computePathName();
   if(only_P0 && mesh()->parallelMng()->commRank() != 0) return;
   pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Ecriture du .csv dans la sortie standard :";
-  
-  std::cout << m_name_tab << m_separator;
-
-  for(Integer j = 0; j < m_name_columns.size(); j++) {
-    std::cout << m_name_columns[j] << m_separator;
-  }
-  std::cout << std::endl;
-
-  for(Integer i = 0; i < m_values_csv.dim1Size(); i++) {
-    if(m_name_rows.size() > i) std::cout << m_name_rows[i];
-    std::cout << m_separator;
-    ConstArrayView<Real> view = m_values_csv[i];
-    for(Integer j = 0; j < m_values_csv.dim2Size(); j++) {
-      std::cout << view[j] << m_separator;
-    }
-    std::cout << std::endl;
-  }
-
+  _print(std::cout);
   pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Fin écriture .csv";
 }
 
-bool CsvOutputService::
-writeFile()
+void CsvOutputService::
+print(Integer only_proc)
 {
-  computePathName();
-  if(m_only_P0 && mesh()->parallelMng()->commRank() != 0) return true;
+  if(mesh()->parallelMng()->commRank() != only_proc) return;
+  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Ecriture du .csv dans la sortie standard :";
+  _print(std::cout);
+  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Fin écriture .csv";
+}
 
-  std::ofstream ofile(m_path_name.localstr());
-  if(ofile.fail()) return false;
-
-  ofile << m_name_tab << m_separator;
+void CsvOutputService::
+_print(std::ostream& stream)
+{
+  stream << m_name_tab << m_separator;
 
   for(Integer j = 0; j < m_name_columns.size(); j++) {
-    ofile << m_name_columns[j] << m_separator;
+    stream << m_name_columns[j] << m_separator;
   }
-  ofile << std::endl;
+  stream << std::endl;
 
   for(Integer i = 0; i < m_values_csv.dim1Size(); i++) {
-    if(m_name_rows.size() > i) ofile << m_name_rows;
-    ofile << m_separator;
+    if(m_name_rows.size() > i) stream << m_name_rows[i];
+    stream << m_separator;
     ConstArrayView<Real> view = m_values_csv[i];
     for(Integer j = 0; j < m_values_csv.dim2Size(); j++) {
-      ofile << view[j] << m_separator;
+      stream << view[j] << m_separator;
     }
-    ofile << std::endl;
+    stream << std::endl;
   }
+}
+
+
+bool CsvOutputService::
+writeFile(bool only_P0)
+{
+  String path = _computeFinalPath();
+  bool all_only_P0 = m_path_only_P0 && m_name_tab_only_P0;
+  // Le seul cas où tout le monde écrit est si only_P0 == false et all_only_P0 == false.
+  if((only_P0 || all_only_P0) && mesh()->parallelMng()->commRank() != 0) return true;
+
+  std::ofstream ofile(path.localstr());
+  if(ofile.fail()) return false;
+
+  _print(ofile);
 
   ofile.close();
   return true;
 }
 
 bool CsvOutputService::
-writeFile(String path_file)
+writeFile(String path, bool only_P0)
 {
-  m_path_name = path_file;
-  m_name_computed = false;
-  return writeFile();
+  m_path = path;
+  m_path_computed = false;
+  return writeFile(only_P0);
 }
 
 bool CsvOutputService::
@@ -366,6 +378,29 @@ editElem(Integer posX, Integer posY, Real elem)
   m_values_csv[posY][posX] = elem;
   return true;
 }
+
+Real CsvOutputService::
+getElem(Integer posX, Integer posY)
+{
+  if(posX < 0 || posX >= m_values_csv.dim2Size() 
+  || posY < 0 || posY >= m_values_csv.dim1Size()) 
+    return 0;
+
+  return m_values_csv[posY][posX];
+}
+
+Integer CsvOutputService::
+getNumRows()
+{
+  return m_values_csv.dim1Size();
+}
+
+Integer CsvOutputService::
+getNumColumns()
+{
+  return m_values_csv.dim2Size();
+}
+
 
 Integer CsvOutputService::
 addAverageColumn(String name_column)

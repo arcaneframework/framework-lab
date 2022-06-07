@@ -32,10 +32,10 @@
   <csv-example>
 
     <csv-output name="CsvOutput">
-      <file>./TestService.csv</file>
+      <path>./</path>
     </csv-output>
 
-    <csvFile>./TestSingleton.csv</csvFile>
+    <csvPath>./</csvPath>
 
   </csv-example>
 
