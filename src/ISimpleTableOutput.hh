@@ -28,8 +28,8 @@ public:
   
 public:
   virtual void init() = 0;
-  virtual void init(String name_csv) = 0;
-  virtual void init(String name_csv, String separator) = 0;
+  virtual void init(String name_table) = 0;
+  virtual void init(String name_table, String separator) = 0;
 
   virtual Integer addRow(String name_line, bool fill_start = false) = 0;
   virtual Integer addRow(String name_line, ConstArrayView<Real> elems) = 0;
@@ -53,7 +53,10 @@ public:
 
 
   virtual bool editElem(Integer posX, Integer posY, Real elem) = 0;
+  virtual bool editElem(String rowName, String columnName, Real elem) = 0;
+
   virtual Real getElem(Integer posX, Integer posY) = 0;
+  virtual Real getElem(String rowName, String columnName) = 0;
   virtual Integer getNumRows() = 0;
   virtual Integer getNumColumns() = 0;
   

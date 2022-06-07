@@ -50,8 +50,8 @@ public:
 
 public:
   void init() override;
-  void init(String name_csv) override;
-  void init(String name_csv, String separator) override;
+  void init(String name_table) override;
+  void init(String name_table, String separator) override;
 
   Integer addRow(String name_row, bool fill_start) override;
   Integer addRow(String name_row, ConstArrayView<Real> elems) override;
@@ -84,7 +84,11 @@ public:
   bool writeFile(String path, bool only_P0) override;
 
   bool editElem(Integer posX, Integer posY, Real elem) override;
+  bool editElem(String rowName, String columnName, Real elem) override;
+
   Real getElem(Integer posX, Integer posY) override;
+  Real getElem(String rowName, String columnName) override;
+
   Integer getNumRows() override;
   Integer getNumColumns() override;
 

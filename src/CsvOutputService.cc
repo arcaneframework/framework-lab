@@ -27,18 +27,18 @@ init()
 }
 
 void CsvOutputService::
-init(String name_csv)
+init(String name_table)
 {
   m_separator = ";";
-  m_name_tab = _computeAt(name_csv, m_name_tab_only_P0);
+  m_name_tab = _computeAt(name_table, m_name_tab_only_P0);
   m_name_tab_computed = true;
 }
 
 void CsvOutputService::
-init(String name_csv, String separator_csv)
+init(String name_table, String separator_csv)
 {
   m_separator = separator_csv;
-  m_name_tab = _computeAt(name_csv, m_name_tab_only_P0);
+  m_name_tab = _computeAt(name_table, m_name_tab_only_P0);
   m_name_tab_computed = true;
 }
 
@@ -379,6 +379,16 @@ editElem(Integer posX, Integer posY, Real elem)
   return true;
 }
 
+bool CsvOutputService::
+editElem(String rowName, String columnName, Real elem)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+
+  if(posX && posY) return editElem(posX.value(), posY.value(), elem);
+  return false;
+}
+
 Real CsvOutputService::
 getElem(Integer posX, Integer posY)
 {
@@ -387,6 +397,16 @@ getElem(Integer posX, Integer posY)
     return 0;
 
   return m_values_csv[posY][posX];
+}
+
+Real CsvOutputService::
+getElem(String rowName, String columnName)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+
+  if(posX && posY) return getElem(posX.value(), posY.value());
+  return 0;
 }
 
 Integer CsvOutputService::
