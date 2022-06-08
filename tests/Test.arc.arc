@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <case codename="csv" xml:lang="en" codeversion="1.0">
   <arcane>
-    <title>Test InOut</title>
-    <timeloop>UnitTest</timeloop>
+    <title>Test</title>
+    <timeloop>csvLoop</timeloop>
   </arcane>
 
   <meshes>
@@ -29,20 +29,14 @@
     </mesh>
   </meshes>
 
+  <csv-example>
 
-  <unit-test-module>
+    <csv-output name="CsvOutput">
+      <path>./</path>
+    </csv-output>
 
-    <!-- Test du module implémentant l'interface (csv ou non). -->
-    <xml-test name="SimpleTableOutputTesterService">
-      <csv-output name="CsvOutput">
-        <path>./</path>
-      </csv-output>
-    </xml-test>
+    <csvPath>./</csvPath>
 
-    <!-- Test du module en lui-même (accès au attributs private). -->
-    <xml-test name="CsvOutput">
-    </xml-test>
-
-  </unit-test-module>
+  </csv-example>
 
 </case>

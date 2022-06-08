@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" ?>
+<service name="SimpleTableOutputTesterService" version="1.0" type="caseoption" parent-name="Arcane::BasicUnitTest"> 
+  <interface name="Arcane::IUnitTest" inherited='false'/>
+
+  <description>Descripteur du service SimpleTableOutputTesterService</description>
+
+  <variables>
+  </variables>
+
+  <tests class-set-up="setUpForClass" test-set-up="setUp" class-tear-down="tearDownForClass" test-tear-down="tearDown">
+    <test name="testAddRow 1" method-name="testAddRow1"/>
+    <test name="testAddRow 2" method-name="testAddRow2"/>
+    <test name="testAddColumn 1" method-name="testAddColumn1"/>
+    <test name="testAddColumn 2" method-name="testAddColumn2"/>
+    <test name="Test 3" method-name="myTestMethod3"/>
+  </tests> 
+
+  <options>
+
+    <service-instance name="csv-output" type="ISimpleTableOutput">
+      <description>Service CSV</description>
+    </service-instance>
+
+    <simple name="csvPath" type="string" default="">
+      <description>
+        Path and name for csv file (example: ./example.csv ).
+      </description>
+    </simple>
+
+  </options>
+
+</service>

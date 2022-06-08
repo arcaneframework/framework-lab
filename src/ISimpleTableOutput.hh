@@ -31,6 +31,8 @@ public:
   virtual void init(String name_table) = 0;
   virtual void init(String name_table, String separator) = 0;
 
+  virtual void clear() = 0;
+
   virtual Integer addRow(String name_line, bool fill_start = false) = 0;
   virtual Integer addRow(String name_line, ConstArrayView<Real> elems) = 0;
 
@@ -57,6 +59,19 @@ public:
 
   virtual Real getElem(Integer posX, Integer posY) = 0;
   virtual Real getElem(String rowName, String columnName) = 0;
+
+  virtual RealUniqueArray getRow(Integer pos) = 0;
+  virtual RealUniqueArray getColumn(Integer pos) = 0;
+
+  virtual RealUniqueArray getRow(String rowName) = 0;
+  virtual RealUniqueArray getColumn(String columnName) = 0;
+
+  virtual Integer getSizeRow(Integer pos) = 0;
+  virtual Integer getSizeColumn(Integer pos) = 0;
+  
+  virtual Integer getSizeRow(String rowName) = 0;
+  virtual Integer getSizeColumn(String columnName) = 0;
+  
   virtual Integer getNumRows() = 0;
   virtual Integer getNumColumns() = 0;
   

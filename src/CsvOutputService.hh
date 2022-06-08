@@ -15,6 +15,7 @@
 #define CSVOUTPUTSERVICE_HH
 
 #include "ISimpleTableOutput.hh"
+#include "arcane/BasicUnitTest.h"
 #include "CsvOutput_axl.h"
 #include <arcane/ServiceBuilder.h>
 #include <arcane/ServiceFactory.h>
@@ -40,10 +41,13 @@ public:
     {
       if(sbi.creationType() == ST_CaseOption) {
         m_path = options()->getPath();
+        withOption = true;
       }
       else {
         m_path = "./";
+        withOption = false;
       }
+      
     }
   
   virtual ~CsvOutputService() {};
@@ -52,6 +56,8 @@ public:
   void init() override;
   void init(String name_table) override;
   void init(String name_table, String separator) override;
+
+  void clear() override;
 
   Integer addRow(String name_row, bool fill_start) override;
   Integer addRow(String name_row, ConstArrayView<Real> elems) override;
@@ -89,10 +95,32 @@ public:
   Real getElem(Integer posX, Integer posY) override;
   Real getElem(String rowName, String columnName) override;
 
+  RealUniqueArray getRow(Integer pos) override;
+  RealUniqueArray getColumn(Integer pos) override;
+  
+  RealUniqueArray getRow(String rowName) override;
+  RealUniqueArray getColumn(String columnName) override;
+
+  Integer getSizeRow(Integer pos) override;
+  Integer getSizeColumn(Integer pos) override;
+  
+  Integer getSizeRow(String rowName) override;
+  Integer getSizeColumn(String columnName) override;
+
   Integer getNumRows() override;
   Integer getNumColumns() override;
 
   Integer addAverageColumn(String name_column) override;
+
+public:
+  void setUpForClass() override;
+  void setUp() override;
+  void testInitProcId() override;
+  void testClear() override;
+  void testComputeAt() override;
+  void testComputeFinalPath() override;
+  void tearDown() override;
+  void tearDownForClass() override;
 
 
 private:
@@ -124,14 +152,8 @@ private:
   // Dernier élement ajouté.
   Integer m_last_row;
   Integer m_last_column;
+
+  bool withOption;
 };
 
 #endif
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-ARCANE_REGISTER_SERVICE_CSVOUTPUT(CsvOutput, CsvOutputService);
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/

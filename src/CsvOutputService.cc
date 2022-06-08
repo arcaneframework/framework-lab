@@ -22,7 +22,7 @@ void CsvOutputService::
 init()
 {
   m_separator = ";";
-  m_name_tab = _computeAt("Table_%proc_id%", m_name_tab_only_P0);
+  m_name_tab = _computeAt("Table_@proc_id@", m_name_tab_only_P0);
   m_name_tab_computed = true;
 }
 
@@ -40,6 +40,36 @@ init(String name_table, String separator_csv)
   m_separator = separator_csv;
   m_name_tab = _computeAt(name_table, m_name_tab_only_P0);
   m_name_tab_computed = true;
+}
+
+void CsvOutputService::
+clear()
+{
+  m_values_csv.clear();
+
+  if(withOption) {
+    m_path = options()->getPath();
+  }
+  else {
+    m_path = "./";
+  }
+  m_path_computed = false;
+  m_path_only_P0 = true;
+
+  m_name_tab = "";
+  m_name_tab_computed = false;
+  m_name_tab_only_P0 = true;
+
+  m_separator = "";
+
+  m_name_rows.clear();
+  m_name_columns.clear();
+
+  m_size_rows.clear();
+  m_size_columns.clear();
+
+  m_last_row = -1;
+  m_last_column = -1;
 }
 
 
@@ -267,6 +297,9 @@ String CsvOutputService::
 _computeAt(String name, bool& only_P0)
 {
   // On découpe la string là où se trouve les @.
+  if(name.startsWith("@")){
+    name = "@" + name;
+  }
   StringUniqueArray string_splited;
   name.split(string_splited, '@');
 
@@ -292,6 +325,7 @@ _computeAt(String name, bool& only_P0)
   String combined = "";
   for (String str : string_splited)
   {
+    if(str == "@") continue;
     combined = combined + str;
   }
   return combined;
@@ -409,6 +443,71 @@ getElem(String rowName, String columnName)
   return 0;
 }
 
+RealUniqueArray CsvOutputService::
+getRow(Integer pos)
+{
+  if(pos < 0 || pos >= m_values_csv.dim1Size()) 
+    return RealUniqueArray(0);
+  return RealUniqueArray(m_values_csv[pos]);
+}
+
+RealUniqueArray CsvOutputService::
+getRow(String rowName)
+{
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+  if(posY) return getRow(posY.value());
+  return RealUniqueArray(0);
+}
+
+RealUniqueArray CsvOutputService::
+getColumn(Integer pos)
+{
+  if(pos < 0 || pos >= m_values_csv.dim2Size()) 
+    return RealUniqueArray(0);
+
+  RealUniqueArray copie(m_values_csv.dim2Size());
+  for(Integer i = 0; i < m_values_csv.dim1Size(); i++){
+    copie.add(m_values_csv[i][pos]);
+  }
+  return copie;
+}
+
+RealUniqueArray CsvOutputService::
+getColumn(String columnName)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  if(posX) return getColumn(posX.value());
+  return RealUniqueArray(0);
+}
+
+Integer CsvOutputService::
+getSizeRow(Integer pos)
+{
+  if(pos < 0 || pos >= m_values_csv.dim1Size()) return -1;
+  return m_size_rows[pos];
+}
+Integer CsvOutputService::
+getSizeRow(String rowName)
+{
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+  if(posY) return getSizeRow(posY.value());
+  return -1;
+}
+
+Integer CsvOutputService::
+getSizeColumn(Integer pos)
+{
+  if(pos < 0 || pos >= m_values_csv.dim2Size()) return -1;
+  return m_size_columns[pos];
+}
+Integer CsvOutputService::
+getSizeColumn(String columnName)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  if(posX) return getSizeColumn(posX.value());
+  return -1;
+}
+
 Integer CsvOutputService::
 getNumRows()
 {
@@ -437,3 +536,14 @@ addAverageColumn(String name_column)
   }
   return pos;
 }
+
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+#ifndef REGISTER_CSV_SERVICE
+#define REGISTER_CSV_SERVICE
+
+ARCANE_REGISTER_SERVICE_CSVOUTPUT(CsvOutput, CsvOutputService);
+
+#endif

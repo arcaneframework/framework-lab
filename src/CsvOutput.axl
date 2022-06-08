@@ -7,6 +7,14 @@
 	<variables>
   </variables>
 
+  <tests class-set-up="setUpForClass" test-set-up="setUp" class-tear-down="tearDownForClass" test-tear-down="tearDown">
+    <test name="Test init() avec @proc_id@" method-name="testInitProcId"/>
+    <test name="Test clear()" method-name="testClear"/>
+    <test name="Test _computeAt()" method-name="testComputeAt"/>
+    <test name="Test _computeFinalPath()" method-name="testComputeFinalPath"/>
+  </tests> 
+
+
 	<options>
     <simple name="path" type="string" default="./">
       <description>
