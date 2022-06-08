@@ -59,29 +59,29 @@ public:
 
   void clear() override;
 
-  Integer addRow(String name_row, bool fill_start) override;
+  Integer addRow(String name_row) override;
   Integer addRow(String name_row, ConstArrayView<Real> elems) override;
 
-  Integer addColumn(String name_column, bool fill_start) override;
+  Integer addColumn(String name_column) override;
   Integer addColumn(String name_column, ConstArrayView<Real> elems) override;
   
 
   bool addElemRow(Integer pos, Real elem) override;
   bool addElemRow(String name_row, Real elem, bool create_if_not_exist) override;
+  bool addElemSameRow(Real elem) override;
   
-  bool addElemNextRow(Real elem) override;
-  bool addElemsNextRow(ConstArrayView<Real> elems) override;
-
   bool addElemsRow(Integer pos, ConstArrayView<Real> elems) override;
+  bool addElemsRow(String name_row, ConstArrayView<Real> elems, bool create_if_not_exist) override;
+  bool addElemsSameRow(ConstArrayView<Real> elems) override;
 
 
   bool addElemColumn(Integer pos, Real elem) override;
   bool addElemColumn(String name_column, Real elem, bool create_if_not_exist) override;
-
-  bool addElemNextColumn(Real elem) override;
-  bool addElemsNextColumn(ConstArrayView<Real> elems) override;
+  bool addElemSameColumn(Real elem) override;
 
   bool addElemsColumn(Integer pos, ConstArrayView<Real> elems) override;
+  bool addElemsColumn(String name_column, ConstArrayView<Real> elems, bool create_if_not_exist) override;
+  bool addElemsSameColumn(ConstArrayView<Real> elems) override;
 
 
   void print(bool only_P0) override;
@@ -106,6 +106,9 @@ public:
   
   Integer getSizeRow(String rowName) override;
   Integer getSizeColumn(String columnName) override;
+
+  Integer getPosRow(String rowName) override;
+  Integer getPosColumn(String columnName) override;
 
   Integer getNumRows() override;
   Integer getNumColumns() override;

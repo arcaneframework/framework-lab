@@ -55,7 +55,7 @@ endModule()
 {
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
 
-  csv->addRow("Ligne 3", true);
+  csv->addRow("Ligne 3");
 
   UniqueArray<Real> end = {99, 99, 99};
   csv->addColumn("Colonne 4", end.constView());
@@ -69,8 +69,8 @@ endModule()
   csv->addElemRow("Ligne 1", 25);
   //csv->addElemRow("Ligne 2", 26);
   //csv->addElemRow("Ligne 3", 27);
-  csv->addElemNextRow(26);
-  csv->addElemNextRow(27);
+  csv->addElemSameColumn(26);
+  csv->addElemSameColumn(27);
 
 
   info() << "Affichage du csv";

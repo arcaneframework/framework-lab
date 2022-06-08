@@ -33,25 +33,29 @@ public:
 
   virtual void clear() = 0;
 
-  virtual Integer addRow(String name_line, bool fill_start = false) = 0;
+  virtual Integer addRow(String name_line) = 0;
   virtual Integer addRow(String name_line, ConstArrayView<Real> elems) = 0;
 
-  virtual Integer addColumn(String name_column, bool fill_start = false) = 0;
+  virtual Integer addColumn(String name_column) = 0;
   virtual Integer addColumn(String name_column, ConstArrayView<Real> elems) = 0;
 
+  // Globalement, return true si tous les éléments ont été ajoutés.
   virtual bool addElemRow(Integer pos, Real elem) = 0;
   virtual bool addElemRow(String name_row, Real elem, bool create_if_not_exist = true) = 0;
-  virtual bool addElemNextRow(Real elem) = 0;
+  virtual bool addElemSameRow(Real elem) = 0;
 
   virtual bool addElemsRow(Integer pos, ConstArrayView<Real> elems) = 0;
-  virtual bool addElemsNextRow(ConstArrayView<Real> elems) = 0;
+  virtual bool addElemsRow(String name_row, ConstArrayView<Real> elems, bool create_if_not_exist = true) = 0;
+  virtual bool addElemsSameRow(ConstArrayView<Real> elems) = 0;
+
 
   virtual bool addElemColumn(Integer pos, Real elem) = 0;
   virtual bool addElemColumn(String name_column, Real elem, bool create_if_not_exist = true) = 0;
-  virtual bool addElemNextColumn(Real elem) = 0;
+  virtual bool addElemSameColumn(Real elem) = 0;
 
   virtual bool addElemsColumn(Integer pos, ConstArrayView<Real> elems) = 0;
-  virtual bool addElemsNextColumn(ConstArrayView<Real> elems) = 0;
+  virtual bool addElemsColumn(String name_column, ConstArrayView<Real> elems, bool create_if_not_exist = true) = 0;
+  virtual bool addElemsSameColumn(ConstArrayView<Real> elems) = 0;
 
 
   virtual bool editElem(Integer posX, Integer posY, Real elem) = 0;
@@ -71,6 +75,9 @@ public:
   
   virtual Integer getSizeRow(String rowName) = 0;
   virtual Integer getSizeColumn(String columnName) = 0;
+
+  virtual Integer getPosRow(String rowName) = 0;
+  virtual Integer getPosColumn(String columnName) = 0;
   
   virtual Integer getNumRows() = 0;
   virtual Integer getNumColumns() = 0;

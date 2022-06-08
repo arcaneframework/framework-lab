@@ -36,6 +36,16 @@ testInitProcId()
 void CsvOutputService::
 testClear()
 {
+  init();
+  addRow("Ma ligne 1");
+  addRow("Ma ligne 2");
+  addElemColumn("Ma colonne 1", 0, true);
+  addElemColumn("Ma colonne 1", 1, false);
+  addColumn("Ma colonne 2");
+  addElemRow("Ma ligne 1", 2, false);
+  addElemRow("Ma ligne 2", 3, false);
+  clear();
+  
   ASSERT_EQUAL(0, m_values_csv.dim1Size());
   ASSERT_EQUAL(0, m_values_csv.dim2Size());
 

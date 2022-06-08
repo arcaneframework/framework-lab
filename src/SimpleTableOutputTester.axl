@@ -10,9 +10,31 @@
   <tests class-set-up="setUpForClass" test-set-up="setUp" class-tear-down="tearDownForClass" test-tear-down="tearDown">
     <test name="testAddRow 1" method-name="testAddRow1"/>
     <test name="testAddRow 2" method-name="testAddRow2"/>
+    <test name="testAddRow 3" method-name="testAddRow3"/>
+
     <test name="testAddColumn 1" method-name="testAddColumn1"/>
     <test name="testAddColumn 2" method-name="testAddColumn2"/>
-    <test name="Test 3" method-name="myTestMethod3"/>
+    <test name="testAddColumn 3" method-name="testAddColumn3"/>
+
+    <test name="testAddElemRow 1" method-name="testAddElemRow1"/>
+    <test name="testAddElemRow 2" method-name="testAddElemRow2"/>
+
+    <test name="testAddElemSameRow 1" method-name="testAddElemSameRow1"/>
+
+    <test name="testAddElemsRow 1" method-name="testAddElemsRow1"/>
+    <test name="testAddElemsRow 2" method-name="testAddElemsRow2"/>
+
+    <test name="testAddElemsSameRow 1" method-name="testAddElemsSameRow1"/>
+
+    <!-- <test name="testAddElemColumn 1" method-name="testAddElemColumn1"/>
+    <test name="testAddElemColumn 2" method-name="testAddElemColumn2"/>
+
+    <test name="testAddElemSameColumn 1" method-name="testAddElemSameColumn1"/>
+
+    <test name="testAddElemsColumn 1" method-name="testAddElemsColumn1"/>
+    <test name="testAddElemsColumn 2" method-name="testAddElemsColumn2"/>
+
+    <test name="testAddElemsSameColumn 1" method-name="testAddElemsSameColumn1"/> -->
   </tests> 
 
   <options>
