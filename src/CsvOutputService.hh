@@ -41,11 +41,11 @@ public:
     {
       if(sbi.creationType() == ST_CaseOption) {
         m_path = options()->getPath();
-        withOption = true;
+        m_with_option = true;
       }
       else {
         m_path = "./";
-        withOption = false;
+        m_with_option = false;
       }
       
     }
@@ -85,29 +85,29 @@ public:
   bool addElemsSameColumn(ConstArrayView<Real> elems) override;
 
 
-  bool editElem(Integer posX, Integer posY, Real elem) override;
-  bool editElem(String columnName, String rowName, Real elem) override;
+  bool editElem(Integer pos_x, Integer pos_y, Real elem) override;
+  bool editElem(String name_column, String name_row, Real elem) override;
 
-  Real getElem(Integer posX, Integer posY) override;
-  Real getElem(String columnName, String rowName) override;
+  Real getElem(Integer pos_x, Integer pos_y) override;
+  Real getElem(String name_column, String name_row) override;
 
 
   RealUniqueArray getRow(Integer pos) override;
   RealUniqueArray getColumn(Integer pos) override;
   
-  RealUniqueArray getRow(String rowName) override;
-  RealUniqueArray getColumn(String columnName) override;
+  RealUniqueArray getRow(String name_row) override;
+  RealUniqueArray getColumn(String name_column) override;
 
 
   Integer getSizeRow(Integer pos) override;
   Integer getSizeColumn(Integer pos) override;
   
-  Integer getSizeRow(String rowName) override;
-  Integer getSizeColumn(String columnName) override;
+  Integer getSizeRow(String name_row) override;
+  Integer getSizeColumn(String name_column) override;
 
 
-  Integer getPosRow(String rowName) override;
-  Integer getPosColumn(String columnName) override;
+  Integer getPosRow(String name_row) override;
+  Integer getPosColumn(String name_column) override;
 
   Integer getNumRows() override;
   Integer getNumColumns() override;
@@ -161,7 +161,7 @@ private:
   Integer m_last_row;
   Integer m_last_column;
 
-  bool withOption;
+  bool m_with_option;
 };
 
 #endif
