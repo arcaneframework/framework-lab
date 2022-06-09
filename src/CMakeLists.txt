@@ -5,11 +5,11 @@ find_package(Arcane REQUIRED)
 
 add_executable(csv 
 main.cc 
-CsvExampleModule.cc CsvExample_axl.h 
+CsvExample1Module.cc CsvExample1_axl.h 
 SimpleTableOutputTesterService.cc SimpleTableOutputTester_axl.h 
 CsvOutputService.cc CsvOutputTestService.cc CsvOutput_axl.h)
 
-arcane_generate_axl(CsvExample)
+arcane_generate_axl(CsvExample1)
 arcane_generate_axl(SimpleTableOutputTester)
 arcane_generate_axl(CsvOutput)
 arcane_add_arcane_libraries_to_target(csv)

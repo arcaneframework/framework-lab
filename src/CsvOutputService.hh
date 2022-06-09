@@ -90,10 +90,10 @@ public:
   bool writeFile(String path, bool only_P0) override;
 
   bool editElem(Integer posX, Integer posY, Real elem) override;
-  bool editElem(String rowName, String columnName, Real elem) override;
+  bool editElem(String columnName, String rowName, Real elem) override;
 
   Real getElem(Integer posX, Integer posY) override;
-  Real getElem(String rowName, String columnName) override;
+  Real getElem(String columnName, String rowName) override;
 
   RealUniqueArray getRow(Integer pos) override;
   RealUniqueArray getColumn(Integer pos) override;

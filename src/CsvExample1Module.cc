@@ -5,32 +5,32 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* CsvExampleModule.cc                                                 (C) 2000-2022 */
+/* CsvExample1Module.cc                                                 (C) 2000-2022 */
 /*                                                                           */
 /*                                                      */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-#include "CsvExampleModule.hh"
+#include "CsvExample1Module.hh"
 #include <iostream>
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-void CsvExampleModule::
+void CsvExample1Module::
 initModule()
 {
   // Initialisation de la sortie CSV.
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
   info() << "Initialisation du csv";
-  csv->init("CSVExample", ";");
+  csv->init("CsvExample1", ";");
   csv->addRow("Ligne 1");
   csv->print();
   csv->addElemColumn("Colonne 0", 65);
   csv->print();
 }
 
-void CsvExampleModule::
+void CsvExample1Module::
 loopModule()
 {
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
@@ -50,7 +50,7 @@ loopModule()
     subDomain()->timeLoopMng()->stopComputeLoop(true);
 }
 
-void CsvExampleModule::
+void CsvExample1Module::
 endModule()
 {
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();

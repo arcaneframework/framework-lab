@@ -109,7 +109,7 @@ addElemRow(Integer pos, Real elem)
   ArrayView<Real> view = m_values_csv[pos];
   Integer size_row = m_size_rows[pos];
 
-  if(view.size() < size_row + 1) return false;
+  if(m_values_csv.dim2Size() < size_row + 1) return false;
 
   view[size_row] = elem;
 
@@ -224,7 +224,7 @@ addElemColumn(Integer pos, Real elem)
 
   Integer size_column = m_size_columns[pos];
 
-  if(m_values_csv.dim2Size() < size_column + 1) return false;
+  if(m_values_csv.dim1Size() < size_column + 1) return false;
 
   m_values_csv[size_column][pos] = elem;
 
@@ -430,7 +430,7 @@ editElem(Integer posX, Integer posY, Real elem)
 }
 
 bool CsvOutputService::
-editElem(String rowName, String columnName, Real elem)
+editElem(String columnName, String rowName, Real elem)
 {
   std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
   std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
@@ -450,7 +450,7 @@ getElem(Integer posX, Integer posY)
 }
 
 Real CsvOutputService::
-getElem(String rowName, String columnName)
+getElem(String columnName, String rowName)
 {
   std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
   std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
@@ -509,7 +509,7 @@ getSizeRow(String rowName)
 {
   std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
   if(posY) return getSizeRow(posY.value());
-  return -1;
+  return 0;
 }
 
 Integer CsvOutputService::
@@ -523,7 +523,7 @@ getSizeColumn(String columnName)
 {
   std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
   if(posX) return getSizeColumn(posX.value());
-  return -1;
+  return 0;
 }
 
 Integer CsvOutputService::

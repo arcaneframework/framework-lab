@@ -254,24 +254,360 @@ testAddElemsSameRow1()
   ASSERT_EQUAL_ARRAY(result3, ptrSTO->getRow("Ma ligne"));
 }
 
-// void SimpleTableOutputTesterService::
-// testAddElemColumn1()
-// {
-//   Integer pos = ptrSTO->addColumn("Ma colonne");
-//   ptrSTO->addRow("Ma ligne 1");
-//   ptrSTO->addRow("Ma ligne 2");
-//   ptrSTO->addRow("Ma ligne 3");
+void SimpleTableOutputTesterService::
+testAddElemColumn1()
+{
+  Integer pos = ptrSTO->addColumn("Ma colonne");
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
 
-//   RealUniqueArray result = {1, 2, 3};
+  RealUniqueArray result = {1, 2, 3};
 
-//   ASSERT_TRUE(ptrSTO->addElemColumn(pos, 1));
-//   ASSERT_TRUE(ptrSTO->addElemColumn(pos, 2));
-//   ASSERT_TRUE(ptrSTO->addElemColumn(pos, 3));
-//   ASSERT_FALSE(ptrSTO->addElemColumn(pos, 4));
+  ASSERT_TRUE(ptrSTO->addElemColumn(pos, 1));
+  ASSERT_TRUE(ptrSTO->addElemColumn(pos, 2));
+  ASSERT_TRUE(ptrSTO->addElemColumn(pos, 3));
+  ASSERT_FALSE(ptrSTO->addElemColumn(pos, 4));
 
-//   ASSERT_EQUAL_ARRAY(result, ptrSTO->getColumn("Ma colonne"));
-// }
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getColumn("Ma colonne"));
+}
 
+void SimpleTableOutputTesterService::
+testAddElemColumn2()
+{
+  ptrSTO->addColumn("Ma colonne vide");
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+
+  RealUniqueArray result = {1, 2, 3};
+
+  ASSERT_FALSE(ptrSTO->addElemColumn("Ma colonne", 1, false));
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne", 1));
+  Integer pos = ptrSTO->getPosColumn("Ma colonne");
+  ASSERT_TRUE(ptrSTO->addElemColumn(pos, 2));
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne", 3));
+  ASSERT_FALSE(ptrSTO->addElemColumn("Ma colonne", 4));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getColumn("Ma colonne"));
+}
+
+void SimpleTableOutputTesterService::
+testAddElemSameColumn1()
+{
+  ptrSTO->addColumn("Ma colonne vide");
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+
+  RealUniqueArray result = {1, 2, 3, 4};
+
+  ASSERT_FALSE(ptrSTO->addElemColumn("Ma colonne", 1, false));
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(2));
+
+  Integer pos = ptrSTO->getPosColumn("Ma colonne");
+  ASSERT_TRUE(ptrSTO->addElemColumn(pos, 3));
+
+  ptrSTO->addRow("Ma ligne 4");
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(4));
+
+  ASSERT_FALSE(ptrSTO->addElemSameColumn(5));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getColumn("Ma colonne"));
+}
+
+void SimpleTableOutputTesterService::
+testAddElemsColumn1()
+{
+  Integer pos = ptrSTO->addColumn("Ma colonne");
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+  RealUniqueArray test = {1, 2, 3};
+  RealUniqueArray result1 = {1, 2, 3};
+  RealUniqueArray result2 = {1, 2, 3, 1, 2};
+  RealUniqueArray result3 = {1, 2, 3, 1, 2, 1};
+  ASSERT_TRUE(ptrSTO->addElemsColumn(pos, test));
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getColumn("Ma colonne"));
+
+  ptrSTO->addRow("Ma ligne 4");
+  ptrSTO->addRow("Ma ligne 5");
+
+  ASSERT_FALSE(ptrSTO->addElemsColumn(pos, test));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getColumn("Ma colonne"));
+
+  ptrSTO->addRow("Ma ligne 6");
+
+  ASSERT_FALSE(ptrSTO->addElemsColumn(pos, test));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getColumn("Ma colonne"));
+}
+
+void SimpleTableOutputTesterService::
+testAddElemsColumn2()
+{
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+  RealUniqueArray test = {1, 2, 3};
+  RealUniqueArray result1 = {1, 2, 3};
+  RealUniqueArray result2 = {1, 2, 3, 1, 2};
+  RealUniqueArray result3 = {1, 2, 3, 1, 2, 1};
+
+  ASSERT_TRUE(ptrSTO->addElemsColumn("Ma colonne", test));
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getColumn("Ma colonne"));
+
+  ptrSTO->addRow("Ma ligne 4");
+  ptrSTO->addRow("Ma ligne 5");
+
+  ASSERT_FALSE(ptrSTO->addElemsColumn("Ma colonne", test));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getColumn("Ma colonne"));
+
+  ptrSTO->addRow("Ma ligne 6");
+
+  Integer pos = ptrSTO->getPosColumn("Ma colonne");
+
+  ASSERT_FALSE(ptrSTO->addElemsColumn(pos, test));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getColumn("Ma colonne"));
+}
+
+
+void SimpleTableOutputTesterService::
+testAddElemsSameColumn1()
+{
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+  RealUniqueArray test = {1, 2, 3};
+  RealUniqueArray result1 = {1, 2, 3};
+  RealUniqueArray result2 = {1, 2, 3, 1, 2};
+  RealUniqueArray result3 = {1, 2, 3, 1, 2, 1};
+
+  ASSERT_TRUE(ptrSTO->addElemsColumn("Ma colonne", test));
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getColumn("Ma colonne"));
+
+  ptrSTO->addRow("Ma ligne 4");
+  ptrSTO->addRow("Ma ligne 5");
+
+  ASSERT_FALSE(ptrSTO->addElemsSameColumn(test));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getColumn("Ma colonne"));
+
+  ptrSTO->addRow("Ma ligne 6");
+
+  Integer pos = ptrSTO->getPosColumn("Ma colonne");
+
+  ASSERT_FALSE(ptrSTO->addElemsColumn(pos, test));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getColumn("Ma colonne"));
+}
+
+void SimpleTableOutputTesterService::
+testEditElem1()
+{
+  Integer posX0 = ptrSTO->addColumn("Ma colonne 1");
+  Integer posX1 = ptrSTO->addColumn("Ma colonne 2");
+  Integer posX2 = ptrSTO->addColumn("Ma colonne 3");
+
+  Integer posY0 = ptrSTO->addRow("Ma ligne 1", RealUniqueArray{1, 2, 3});
+  Integer posY1 = ptrSTO->addRow("Ma ligne 2", RealUniqueArray{4, 5, 6});
+  Integer posY2 = ptrSTO->addRow("Ma ligne 3", RealUniqueArray{7, 8, 9});
+
+  ASSERT_TRUE(ptrSTO->editElem(posX2, posY0, 10));
+  ASSERT_TRUE(ptrSTO->editElem(posX1, posY2, 11));
+
+  RealUniqueArray result1 = {1, 2, 10};
+  RealUniqueArray result2 = {4, 5, 6};
+  RealUniqueArray result3 = {7, 11, 9};
+
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getRow("Ma ligne 1"));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getRow("Ma ligne 2"));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getRow("Ma ligne 3"));
+}
+
+void SimpleTableOutputTesterService::
+testEditElem2()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+
+  ptrSTO->addRow("Ma ligne 1", RealUniqueArray{1, 2, 3});
+  ptrSTO->addRow("Ma ligne 2", RealUniqueArray{4, 5, 6});
+  ptrSTO->addRow("Ma ligne 3", RealUniqueArray{7, 8, 9});
+
+  ASSERT_TRUE(ptrSTO->editElem("Ma colonne 3", "Ma ligne 1", 10));
+  ASSERT_TRUE(ptrSTO->editElem("Ma colonne 2", "Ma ligne 3", 11));
+  ASSERT_FALSE(ptrSTO->editElem("Ma colonne 4", "Ma ligne 1", 11));
+  ASSERT_FALSE(ptrSTO->editElem("Ma colonne 1", "Ma ligne 4", 11));
+  ASSERT_FALSE(ptrSTO->editElem("Ma colonne 4", "Ma ligne 4", 11));
+
+  RealUniqueArray result1 = {1, 2, 10};
+  RealUniqueArray result2 = {4, 5, 6};
+  RealUniqueArray result3 = {7, 11, 9};
+
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getRow("Ma ligne 1"));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getRow("Ma ligne 2"));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getRow("Ma ligne 3"));
+}
+
+void SimpleTableOutputTesterService::
+testGetElem1()
+{
+  Integer posX0 = ptrSTO->addColumn("Ma colonne 1");
+  Integer posX1 = ptrSTO->addColumn("Ma colonne 2");
+  Integer posX2 = ptrSTO->addColumn("Ma colonne 3");
+
+  Integer posY0 = ptrSTO->addRow("Ma ligne 1", RealUniqueArray{1, 2, 3});
+  Integer posY1 = ptrSTO->addRow("Ma ligne 2", RealUniqueArray{4, 5, 6});
+  Integer posY2 = ptrSTO->addRow("Ma ligne 3", RealUniqueArray{7, 8, 9});
+
+  ASSERT_EQUAL(5., ptrSTO->getElem(posX1, posY1));
+  ASSERT_EQUAL(7., ptrSTO->getElem(posX0, posY2));
+  ASSERT_EQUAL(8., ptrSTO->getElem(posX1, posY2));
+}
+
+void SimpleTableOutputTesterService::
+testGetElem2()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+
+  ptrSTO->addRow("Ma ligne 1", RealUniqueArray{1, 2, 3});
+  ptrSTO->addRow("Ma ligne 2", RealUniqueArray{4, 5, 6});
+  ptrSTO->addRow("Ma ligne 3", RealUniqueArray{7, 8, 9});
+
+  ASSERT_EQUAL(5., ptrSTO->getElem("Ma colonne 2", "Ma ligne 2"));
+  ASSERT_EQUAL(7., ptrSTO->getElem("Ma colonne 1", "Ma ligne 3"));
+  ASSERT_EQUAL(8., ptrSTO->getElem("Ma colonne 2", "Ma ligne 3"));
+}
+
+void SimpleTableOutputTesterService::
+testGetSizeRow1()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+
+  Integer posY0 = ptrSTO->addRow("Ma ligne 1", RealUniqueArray{1, 2, 3});
+  Integer posY1 = ptrSTO->addRow("Ma ligne 2", RealUniqueArray{4});
+  Integer posY2 = ptrSTO->addRow("Ma ligne 3", RealUniqueArray{7, 8});
+
+  ASSERT_EQUAL(3, ptrSTO->getSizeRow(posY0));
+  ASSERT_EQUAL(1, ptrSTO->getSizeRow(posY1));
+  ASSERT_EQUAL(2, ptrSTO->getSizeRow(posY2));
+
+  ptrSTO->addColumn("Ma colonne 4", RealUniqueArray{9, 10, 11});
+
+  ASSERT_EQUAL(4, ptrSTO->getSizeRow(posY0));
+  ASSERT_EQUAL(4, ptrSTO->getSizeRow(posY1));
+  ASSERT_EQUAL(4, ptrSTO->getSizeRow(posY2));
+
+}
+
+void SimpleTableOutputTesterService::
+testGetSizeRow2()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+
+  Integer posY0 = ptrSTO->addRow("Ma ligne 1", RealUniqueArray{1, 2, 3});
+  Integer posY1 = ptrSTO->addRow("Ma ligne 2", RealUniqueArray{4});
+  Integer posY2 = ptrSTO->addRow("Ma ligne 3", RealUniqueArray{7, 8});
+
+  ASSERT_EQUAL(3, ptrSTO->getSizeRow("Ma ligne 1"));
+  ASSERT_EQUAL(1, ptrSTO->getSizeRow("Ma ligne 2"));
+  ASSERT_EQUAL(2, ptrSTO->getSizeRow("Ma ligne 3"));
+  ASSERT_EQUAL(0, ptrSTO->getSizeRow("Ma ligne 4"));
+
+  ptrSTO->addColumn("Ma colonne 4", RealUniqueArray{9, 10, 11});
+
+  ASSERT_EQUAL(4, ptrSTO->getSizeRow("Ma ligne 1"));
+  ASSERT_EQUAL(4, ptrSTO->getSizeRow("Ma ligne 2"));
+  ASSERT_EQUAL(4, ptrSTO->getSizeRow("Ma ligne 3"));
+  ASSERT_EQUAL(0, ptrSTO->getSizeRow("Ma ligne 4"));
+}
+
+void SimpleTableOutputTesterService::
+testGetSizeColumn1()
+{
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+
+  Integer posX0 = ptrSTO->addColumn("Ma colonne 1", RealUniqueArray{1, 2, 3});
+  Integer posX1 = ptrSTO->addColumn("Ma colonne 2", RealUniqueArray{4});
+  Integer posX2 = ptrSTO->addColumn("Ma colonne 3", RealUniqueArray{7, 8});
+
+  ASSERT_EQUAL(3, ptrSTO->getSizeColumn(posX0));
+  ASSERT_EQUAL(1, ptrSTO->getSizeColumn(posX1));
+  ASSERT_EQUAL(2, ptrSTO->getSizeColumn(posX2));
+
+  ptrSTO->addRow("Ma ligne 4", RealUniqueArray{9, 10, 11});
+
+  ASSERT_EQUAL(4, ptrSTO->getSizeColumn(posX0));
+  ASSERT_EQUAL(4, ptrSTO->getSizeColumn(posX1));
+  ASSERT_EQUAL(4, ptrSTO->getSizeColumn(posX2));
+
+}
+
+void SimpleTableOutputTesterService::
+testGetSizeColumn2()
+{
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+
+  Integer posX0 = ptrSTO->addColumn("Ma colonne 1", RealUniqueArray{1, 2, 3});
+  Integer posX1 = ptrSTO->addColumn("Ma colonne 2", RealUniqueArray{4});
+  Integer posX2 = ptrSTO->addColumn("Ma colonne 3", RealUniqueArray{7, 8});
+
+  ASSERT_EQUAL(3, ptrSTO->getSizeColumn("Ma colonne 1"));
+  ASSERT_EQUAL(1, ptrSTO->getSizeColumn("Ma colonne 2"));
+  ASSERT_EQUAL(2, ptrSTO->getSizeColumn("Ma colonne 3"));
+  ASSERT_EQUAL(0, ptrSTO->getSizeColumn("Ma colonne 4"));
+
+  ptrSTO->addRow("Ma ligne 4", RealUniqueArray{9, 10, 11});
+
+  ASSERT_EQUAL(4, ptrSTO->getSizeColumn("Ma colonne 1"));
+  ASSERT_EQUAL(4, ptrSTO->getSizeColumn("Ma colonne 2"));
+  ASSERT_EQUAL(4, ptrSTO->getSizeColumn("Ma colonne 3"));
+  ASSERT_EQUAL(0, ptrSTO->getSizeColumn("Ma colonne 4"));
+}
+
+void SimpleTableOutputTesterService::
+testGetPosRowColumn1()
+{
+  Integer posX0 = ptrSTO->addColumn("Ma colonne 1");
+  Integer posX1 = ptrSTO->addColumn("Ma colonne 2");
+  Integer posX2 = ptrSTO->addColumn("Ma colonne 3");
+
+  Integer posY0 = ptrSTO->addRow("Ma ligne 1", RealUniqueArray{1, 2, 3});
+  Integer posY1 = ptrSTO->addRow("Ma ligne 2", RealUniqueArray{4, 5, 6});
+  Integer posY2 = ptrSTO->addRow("Ma ligne 3", RealUniqueArray{7, 8, 9});
+
+  ASSERT_EQUAL(posX0, ptrSTO->getPosColumn("Ma colonne 1"));
+  ASSERT_EQUAL(posX1, ptrSTO->getPosColumn("Ma colonne 2"));
+  ASSERT_EQUAL(posX2, ptrSTO->getPosColumn("Ma colonne 3"));
+
+  ASSERT_EQUAL(posY0, ptrSTO->getPosRow("Ma ligne 1"));
+  ASSERT_EQUAL(posY1, ptrSTO->getPosRow("Ma ligne 2"));
+  ASSERT_EQUAL(posY2, ptrSTO->getPosRow("Ma ligne 3"));
+}
+
+void SimpleTableOutputTesterService::
+testGetNumRowColumn1()
+{
+  Integer posX0 = ptrSTO->addColumn("Ma colonne 1");
+  Integer posX1 = ptrSTO->addColumn("Ma colonne 2");
+  Integer posX2 = ptrSTO->addColumn("Ma colonne 3");
+
+  Integer posY0 = ptrSTO->addRow("Ma ligne 1");
+  Integer posY1 = ptrSTO->addRow("Ma ligne 2");
+
+  ASSERT_EQUAL(3, ptrSTO->getNumColumns());
+  ASSERT_EQUAL(2, ptrSTO->getNumRows());
+}
 
 
 void SimpleTableOutputTesterService::

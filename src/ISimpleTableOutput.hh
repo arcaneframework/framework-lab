@@ -59,21 +59,21 @@ public:
 
 
   virtual bool editElem(Integer posX, Integer posY, Real elem) = 0;
-  virtual bool editElem(String rowName, String columnName, Real elem) = 0;
+  virtual bool editElem(String columnName, String rowName, Real elem) = 0;
 
   virtual Real getElem(Integer posX, Integer posY) = 0;
-  virtual Real getElem(String rowName, String columnName) = 0;
+  virtual Real getElem(String columnName, String rowName) = 0;
 
   virtual RealUniqueArray getRow(Integer pos) = 0;
-  virtual RealUniqueArray getColumn(Integer pos) = 0;
-
   virtual RealUniqueArray getRow(String rowName) = 0;
+
+  virtual RealUniqueArray getColumn(Integer pos) = 0;
   virtual RealUniqueArray getColumn(String columnName) = 0;
 
   virtual Integer getSizeRow(Integer pos) = 0;
-  virtual Integer getSizeColumn(Integer pos) = 0;
-  
   virtual Integer getSizeRow(String rowName) = 0;
+  
+  virtual Integer getSizeColumn(Integer pos) = 0;
   virtual Integer getSizeColumn(String columnName) = 0;
 
   virtual Integer getPosRow(String rowName) = 0;

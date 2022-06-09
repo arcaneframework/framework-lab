@@ -15,7 +15,7 @@ CSV_SOURCE_DIR=framework-lab # your src path
 CSV_BUILD_DIR=build_lab # build dir
 
 CSV_EXE=${CSV_BUILD_DIR}/src/csv
-CSV_ARC=${CSV_SOURCE_DIR}/tests/Test.arc
+CSV_ARC=${CSV_SOURCE_DIR}/tests/Tester.arc
 mkdir -p ${CSV_BUILD_DIR}
 cd ${CSV_BUILD_DIR}
 

@@ -8,33 +8,49 @@
   </variables>
 
   <tests class-set-up="setUpForClass" test-set-up="setUp" class-tear-down="tearDownForClass" test-tear-down="tearDown">
-    <test name="testAddRow 1" method-name="testAddRow1"/>
-    <test name="testAddRow 2" method-name="testAddRow2"/>
-    <test name="testAddRow 3" method-name="testAddRow3"/>
+    <test name="Test addRow() 1" method-name="testAddRow1"/>
+    <test name="Test addRow() 2" method-name="testAddRow2"/>
+    <test name="Test addRow() 3" method-name="testAddRow3"/>
 
-    <test name="testAddColumn 1" method-name="testAddColumn1"/>
-    <test name="testAddColumn 2" method-name="testAddColumn2"/>
-    <test name="testAddColumn 3" method-name="testAddColumn3"/>
+    <test name="Test addColumn() 1" method-name="testAddColumn1"/>
+    <test name="Test addColumn() 2" method-name="testAddColumn2"/>
+    <test name="Test addColumn() 3" method-name="testAddColumn3"/>
 
-    <test name="testAddElemRow 1" method-name="testAddElemRow1"/>
-    <test name="testAddElemRow 2" method-name="testAddElemRow2"/>
+    <test name="Test addElemRow() 1" method-name="testAddElemRow1"/>
+    <test name="Test addElemRow() 2" method-name="testAddElemRow2"/>
 
-    <test name="testAddElemSameRow 1" method-name="testAddElemSameRow1"/>
+    <test name="Test addElemSameRow() 1" method-name="testAddElemSameRow1"/>
 
-    <test name="testAddElemsRow 1" method-name="testAddElemsRow1"/>
-    <test name="testAddElemsRow 2" method-name="testAddElemsRow2"/>
+    <test name="Test addElemsRow() 1" method-name="testAddElemsRow1"/>
+    <test name="Test addElemsRow() 2" method-name="testAddElemsRow2"/>
 
-    <test name="testAddElemsSameRow 1" method-name="testAddElemsSameRow1"/>
+    <test name="Test addElemsSameRow() 1" method-name="testAddElemsSameRow1"/>
 
-    <!-- <test name="testAddElemColumn 1" method-name="testAddElemColumn1"/>
-    <test name="testAddElemColumn 2" method-name="testAddElemColumn2"/>
+    <test name="Test addElemColumn() 1" method-name="testAddElemColumn1"/>
+    <test name="Test addElemColumn() 2" method-name="testAddElemColumn2"/>
 
-    <test name="testAddElemSameColumn 1" method-name="testAddElemSameColumn1"/>
+    <test name="Test addElemSameColumn() 1" method-name="testAddElemSameColumn1"/>
 
-    <test name="testAddElemsColumn 1" method-name="testAddElemsColumn1"/>
-    <test name="testAddElemsColumn 2" method-name="testAddElemsColumn2"/>
+    <test name="Test addElemsColumn() 1" method-name="testAddElemsColumn1"/>
+    <test name="Test addElemsColumn() 2" method-name="testAddElemsColumn2"/>
 
-    <test name="testAddElemsSameColumn 1" method-name="testAddElemsSameColumn1"/> -->
+    <test name="Test addElemsSameColumn() 1" method-name="testAddElemsSameColumn1"/>
+
+    <test name="Test editElem() 1" method-name="testEditElem1"/>
+    <test name="Test editElem() 2" method-name="testEditElem2"/>
+
+    <test name="Test getElem() 1" method-name="testGetElem1"/>
+    <test name="Test getElem() 2" method-name="testGetElem2"/>
+
+    <test name="Test getSizeRow() 1" method-name="testGetSizeRow1"/>
+    <test name="Test getSizeRow() 2" method-name="testGetSizeRow2"/>
+
+    <test name="Test getSizeColumn() 1" method-name="testGetSizeColumn1"/>
+    <test name="Test getSizeColumn() 2" method-name="testGetSizeColumn2"/>
+
+    <test name="Test getPosRowColumn() 1" method-name="testGetPosRowColumn1"/>
+
+    <test name="Test getNumRowColumn() 1" method-name="testGetNumRowColumn1"/>
   </tests> 
 
   <options>

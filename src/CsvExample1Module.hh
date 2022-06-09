@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* CsvExampleModule.hh                                                 (C) 2000-2022 */
+/* CsvExample1Module.hh                                                 (C) 2000-2022 */
 /*                                                                           */
 /*                                                      */
 /*---------------------------------------------------------------------------*/
@@ -17,20 +17,20 @@
 #include "ISimpleTableOutput.hh"
 
 
-#include "CsvExample_axl.h"
+#include "CsvExample1_axl.h"
 
 using namespace Arcane;
 
 /*!
-  \brief Module CsvExample.
+  \brief Module CsvExample1.
  */
-class CsvExampleModule : 
-public ArcaneCsvExampleObject
+class CsvExample1Module : 
+public ArcaneCsvExample1Object
 {
 
  public:
-  explicit CsvExampleModule(const ModuleBuildInfo& mbi)
-  : ArcaneCsvExampleObject(mbi)
+  explicit CsvExample1Module(const ModuleBuildInfo& mbi)
+  : ArcaneCsvExample1Object(mbi)
   {}
 
  public:
@@ -44,7 +44,7 @@ public ArcaneCsvExampleObject
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-ARCANE_REGISTER_MODULE_CSVEXAMPLE(CsvExampleModule);
+ARCANE_REGISTER_MODULE_CSVEXAMPLE1(CsvExample1Module);
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
