@@ -59,6 +59,7 @@ public:
 
   void clear() override;
 
+
   Integer addRow(String name_row) override;
   Integer addRow(String name_row, ConstArrayView<Real> elems) override;
 
@@ -84,16 +85,12 @@ public:
   bool addElemsSameColumn(ConstArrayView<Real> elems) override;
 
 
-  void print(bool only_P0) override;
-  void print(Integer only_proc) override;
-  bool writeFile(bool only_P0) override;
-  bool writeFile(String path, bool only_P0) override;
-
   bool editElem(Integer posX, Integer posY, Real elem) override;
   bool editElem(String columnName, String rowName, Real elem) override;
 
   Real getElem(Integer posX, Integer posY) override;
   Real getElem(String columnName, String rowName) override;
+
 
   RealUniqueArray getRow(Integer pos) override;
   RealUniqueArray getColumn(Integer pos) override;
@@ -101,11 +98,13 @@ public:
   RealUniqueArray getRow(String rowName) override;
   RealUniqueArray getColumn(String columnName) override;
 
+
   Integer getSizeRow(Integer pos) override;
   Integer getSizeColumn(Integer pos) override;
   
   Integer getSizeRow(String rowName) override;
   Integer getSizeColumn(String columnName) override;
+
 
   Integer getPosRow(String rowName) override;
   Integer getPosColumn(String columnName) override;
@@ -113,7 +112,13 @@ public:
   Integer getNumRows() override;
   Integer getNumColumns() override;
 
+
   Integer addAverageColumn(String name_column) override;
+
+  void print(bool only_P0) override;
+  void print(Integer only_proc) override;
+  bool writeFile(bool only_P0) override;
+  bool writeFile(String path, bool only_P0) override;
 
 public:
   void setUpForClass() override;
@@ -132,8 +137,6 @@ private:
   void _print(std::ostream& stream);
 
 private:
-  UniqueArray2<Real> m_values_csv;
-
   String m_path;
   bool m_path_computed;
   bool m_path_only_P0;
@@ -143,6 +146,8 @@ private:
   bool m_name_tab_only_P0;
 
   String m_separator;
+
+  UniqueArray2<Real> m_values_csv;
 
   UniqueArray<String> m_name_rows;
   UniqueArray<String> m_name_columns;

@@ -24,9 +24,6 @@ initModule()
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
   info() << "Initialisation du csv";
   csv->init("CsvExample1", ";");
-  csv->addRow("Ligne 1");
-  csv->print();
-  csv->addElemColumn("Colonne 0", 65);
   csv->print();
 }
 
@@ -34,15 +31,15 @@ void CsvExample1Module::
 loopModule()
 {
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
-  info() << "Ajout d'une colonne nommée " << ("Iteration " + String::fromNumber(m_global_iteration())) << " dans le csv";
+  info() << "Ajout d'une colonne nommée \"Iteration " + String::fromNumber(m_global_iteration()) << "\" dans le csv";
   csv->addColumn("Iteration " + String::fromNumber(m_global_iteration()));
   csv->print();
 
-  info() << "Ajout de l'élément " << 98 << " sur la ligne " << "Ligne 1";
+  info() << "Ajout de l'élément 98 sur la Ligne 1";
   csv->addElemRow("Ligne 1", 98);
   csv->print();
 
-  info() << "Ajout de l'élément " << 87 << " sur la ligne " << "Ligne 2";
+  info() << "Ajout de l'élément 87 sur la ligne Ligne 2";
   csv->addElemRow("Ligne 2", 87);
   csv->print();
 

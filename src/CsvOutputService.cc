@@ -18,6 +18,9 @@
 
 using namespace Arcane;
 
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
 void CsvOutputService::
 init()
 {
@@ -41,6 +44,9 @@ init(String name_table, String separator_csv)
   m_name_tab = _computeAt(name_table, m_name_tab_only_P0);
   m_name_tab_computed = true;
 }
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 void CsvOutputService::
 clear()
@@ -72,6 +78,8 @@ clear()
   m_last_column = -1;
 }
 
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 Integer CsvOutputService::
 addRow(String name_row)
@@ -100,6 +108,41 @@ addRow(String name_row, ConstArrayView<Real> elems)
 
   return pos;
 }
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+Integer CsvOutputService::
+addColumn(String name_column)
+{
+  Integer pos = m_values_csv.dim2Size();
+  m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
+
+  m_name_columns.add(name_column);
+
+  m_size_columns.add(0);
+
+  m_last_column = pos;
+
+  return pos;
+}
+
+Integer CsvOutputService::
+addColumn(String name_column, ConstArrayView<Real> elems)
+{
+  Integer pos = m_values_csv.dim2Size();
+  m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
+
+  m_name_columns.add(name_column);
+  m_size_columns.add(0);
+
+  addElemsColumn(pos, elems);
+
+  return pos;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 bool CsvOutputService::
 addElemRow(Integer pos, Real elem)
@@ -146,12 +189,8 @@ addElemSameRow(Real elem)
   return addElemRow(m_last_row, elem);
 }
 
-bool CsvOutputService::
-addElemsSameRow(ConstArrayView<Real> elems)
-{
-  if(m_last_row == -1 || m_last_column == -1) return false;
-  return addElemsRow(m_last_row, elems);
-}
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 bool CsvOutputService::
 addElemsRow(Integer pos, ConstArrayView<Real> elems)
@@ -187,35 +226,15 @@ addElemsRow(String name_row, ConstArrayView<Real> elems, bool create_if_not_exis
   else                          return false;
 }
 
-
-Integer CsvOutputService::
-addColumn(String name_column)
+bool CsvOutputService::
+addElemsSameRow(ConstArrayView<Real> elems)
 {
-  Integer pos = m_values_csv.dim2Size();
-  m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
-
-  m_name_columns.add(name_column);
-
-  m_size_columns.add(0);
-
-  m_last_column = pos;
-
-  return pos;
+  if(m_last_row == -1 || m_last_column == -1) return false;
+  return addElemsRow(m_last_row, elems);
 }
 
-Integer CsvOutputService::
-addColumn(String name_column, ConstArrayView<Real> elems)
-{
-  Integer pos = m_values_csv.dim2Size();
-  m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
-
-  m_name_columns.add(name_column);
-  m_size_columns.add(0);
-
-  addElemsColumn(pos, elems);
-
-  return pos;
-}
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 bool CsvOutputService::
 addElemColumn(Integer pos, Real elem)
@@ -246,6 +265,16 @@ addElemColumn(String name_column, Real elem, bool create_if_not_exist)
   else if(create_if_not_exist)  return addElemColumn(addColumn(name_column), elem);
   else                          return false;
 }
+
+bool CsvOutputService::
+addElemSameColumn(Real elem)
+{
+  if(m_last_row == -1 || m_last_column == -1) return false;
+  return addElemColumn(m_last_column, elem);
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 bool CsvOutputService::
 addElemsColumn(Integer pos, ConstArrayView<Real> elems)
@@ -281,19 +310,246 @@ addElemsColumn(String name_column, ConstArrayView<Real> elems, bool create_if_no
 }
 
 bool CsvOutputService::
-addElemSameColumn(Real elem)
-{
-  if(m_last_row == -1 || m_last_column == -1) return false;
-  return addElemColumn(m_last_column, elem);
-}
-
-bool CsvOutputService::
 addElemsSameColumn(ConstArrayView<Real> elems)
 {
   if(m_last_row == -1 || m_last_column == -1) return false;
   return addElemsColumn(m_last_column, elems);
 }
 
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+bool CsvOutputService::
+editElem(Integer posX, Integer posY, Real elem)
+{
+  if(posX < 0 || posX >= m_values_csv.dim2Size() 
+  || posY < 0 || posY >= m_values_csv.dim1Size()) 
+    return false;
+
+
+  if(m_size_columns[posX] <= posY) m_size_columns[posX] = posY+1;
+  if(m_size_rows[posY] <= posX) m_size_rows[posY] = posX+1;
+
+
+  m_values_csv[posY][posX] = elem;
+  return true;
+}
+
+bool CsvOutputService::
+editElem(String columnName, String rowName, Real elem)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+
+  if(posX && posY) return editElem(posX.value(), posY.value(), elem);
+  return false;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+Real CsvOutputService::
+getElem(Integer posX, Integer posY)
+{
+  if(posX < 0 || posX >= m_values_csv.dim2Size() 
+  || posY < 0 || posY >= m_values_csv.dim1Size()) 
+    return 0;
+
+  return m_values_csv[posY][posX];
+}
+
+Real CsvOutputService::
+getElem(String columnName, String rowName)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+
+  if(posX && posY) return getElem(posX.value(), posY.value());
+  return 0;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+RealUniqueArray CsvOutputService::
+getRow(Integer pos)
+{
+  Integer size = getSizeRow(pos);
+  RealUniqueArray copie(size);
+  for(Integer i = 0; i < size; i++){
+    copie[i] = m_values_csv[pos][i];
+  }
+  return copie;
+}
+
+RealUniqueArray CsvOutputService::
+getRow(String rowName)
+{
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+  if(posY) return getRow(posY.value());
+  return RealUniqueArray(0);
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+RealUniqueArray CsvOutputService::
+getColumn(Integer pos)
+{
+  Integer size = getSizeColumn(pos);
+
+  RealUniqueArray copie(size);
+  for(Integer i = 0; i < size; i++){
+    copie[i] = m_values_csv[i][pos];
+  }
+  return copie;
+}
+
+RealUniqueArray CsvOutputService::
+getColumn(String columnName)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  if(posX) return getColumn(posX.value());
+  return RealUniqueArray(0);
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+Integer CsvOutputService::
+getSizeRow(Integer pos)
+{
+  if(pos < 0 || pos >= m_values_csv.dim1Size()) return 0;
+  return m_size_rows[pos];
+}
+
+Integer CsvOutputService::
+getSizeRow(String rowName)
+{
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+  if(posY) return getSizeRow(posY.value());
+  return 0;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+Integer CsvOutputService::
+getSizeColumn(Integer pos)
+{
+  if(pos < 0 || pos >= m_values_csv.dim2Size()) return 0;
+  return m_size_columns[pos];
+}
+
+Integer CsvOutputService::
+getSizeColumn(String columnName)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  if(posX) return getSizeColumn(posX.value());
+  return 0;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+Integer CsvOutputService::
+getPosRow(String rowName)
+{
+  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
+  if(posY) return posY.value();
+  return -1;
+}
+
+Integer CsvOutputService::
+getPosColumn(String columnName)
+{
+  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
+  if(posX) return posX.value();
+  return -1;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+Integer CsvOutputService::
+getNumRows()
+{
+  return m_values_csv.dim1Size();
+}
+
+Integer CsvOutputService::
+getNumColumns()
+{
+  return m_values_csv.dim2Size();
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+Integer CsvOutputService::
+addAverageColumn(String name_column)
+{
+  Integer pos = addColumn(name_column);
+  for(Integer i = 0; i < m_values_csv.dim1Size(); i++) {
+    Real avg = 0.0;
+    ConstArrayView<Real> view = m_values_csv[i];
+    for(Integer j = 0; j < view.size()-1; j++) {
+      avg += view[j];
+    }
+    avg /= view.size()-1;
+    addElemColumn(pos, avg);
+  }
+  return pos;
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+void CsvOutputService::
+print(bool only_P0)
+{
+  if(only_P0 && mesh()->parallelMng()->commRank() != 0) return;
+  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Ecriture du .csv dans la sortie standard :";
+  _print(std::cout);
+  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Fin écriture .csv";
+}
+
+void CsvOutputService::
+print(Integer only_proc)
+{
+  if(mesh()->parallelMng()->commRank() != only_proc) return;
+  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Ecriture du .csv dans la sortie standard :";
+  _print(std::cout);
+  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Fin écriture .csv";
+}
+
+bool CsvOutputService::
+writeFile(bool only_P0)
+{
+  String path = _computeFinalPath();
+  bool all_only_P0 = m_path_only_P0 && m_name_tab_only_P0;
+  // Le seul cas où tout le monde écrit est si only_P0 == false et all_only_P0 == false.
+  if((only_P0 || all_only_P0) && mesh()->parallelMng()->commRank() != 0) return true;
+
+  std::ofstream ofile(path.localstr());
+  if(ofile.fail()) return false;
+
+  _print(ofile);
+
+  ofile.close();
+  return true;
+}
+
+bool CsvOutputService::
+writeFile(String path, bool only_P0)
+{
+  m_path = path;
+  m_path_computed = false;
+  return writeFile(only_P0);
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 String CsvOutputService::
 _computeFinalPath()
@@ -347,25 +603,6 @@ _computeAt(String name, bool& only_P0)
   return combined;
 }
 
-
-void CsvOutputService::
-print(bool only_P0)
-{
-  if(only_P0 && mesh()->parallelMng()->commRank() != 0) return;
-  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Ecriture du .csv dans la sortie standard :";
-  _print(std::cout);
-  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Fin écriture .csv";
-}
-
-void CsvOutputService::
-print(Integer only_proc)
-{
-  if(mesh()->parallelMng()->commRank() != only_proc) return;
-  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Ecriture du .csv dans la sortie standard :";
-  _print(std::cout);
-  pinfo() << "P" << mesh()->parallelMng()->commRank() << " - Fin écriture .csv";
-}
-
 void CsvOutputService::
 _print(std::ostream& stream)
 {
@@ -385,190 +622,6 @@ _print(std::ostream& stream)
     }
     stream << std::endl;
   }
-}
-
-
-bool CsvOutputService::
-writeFile(bool only_P0)
-{
-  String path = _computeFinalPath();
-  bool all_only_P0 = m_path_only_P0 && m_name_tab_only_P0;
-  // Le seul cas où tout le monde écrit est si only_P0 == false et all_only_P0 == false.
-  if((only_P0 || all_only_P0) && mesh()->parallelMng()->commRank() != 0) return true;
-
-  std::ofstream ofile(path.localstr());
-  if(ofile.fail()) return false;
-
-  _print(ofile);
-
-  ofile.close();
-  return true;
-}
-
-bool CsvOutputService::
-writeFile(String path, bool only_P0)
-{
-  m_path = path;
-  m_path_computed = false;
-  return writeFile(only_P0);
-}
-
-bool CsvOutputService::
-editElem(Integer posX, Integer posY, Real elem)
-{
-  if(posX < 0 || posX >= m_values_csv.dim2Size() 
-  || posY < 0 || posY >= m_values_csv.dim1Size()) 
-    return false;
-
-
-  if(m_size_columns[posX] <= posY) m_size_columns[posX] = posY+1;
-  if(m_size_rows[posY] <= posX) m_size_rows[posY] = posX+1;
-
-
-  m_values_csv[posY][posX] = elem;
-  return true;
-}
-
-bool CsvOutputService::
-editElem(String columnName, String rowName, Real elem)
-{
-  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
-  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
-
-  if(posX && posY) return editElem(posX.value(), posY.value(), elem);
-  return false;
-}
-
-Real CsvOutputService::
-getElem(Integer posX, Integer posY)
-{
-  if(posX < 0 || posX >= m_values_csv.dim2Size() 
-  || posY < 0 || posY >= m_values_csv.dim1Size()) 
-    return 0;
-
-  return m_values_csv[posY][posX];
-}
-
-Real CsvOutputService::
-getElem(String columnName, String rowName)
-{
-  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
-  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
-
-  if(posX && posY) return getElem(posX.value(), posY.value());
-  return 0;
-}
-
-RealUniqueArray CsvOutputService::
-getRow(Integer pos)
-{
-  Integer size = getSizeRow(pos);
-  RealUniqueArray copie(size);
-  for(Integer i = 0; i < size; i++){
-    copie[i] = m_values_csv[pos][i];
-  }
-  return copie;
-}
-
-RealUniqueArray CsvOutputService::
-getRow(String rowName)
-{
-  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
-  if(posY) return getRow(posY.value());
-  return RealUniqueArray(0);
-}
-
-RealUniqueArray CsvOutputService::
-getColumn(Integer pos)
-{
-  Integer size = getSizeColumn(pos);
-
-  RealUniqueArray copie(size);
-  for(Integer i = 0; i < size; i++){
-    copie[i] = m_values_csv[i][pos];
-  }
-  return copie;
-}
-
-RealUniqueArray CsvOutputService::
-getColumn(String columnName)
-{
-  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
-  if(posX) return getColumn(posX.value());
-  return RealUniqueArray(0);
-}
-
-Integer CsvOutputService::
-getSizeRow(Integer pos)
-{
-  if(pos < 0 || pos >= m_values_csv.dim1Size()) return 0;
-  return m_size_rows[pos];
-}
-Integer CsvOutputService::
-getSizeRow(String rowName)
-{
-  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
-  if(posY) return getSizeRow(posY.value());
-  return 0;
-}
-
-Integer CsvOutputService::
-getSizeColumn(Integer pos)
-{
-  if(pos < 0 || pos >= m_values_csv.dim2Size()) return 0;
-  return m_size_columns[pos];
-}
-Integer CsvOutputService::
-getSizeColumn(String columnName)
-{
-  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
-  if(posX) return getSizeColumn(posX.value());
-  return 0;
-}
-
-Integer CsvOutputService::
-getPosRow(String rowName)
-{
-  std::optional<Integer> posY = m_name_rows.span().findFirst(rowName);
-  if(posY) return posY.value();
-  return -1;
-}
-
-Integer CsvOutputService::
-getPosColumn(String columnName)
-{
-  std::optional<Integer> posX = m_name_columns.span().findFirst(columnName);
-  if(posX) return posX.value();
-  return -1;
-}
-
-Integer CsvOutputService::
-getNumRows()
-{
-  return m_values_csv.dim1Size();
-}
-
-Integer CsvOutputService::
-getNumColumns()
-{
-  return m_values_csv.dim2Size();
-}
-
-
-Integer CsvOutputService::
-addAverageColumn(String name_column)
-{
-  Integer pos = addColumn(name_column);
-  for(Integer i = 0; i < m_values_csv.dim1Size(); i++) {
-    Real avg = 0.0;
-    ConstArrayView<Real> view = m_values_csv[i];
-    for(Integer j = 0; j < view.size()-1; j++) {
-      avg += view[j];
-    }
-    avg /= view.size()-1;
-    addElemColumn(pos, avg);
-  }
-  return pos;
 }
 
 

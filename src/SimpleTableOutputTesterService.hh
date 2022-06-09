@@ -47,22 +47,18 @@ public:
 
   void testAddElemRow1() override;
   void testAddElemRow2() override;
-
   void testAddElemSameRow1() override;
 
   void testAddElemsRow1() override;
   void testAddElemsRow2() override;
-
   void testAddElemsSameRow1() override;
 
   void testAddElemColumn1() override;
   void testAddElemColumn2() override;
-
   void testAddElemSameColumn1() override;
 
   void testAddElemsColumn1() override;
   void testAddElemsColumn2() override;
-
   void testAddElemsSameColumn1() override;
 
   void testEditElem1() override;
