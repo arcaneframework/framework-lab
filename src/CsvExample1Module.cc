@@ -5,14 +5,15 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* CsvExample1Module.cc                                                 (C) 2000-2022 */
+/* CsvExample1Module.cc                                        (C) 2000-2022 */
 /*                                                                           */
-/*                                                      */
+/* Exemple de module utilisant ISimpleTableOutput en tant que singleton.     */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
 #include "CsvExample1Module.hh"
 #include <iostream>
+#include <random>
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -20,6 +21,7 @@
 void CsvExample1Module::
 initModule()
 {
+  srand(1234);
   // Initialisation de la sortie CSV.
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
   info() << "Initialisation du csv";
@@ -33,14 +35,9 @@ loopModule()
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
   info() << "Ajout d'une colonne nommée \"Iteration " + String::fromNumber(m_global_iteration()) << "\" dans le csv";
   csv->addColumn("Iteration " + String::fromNumber(m_global_iteration()));
-  csv->print();
 
-  info() << "Ajout de l'élément 98 sur la Ligne 1";
-  csv->addElemRow("Ligne 1", 98);
-  csv->print();
-
-  info() << "Ajout de l'élément 87 sur la ligne Ligne 2";
-  csv->addElemRow("Ligne 2", 87);
+  csv->addElemRow("Ligne 1", rand()%99);
+  csv->addElemRow("Ligne 2", rand()%99);
   csv->print();
 
   if (m_global_iteration() == 3)
@@ -52,10 +49,18 @@ endModule()
 {
   ISimpleTableOutput* csv = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
 
-  csv->addRow("Ligne 3");
+  csv->addRows(StringUniqueArray{"Ligne 3", "Ligne 4"});
 
-  UniqueArray<Real> end = {99, 99, 99};
-  csv->addColumn("Colonne 4", end.constView());
+  csv->addElemRow("Ligne 3", 24);
+
+  UniqueArray<Real> end = {99, 99};
+  csv->addElemsColumn("Iteration 2", end.constView());
+
+  csv->editElem("Iteration 1", "Ligne 4", 86);
+
+
+  UniqueArray<Real> end2 = {99, 99, 99};
+  csv->addColumn("Colonne 4", end2.constView());
 
   csv->editElem(3, 1, 86);
 
@@ -64,14 +69,11 @@ endModule()
 
   csv->addColumn("Colonne 5");
   csv->addElemRow("Ligne 1", 25);
-  //csv->addElemRow("Ligne 2", 26);
-  //csv->addElemRow("Ligne 3", 27);
   csv->addElemSameColumn(26);
   csv->addElemSameColumn(27);
 
-
-  info() << "Affichage du csv";
   csv->print();
+
   if(options()->getCsvPath() != "") {
     info() << "Ecriture du csv dans un fichier";
     csv->writeFile(options()->getCsvPath());

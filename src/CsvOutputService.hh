@@ -11,9 +11,6 @@
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-#ifndef CSVOUTPUTSERVICE_HH
-#define CSVOUTPUTSERVICE_HH
-
 #include "ISimpleTableOutput.hh"
 #include "arcane/BasicUnitTest.h"
 #include "CsvOutput_axl.h"
@@ -122,20 +119,10 @@ public:
   bool writeFile(bool only_P0) override;
   bool writeFile(String path, bool only_P0) override;
 
-public:
-  void setUpForClass() override;
-  void setUp() override;
-  void testInitProcId() override;
-  void testClear() override;
-  void testComputeAt() override;
-  void testComputeFinalPath() override;
-  void tearDown() override;
-  void tearDownForClass() override;
-
 
 private:
   String _computeAt(String name, bool& only_P0);
-  String _computeFinalPath();
+  String _computeFinal();
   void _print(std::ostream& stream);
 
 private:
@@ -166,4 +153,10 @@ private:
   bool m_with_option;
 };
 
-#endif
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+ARCANE_REGISTER_SERVICE_CSVOUTPUT(CsvOutput, CsvOutputService);
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/

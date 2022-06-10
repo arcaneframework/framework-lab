@@ -39,11 +39,6 @@
       </csv-output>
     </xml-test>
 
-    <!-- Test du module en lui-même (accès au attributs private). -->
-    <xml-test name="CsvOutput">
-        <path>./</path>
-    </xml-test>
-
   </unit-test-module>
 
 </case>

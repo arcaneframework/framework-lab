@@ -11,10 +11,12 @@
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-#include "CsvOutputService.hh"
 #include <arcane/IMesh.h>
 #include <arcane/IParallelMng.h>
+#include <arcane/Directory.h>
 #include <optional>
+
+#include "CsvOutputService.hh"
 
 using namespace Arcane;
 
@@ -559,12 +561,24 @@ print(Integer only_proc)
 bool CsvOutputService::
 writeFile(bool only_P0)
 {
-  String path = _computeFinalPath();
+  String file_name = _computeFinal();
   bool all_only_P0 = m_path_only_P0 && m_name_tab_only_P0;
   // Le seul cas où tout le monde écrit est si only_P0 == false et all_only_P0 == false.
   if((only_P0 || all_only_P0) && mesh()->parallelMng()->commRank() != 0) return true;
 
-  std::ofstream ofile(path.localstr());
+  Directory dir(m_path);
+
+  bool sf = false;
+  if(mesh()->parallelMng()->commRank() == 0) {
+    sf = dir.createDirectory();
+  }
+  if(mesh()->parallelMng()->commSize() != 1) {
+    sf = mesh()->parallelMng()->reduce(Parallel::ReduceMax, sf?1:0);
+  }
+  if(sf) return false;
+
+
+  std::ofstream ofile(dir.file(file_name).localstr());
   if(ofile.fail()) return false;
 
   _print(ofile);
@@ -585,7 +599,7 @@ writeFile(String path, bool only_P0)
 /*---------------------------------------------------------------------------*/
 
 String CsvOutputService::
-_computeFinalPath()
+_computeFinal()
 {
   if(!m_path_computed) {
     m_path = _computeAt(m_path, m_path_only_P0);
@@ -595,7 +609,7 @@ _computeFinalPath()
     m_name_tab = _computeAt(m_name_tab, m_name_tab_only_P0);
     m_name_tab_computed = true;
   }
-  return m_path + m_name_tab + ".csv";
+  return m_name_tab + ".csv";
 }
 
 String CsvOutputService::
@@ -657,13 +671,3 @@ _print(std::ostream& stream)
   }
 }
 
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-#ifndef REGISTER_CSV_SERVICE
-#define REGISTER_CSV_SERVICE
-
-ARCANE_REGISTER_SERVICE_CSVOUTPUT(CsvOutput, CsvOutputService);
-
-#endif

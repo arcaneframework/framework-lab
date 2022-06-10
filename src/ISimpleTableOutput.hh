@@ -5,9 +5,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* ISimpleTableOutput.hh                                            (C) 2000-2022 */
+/* ISimpleTableOutput.hh                                       (C) 2000-2022 */
 /*                                                                           */
-/* Interface pour simples services de sortie de tableaux de valeurs          */
+/* Interface pour simples services de sortie de tableaux de valeurs.         */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 

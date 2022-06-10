@@ -29,14 +29,14 @@
     </mesh>
   </meshes>
 
-  <csv-example>
+  <csv-example1>
 
-    <csv-output name="CsvOutput">
-      <path>./</path>
-    </csv-output>
+    <!-- <csv-output name="CsvOutput">
+      <path>./csv_output/P@proc_id@/</path>
+    </csv-output> -->
 
-    <csvPath>./</csvPath>
+    <csvPath>./csv_output/</csvPath>
 
-  </csv-example>
+  </csv-example1>
 
 </case>

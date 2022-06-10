@@ -7,7 +7,7 @@ add_executable(csv
 main.cc 
 CsvExample1Module.cc CsvExample1_axl.h 
 SimpleTableOutputTesterService.cc SimpleTableOutputTester_axl.h 
-CsvOutputService.cc CsvOutputTestService.cc CsvOutput_axl.h)
+CsvOutputService.cc CsvOutput_axl.h)
 
 arcane_generate_axl(CsvExample1)
 arcane_generate_axl(SimpleTableOutputTester)
