@@ -109,6 +109,23 @@ addRow(String name_row, ConstArrayView<Real> elems)
   return pos;
 }
 
+bool CsvOutputService::
+addRows(StringConstArrayView name_rows)
+{
+  Integer size = name_rows.size();
+  if(size == 0) return true;
+
+  Integer pos = m_values_csv.dim1Size();
+  m_values_csv.resize(pos+size);
+
+  m_name_rows.addRange(name_rows);
+  m_size_rows.addRange(IntegerUniqueArray(size, 0));
+
+  m_last_row = pos;
+
+  return true;
+}
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -119,7 +136,6 @@ addColumn(String name_column)
   m_values_csv.resize(m_values_csv.dim1Size(), pos+1);
 
   m_name_columns.add(name_column);
-
   m_size_columns.add(0);
 
   m_last_column = pos;
@@ -139,6 +155,23 @@ addColumn(String name_column, ConstArrayView<Real> elems)
   addElemsColumn(pos, elems);
 
   return pos;
+}
+
+bool CsvOutputService::
+addColumns(StringConstArrayView name_columns)
+{
+  Integer size = name_columns.size();
+  if(size == 0) return true;
+
+  Integer pos = m_values_csv.dim2Size();
+  m_values_csv.resize(m_values_csv.dim1Size(), pos+size);
+
+  m_name_columns.addRange(name_columns);
+  m_size_columns.addRange(IntegerUniqueArray(size, 0));
+
+  m_last_column = pos;
+
+  return true;
 }
 
 /*---------------------------------------------------------------------------*/

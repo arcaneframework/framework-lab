@@ -40,10 +40,12 @@ public:
   void testAddRow1() override;
   void testAddRow2() override;
   void testAddRow3() override;
+  void testAddRows1() override;
 
   void testAddColumn1() override;
   void testAddColumn2() override;
   void testAddColumn3() override;
+  void testAddColumns1() override;
 
   void testAddElemRow1() override;
   void testAddElemRow2() override;
@@ -60,6 +62,8 @@ public:
   void testAddElemsColumn1() override;
   void testAddElemsColumn2() override;
   void testAddElemsSameColumn1() override;
+
+  void testAddElemSame1() override;
 
   void testEditElem1() override;
   void testEditElem2() override;

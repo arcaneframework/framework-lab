@@ -62,9 +62,11 @@ public:
 
   Integer addRow(String name_row) override;
   Integer addRow(String name_row, ConstArrayView<Real> elems) override;
+  bool addRows(StringConstArrayView name_rows) override;
 
   Integer addColumn(String name_column) override;
   Integer addColumn(String name_column, ConstArrayView<Real> elems) override;
+  bool addColumns(StringConstArrayView name_columns) override;
   
 
   bool addElemRow(Integer pos, Real elem) override;
