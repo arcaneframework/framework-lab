@@ -55,6 +55,18 @@
     <test name="Test getPosRowColumn() 1" method-name="testGetPosRowColumn1"/>
 
     <test name="Test getNumRowColumn() 1" method-name="testGetNumRowColumn1"/>
+
+    <test name="Test addElemRow() / addElemSameColumn() 1" method-name="testAddRowSameColumn1"/>
+    <test name="Test addElemRow() / addElemSameColumn() 2" method-name="testAddRowSameColumn2"/>
+    <test name="Test addElemRow() / addElemSameColumn() 3" method-name="testAddRowSameColumn3"/>
+
+    <test name="Test addElemColumn() / addElemSameRow() 1" method-name="testAddColumnSameRow1"/>
+    <test name="Test addElemColumn() / addElemSameRow() 2" method-name="testAddColumnSameRow2"/>
+    <test name="Test addElemColumn() / addElemSameRow() 3" method-name="testAddColumnSameRow3"/>
+
+    <test name="Test editElemUp/Down/Left/Right() 1" method-name="testEditElemUDLR1"/>
+    <test name="Test editElemDown() 1" method-name="testEditElemDown1"/>
+    <test name="Test editElemRight() 1" method-name="testEditElemRight1"/>
   </tests> 
 
   <options>

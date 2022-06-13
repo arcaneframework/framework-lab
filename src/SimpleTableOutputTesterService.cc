@@ -34,6 +34,7 @@ setUpForClass()
 void SimpleTableOutputTesterService::
 setUp()
 {
+  ptrSTO->clear();
   ptrSTO->init();
 }
 
@@ -675,9 +676,303 @@ testGetNumRowColumn1()
 
 
 void SimpleTableOutputTesterService::
+testAddRowSameColumn1()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+
+  RealUniqueArray result1 = {1, 2, 3};
+  RealUniqueArray result2 = {4, 5, 6};
+  RealUniqueArray result3 = {7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(4));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(7));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 1", 2));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(5));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(8));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 1", 3));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(6));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(9));
+
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getRow("Ma ligne 1"));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getRow("Ma ligne 2"));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getRow("Ma ligne 3"));
+}
+
+void SimpleTableOutputTesterService::
+testAddRowSameColumn2()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+  ptrSTO->addRow("Ma ligne 4");
+  ptrSTO->addRow("Ma ligne 5");
+  ptrSTO->addRow("Ma ligne 6");
+  ptrSTO->addRow("Ma ligne 7");
+  ptrSTO->addRow("Ma ligne 8");
+  ptrSTO->addRow("Ma ligne 9");
+
+  RealUniqueArray result = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(2));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(3));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 4", 4));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(5));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(6));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 7", 7));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(8));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(9));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getColumn("Ma colonne 1"));
+}
+
+void SimpleTableOutputTesterService::
+testAddRowSameColumn3()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+  ptrSTO->addRow("Ma ligne 4");
+  ptrSTO->addRow("Ma ligne 5");
+  ptrSTO->addRow("Ma ligne 6");
+  ptrSTO->addRow("Ma ligne 7");
+  ptrSTO->addRow("Ma ligne 8");
+  ptrSTO->addRow("Ma ligne 9");
+
+  RealUniqueArray result = {1, 2, 3, 4, 0, 0, 7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(2));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(3));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 7", 7));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(8));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(9));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 4", 4));
+  ASSERT_FALSE(ptrSTO->addElemSameColumn(5));
+  ASSERT_FALSE(ptrSTO->addElemSameColumn(6));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getColumn("Ma colonne 1"));
+}
+
+void SimpleTableOutputTesterService::
+testAddColumnSameRow1()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+
+  RealUniqueArray result1 = {1, 2, 3};
+  RealUniqueArray result2 = {4, 5, 6};
+  RealUniqueArray result3 = {7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(2));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(3));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 1", 4));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(5));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(6));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 1", 7));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(8));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(9));
+
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getRow("Ma ligne 1"));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getRow("Ma ligne 2"));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getRow("Ma ligne 3"));
+}
+
+void SimpleTableOutputTesterService::
+testAddColumnSameRow2()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+  ptrSTO->addColumn("Ma colonne 4");
+  ptrSTO->addColumn("Ma colonne 5");
+  ptrSTO->addColumn("Ma colonne 6");
+  ptrSTO->addColumn("Ma colonne 7");
+  ptrSTO->addColumn("Ma colonne 8");
+  ptrSTO->addColumn("Ma colonne 9");
+
+  ptrSTO->addRow("Ma ligne 1");
+
+  RealUniqueArray result = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(2));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(3));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 4", 4));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(5));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(6));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 7", 7));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(8));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(9));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getRow("Ma ligne 1"));
+}
+
+void SimpleTableOutputTesterService::
+testAddColumnSameRow3()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+  ptrSTO->addColumn("Ma colonne 4");
+  ptrSTO->addColumn("Ma colonne 5");
+  ptrSTO->addColumn("Ma colonne 6");
+  ptrSTO->addColumn("Ma colonne 7");
+  ptrSTO->addColumn("Ma colonne 8");
+  ptrSTO->addColumn("Ma colonne 9");
+
+  ptrSTO->addRow("Ma ligne 1");
+
+  RealUniqueArray result = {1, 2, 3, 4, 0, 0, 7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(2));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(3));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 7", 7));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(8));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(9));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 4", 4));
+  ASSERT_FALSE(ptrSTO->addElemSameRow(5));
+  ASSERT_FALSE(ptrSTO->addElemSameRow(6));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getRow("Ma ligne 1"));
+}
+
+
+void SimpleTableOutputTesterService::
+testEditElemUDLR1()
+{
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+
+  RealUniqueArray result1 = {1, 2, 3};
+  RealUniqueArray result2 = {4, 5, 6};
+  RealUniqueArray result3 = {7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->editElem("Ma colonne 2", "Ma ligne 2", 5));
+  ASSERT_TRUE(ptrSTO->editElemDown(8));
+  ASSERT_FALSE(ptrSTO->editElemDown(99));
+  ASSERT_TRUE(ptrSTO->editElemLeft(7));
+  ASSERT_FALSE(ptrSTO->editElemLeft(99));
+  ASSERT_TRUE(ptrSTO->editElemUp(4));
+  ASSERT_TRUE(ptrSTO->editElemUp(1));
+  ASSERT_FALSE(ptrSTO->editElemUp(99));
+  ASSERT_TRUE(ptrSTO->editElemRight(2));
+  ASSERT_TRUE(ptrSTO->editElemRight(3));
+  ASSERT_FALSE(ptrSTO->editElemRight(99));
+  ASSERT_TRUE(ptrSTO->editElemDown(6));
+  ASSERT_TRUE(ptrSTO->editElemDown(9));
+  ASSERT_FALSE(ptrSTO->editElemDown(99));
+
+  ASSERT_EQUAL_ARRAY(result1, ptrSTO->getRow("Ma ligne 1"));
+  ASSERT_EQUAL_ARRAY(result2, ptrSTO->getRow("Ma ligne 2"));
+  ASSERT_EQUAL_ARRAY(result3, ptrSTO->getRow("Ma ligne 3"));
+}
+
+void SimpleTableOutputTesterService::
+testEditElemDown1()
+{
+  // Voir testAddRowSameColumn3()
+  ptrSTO->addColumn("Ma colonne 1");
+
+  ptrSTO->addRow("Ma ligne 1");
+  ptrSTO->addRow("Ma ligne 2");
+  ptrSTO->addRow("Ma ligne 3");
+  ptrSTO->addRow("Ma ligne 4");
+  ptrSTO->addRow("Ma ligne 5");
+  ptrSTO->addRow("Ma ligne 6");
+  ptrSTO->addRow("Ma ligne 7");
+  ptrSTO->addRow("Ma ligne 8");
+  ptrSTO->addRow("Ma ligne 9");
+
+  RealUniqueArray result = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(2));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(3));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 7", 7));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(8));
+  ASSERT_TRUE(ptrSTO->addElemSameColumn(9));
+
+  ASSERT_TRUE(ptrSTO->addElemRow("Ma ligne 4", 4));
+  ASSERT_TRUE(ptrSTO->editElemDown(5));
+  ASSERT_TRUE(ptrSTO->editElemDown(6));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getColumn("Ma colonne 1"));
+}
+
+void SimpleTableOutputTesterService::
+testEditElemRight1()
+{
+  // Voir testAddColumnSameRow3()
+  ptrSTO->addColumn("Ma colonne 1");
+  ptrSTO->addColumn("Ma colonne 2");
+  ptrSTO->addColumn("Ma colonne 3");
+  ptrSTO->addColumn("Ma colonne 4");
+  ptrSTO->addColumn("Ma colonne 5");
+  ptrSTO->addColumn("Ma colonne 6");
+  ptrSTO->addColumn("Ma colonne 7");
+  ptrSTO->addColumn("Ma colonne 8");
+  ptrSTO->addColumn("Ma colonne 9");
+
+  ptrSTO->addRow("Ma ligne 1");
+
+  RealUniqueArray result = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 1", 1));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(2));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(3));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 7", 7));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(8));
+  ASSERT_TRUE(ptrSTO->addElemSameRow(9));
+
+  ASSERT_TRUE(ptrSTO->addElemColumn("Ma colonne 4", 4));
+  ASSERT_TRUE(ptrSTO->editElemRight(5));
+  ASSERT_TRUE(ptrSTO->editElemRight(6));
+
+  ASSERT_EQUAL_ARRAY(result, ptrSTO->getRow("Ma ligne 1"));
+}
+
+
+void SimpleTableOutputTesterService::
 tearDown()
 {
-  ptrSTO->clear();
 }
 
 

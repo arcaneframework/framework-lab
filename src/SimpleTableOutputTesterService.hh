@@ -81,6 +81,20 @@ public:
 
   void testGetNumRowColumn1() override;
 
+  void testAddRowSameColumn1() override;
+  void testAddRowSameColumn2() override;
+  void testAddRowSameColumn3() override;
+
+  void testAddColumnSameRow1() override;
+  void testAddColumnSameRow2() override;
+  void testAddColumnSameRow3() override;
+
+  void testEditElemUDLR1() override;
+
+  void testEditElemDown1() override;
+  void testEditElemRight1() override;
+
+
   void tearDown() override;
   void tearDownForClass() override;
 
