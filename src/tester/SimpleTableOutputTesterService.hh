@@ -15,10 +15,10 @@
 #include <arcane/ITimeLoopMng.h>
 #include <arcane/ServiceBuilder.h>
 #include "arcane/BasicUnitTest.h"
-#include "csv_output/ISimpleTableOutput.hh"
+#include "simple_table_output/ISimpleTableOutput.hh"
 
 
-#include "SimpleTableOutputTesterService_axl.h"
+#include "tester/SimpleTableOutputTesterService_axl.h"
 
 using namespace Arcane;
 

@@ -4,7 +4,7 @@ Ce service permet de créer un tableau 2D de valeur avec des lignes et des colon
 Ce service peut être utilisé comme service classique à définir dans l'AXL d'un module ou comme singleton pour avoir une instance unique pour tous les modules.
 
 Ce service se veut simple d'utilisation mais permet aussi une utilisation plus avancée.
-Un première exemple d'utilisation simple pourrait être celui de l'exemple 1 (CsvExample1) :
+Un premier exemple d'utilisation simple pourrait être celui de l'exemple 1 (TableExample1) :
 On utilise le service en tant que singleton. Sur un projet faisant plusieurs boucles.
 
 Lors de l'init :

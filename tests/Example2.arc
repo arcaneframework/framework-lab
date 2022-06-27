@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <case codename="csv" xml:lang="en" codeversion="1.0">
   <arcane>
-    <title>Test</title>
+    <title>Example 2</title>
     <timeloop>csvLoop</timeloop>
   </arcane>
 
@@ -29,14 +29,13 @@
     </mesh>
   </meshes>
 
-  <csv-example1>
+  <table-example2>
+    <!-- Le nom du répertoire à créer/utiliser. -->
+    <tableDir>./example2/</tableDir>
+    <!-- Le nom du fichier à créer/écraser. -->
+    <tableName>Results_Example2</tableName>
 
-    <!-- <csv-output name="CsvOutput">
-      <path>./csv_output/P@proc_id@/</path>
-    </csv-output> -->
-
-    <csvPath>./csv_output/</csvPath>
-
-  </csv-example1>
+    <!-- Au final, on aura un fichier ayant comme chemin : ./example2/Results.csv -->
+  </table-example2>
 
 </case>

@@ -5,7 +5,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* CsvExample1Module.hh                                        (C) 2000-2022 */
+/* TableExample3Module.hh                                        (C) 2000-2022 */
 /*                                                                           */
 /* Exemple de module utilisant ISimpleTableOutput en tant que singleton.     */
 /*---------------------------------------------------------------------------*/
@@ -14,23 +14,23 @@
 #include <arcane/IParallelMng.h>
 #include <arcane/ITimeLoopMng.h>
 #include <arcane/ServiceBuilder.h>
-#include "csv_output/ISimpleTableOutput.hh"
+#include "simple_table_output/ISimpleTableOutput.hh"
 
 
-#include "CsvExample1_axl.h"
+#include "examples/TableExample3_axl.h"
 
 using namespace Arcane;
 
 /*!
-  \brief Module CsvExample1.
+  \brief Module TableExample3.
  */
-class CsvExample1Module : 
-public ArcaneCsvExample1Object
+class TableExample3Module : 
+public ArcaneTableExample3Object
 {
 
  public:
-  explicit CsvExample1Module(const ModuleBuildInfo& mbi)
-  : ArcaneCsvExample1Object(mbi)
+  explicit TableExample3Module(const ModuleBuildInfo& mbi)
+  : ArcaneTableExample3Object(mbi)
   {}
 
  public:
@@ -44,7 +44,7 @@ public ArcaneCsvExample1Object
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-ARCANE_REGISTER_MODULE_CSVEXAMPLE1(CsvExample1Module);
+ARCANE_REGISTER_MODULE_TABLEEXAMPLE3(TableExample3Module);
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
