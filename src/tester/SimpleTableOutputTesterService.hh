@@ -15,7 +15,7 @@
 #include <arcane/ITimeLoopMng.h>
 #include <arcane/ServiceBuilder.h>
 #include "arcane/BasicUnitTest.h"
-#include "ISimpleTableOutput.hh"
+#include "csv_output/ISimpleTableOutput.hh"
 
 
 #include "SimpleTableOutputTesterService_axl.h"

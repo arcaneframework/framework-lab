@@ -14,7 +14,7 @@
 #include <arcane/IParallelMng.h>
 #include <arcane/ITimeLoopMng.h>
 #include <arcane/ServiceBuilder.h>
-#include "ISimpleTableOutput.hh"
+#include "csv_output/ISimpleTableOutput.hh"
 
 
 #include "CsvExample1_axl.h"

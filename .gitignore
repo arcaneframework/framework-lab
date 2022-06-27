@@ -60,3 +60,7 @@ Debug*
 
 # [AL] personal build notes
 perso_build_install.txt
+
+# [AL] exclude doxygen generated files
+html*
+latex*

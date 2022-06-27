@@ -973,6 +973,7 @@ testEditElemRight1()
 void SimpleTableOutputTesterService::
 tearDown()
 {
+  // N'est pas exécuté après un test qui a échoué.
 }
 
 
