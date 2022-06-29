@@ -36,6 +36,8 @@ public:
   void setUpForClass() override;
   void setUp() override;
 
+  void testInit() override;
+
 
   void testAddRow1() override;
   void testAddRow2() override;

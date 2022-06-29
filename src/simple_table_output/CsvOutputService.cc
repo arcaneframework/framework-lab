@@ -347,7 +347,7 @@ addElemsSameColumn(ConstArrayView<Real> elems)
 /*---------------------------------------------------------------------------*/
 
 bool CsvOutputService::
-editElemUp(Real elem)
+editElemUp(Real elem, bool update_last_pos)
 {
   if(m_last_row == -1 || m_last_column == -1 || m_last_row - 1 < 0) return false;
   m_last_row--;
@@ -356,11 +356,12 @@ editElemUp(Real elem)
   if(m_size_rows[m_last_row] <= m_last_column) m_size_rows[m_last_row] = m_last_column+1;
 
   m_values_csv[m_last_row][m_last_column] = elem;
+  if(!update_last_pos) m_last_row++;
   return true;
 }
 
 bool CsvOutputService::
-editElemDown(Real elem)
+editElemDown(Real elem, bool update_last_pos)
 {
   if(m_last_row == -1 || m_last_column == -1 || m_last_row + 1 >= m_values_csv.dim1Size()) return false;
   m_last_row++;
@@ -369,11 +370,12 @@ editElemDown(Real elem)
   if(m_size_columns[m_last_column] <= m_last_row) m_size_columns[m_last_column] = m_last_row+1;
 
   m_values_csv[m_last_row][m_last_column] = elem;
+  if(!update_last_pos) m_last_row--;
   return true;
 }
 
 bool CsvOutputService::
-editElemLeft(Real elem)
+editElemLeft(Real elem, bool update_last_pos)
 {
   if(m_last_row == -1 || m_last_column == -1 || m_last_column - 1 < 0) return false;
   m_last_column--;
@@ -382,11 +384,12 @@ editElemLeft(Real elem)
   if(m_size_columns[m_last_column] <= m_last_row) m_size_columns[m_last_column] = m_last_row+1;
 
   m_values_csv[m_last_row][m_last_column] = elem;
+  if(!update_last_pos) m_last_column++;
   return true;
 }
 
 bool CsvOutputService::
-editElemRight(Real elem)
+editElemRight(Real elem, bool update_last_pos)
 {
   if(m_last_row == -1 || m_last_column == -1 || m_last_column + 1 >= m_values_csv.dim2Size()) return false;
   m_last_column++;
@@ -395,11 +398,91 @@ editElemRight(Real elem)
   if(m_size_columns[m_last_column] <= m_last_row) m_size_columns[m_last_column] = m_last_row+1;
 
   m_values_csv[m_last_row][m_last_column] = elem;
+  if(!update_last_pos) m_last_column--;
   return true;
 }
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
+
+Real CsvOutputService::
+getElemUp(bool update_last_pos)
+{
+  if(m_last_row == -1 || m_last_column == -1 || m_last_row - 1 < 0) return 0;
+
+  // Par rapport à editElemUp(), si on ne veut pas mettre à jour la dernière position,
+  // on ne verifie pas ni modifie m_size_rows.
+  if(update_last_pos){
+    m_last_row--;
+    // Pas besoin d'ajuster la taille de la colonne car on est sûr que m_size_columns[m_last_column] >= m_last_row.
+    if(m_size_rows[m_last_row] <= m_last_column) m_size_rows[m_last_row] = m_last_column+1;
+    return m_values_csv[m_last_row][m_last_column];
+  }
+
+  return m_values_csv[m_last_row-1][m_last_column];
+}
+
+Real CsvOutputService::
+getElemDown(bool update_last_pos)
+{
+  if(m_last_row == -1 || m_last_column == -1 || m_last_row + 1 >= m_values_csv.dim1Size()) return 0;
+
+  // Par rapport à editElemDown(), si on ne veut pas mettre à jour la dernière position,
+  // on ne verifie pas ni modifie m_size_rows.
+  if(update_last_pos){
+    m_last_row++;
+    
+    if(m_size_rows[m_last_row] <= m_last_column) m_size_rows[m_last_row] = m_last_column+1;
+    if(m_size_columns[m_last_column] <= m_last_row) m_size_columns[m_last_column] = m_last_row+1;
+    return m_values_csv[m_last_row][m_last_column];
+  }
+  return m_values_csv[m_last_row+1][m_last_column];
+}
+
+Real CsvOutputService::
+getElemLeft(bool update_last_pos)
+{
+  if(m_last_row == -1 || m_last_column == -1 || m_last_column - 1 < 0) return 0;
+
+  // Par rapport à editElemLeft(), si on ne veut pas mettre à jour la dernière position,
+  // on ne verifie pas ni modifie m_size_columns.
+  if(update_last_pos){
+    m_last_column--;
+
+    // Pas besoin d'ajuster la taille de la ligne car on est sûr que m_size_rows[m_last_row] >= m_last_column.
+    if(m_size_columns[m_last_column] <= m_last_row) m_size_columns[m_last_column] = m_last_row+1;
+    return m_values_csv[m_last_row][m_last_column];
+  }
+  return m_values_csv[m_last_row][m_last_column-1];
+}
+
+Real CsvOutputService::
+getElemRight(bool update_last_pos)
+{
+  if(m_last_row == -1 || m_last_column == -1 || m_last_column + 1 >= m_values_csv.dim2Size()) return 0;
+
+  // Par rapport à editElemRight(), si on ne veut pas mettre à jour la dernière position,
+  // on ne verifie pas ni modifie m_size_columns.
+  if(update_last_pos){
+    m_last_column++;
+
+    if(m_size_rows[m_last_row] <= m_last_column) m_size_rows[m_last_row] = m_last_column+1;
+    if(m_size_columns[m_last_column] <= m_last_row) m_size_columns[m_last_column] = m_last_row+1;
+    return m_values_csv[m_last_row][m_last_column];
+  }
+  return m_values_csv[m_last_row][m_last_column+1];
+
+}
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+bool CsvOutputService::
+editElem(Real elem)
+{
+  m_values_csv[m_last_row][m_last_column] = elem;
+  return true;
+}
 
 bool CsvOutputService::
 editElem(Integer pos_x, Integer pos_y, Real elem)
@@ -435,22 +518,33 @@ editElem(String name_column, String name_row, Real elem)
 /*---------------------------------------------------------------------------*/
 
 Real CsvOutputService::
-getElem(Integer pos_x, Integer pos_y)
+getElem()
+{
+  return m_values_csv[m_last_row][m_last_column];
+}
+
+Real CsvOutputService::
+getElem(Integer pos_x, Integer pos_y, bool update_last_pos)
 {
   if(pos_x < 0 || pos_x >= m_values_csv.dim2Size() 
   || pos_y < 0 || pos_y >= m_values_csv.dim1Size()) 
     return 0;
 
+  if(update_last_pos){
+    m_last_column = pos_x;
+    m_last_row = pos_y;
+  }
+
   return m_values_csv[pos_y][pos_x];
 }
 
 Real CsvOutputService::
-getElem(String name_column, String name_row)
+getElem(String name_column, String name_row, bool update_last_pos)
 {
   std::optional<Integer> pos_x = m_name_columns.span().findFirst(name_column);
   std::optional<Integer> pos_y = m_name_rows.span().findFirst(name_row);
 
-  if(pos_x && pos_y) return getElem(pos_x.value(), pos_y.value());
+  if(pos_x && pos_y) return getElem(pos_x.value(), pos_y.value(), update_last_pos);
   return 0;
 }
 

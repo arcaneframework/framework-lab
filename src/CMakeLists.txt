@@ -36,14 +36,28 @@ add_library(TableExample3 examples/TableExample3Module.cc)
 target_include_directories(TableExample3 PUBLIC .)
 target_link_libraries(TableExample3 PUBLIC arcane_core)
 
+add_library(TableExample4 examples/TableExample4Module.cc)
+target_include_directories(TableExample4 PUBLIC .)
+target_link_libraries(TableExample4 PUBLIC arcane_core)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE CsvOutput SimpleTableOutputTester TableExample1 TableExample2 TableExample3)
+add_library(TableExample5 examples/TableExample5Module.cc)
+target_include_directories(TableExample5 PUBLIC .)
+target_link_libraries(TableExample5 PUBLIC arcane_core)
+
+add_library(TableExample6 examples/TableExample6Module.cc)
+target_include_directories(TableExample6 PUBLIC .)
+target_link_libraries(TableExample6 PUBLIC arcane_core)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE CsvOutput SimpleTableOutputTester TableExample1 TableExample2 TableExample3 TableExample4 TableExample5 TableExample6)
 
 arcane_target_add_axl(CsvOutput simple_table_output/CsvOutput)
 arcane_target_add_axl(SimpleTableOutputTester tester/SimpleTableOutputTester)
 arcane_target_add_axl(TableExample1 examples/TableExample1)
 arcane_target_add_axl(TableExample2 examples/TableExample2)
 arcane_target_add_axl(TableExample3 examples/TableExample3)
+arcane_target_add_axl(TableExample4 examples/TableExample4)
+arcane_target_add_axl(TableExample5 examples/TableExample5)
+arcane_target_add_axl(TableExample6 examples/TableExample6)
 
 arcane_add_arcane_libraries_to_target(${PROJECT_NAME})
 target_compile_options(${PROJECT_NAME} PUBLIC -Wpedantic)

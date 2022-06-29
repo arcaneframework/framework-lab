@@ -39,6 +39,29 @@ setUp()
 }
 
 void SimpleTableOutputTesterService::
+testInit()
+{
+  // La position de la première ligne et de la première colonne doivent être 0.
+  ptrSTO->addRow("Ma ligne");
+  ptrSTO->addColumn("Ma colonne");
+
+  ASSERT_EQUAL(1, ptrSTO->getNumRows());
+  ASSERT_EQUAL(1, ptrSTO->getNumColumns());
+
+  ASSERT_EQUAL(0, ptrSTO->getPosRow("Ma ligne"));
+  ASSERT_EQUAL(0, ptrSTO->getPosColumn("Ma colonne"));
+
+  ASSERT_TRUE(ptrSTO->editElem(0, 0, 123.));
+  ASSERT_EQUAL(123., ptrSTO->getElem("Ma colonne", "Ma ligne"));
+
+  ptrSTO->addColumn("Ma colonne 2");
+  ASSERT_EQUAL(1, ptrSTO->getPosColumn("Ma colonne 2"));
+  ASSERT_TRUE(ptrSTO->editElem(1, 0, 456.));
+  ASSERT_EQUAL(456., ptrSTO->getElem("Ma colonne 2", "Ma ligne"));
+  ASSERT_EQUAL(123., ptrSTO->getElem("Ma colonne", "Ma ligne"));
+}
+
+void SimpleTableOutputTesterService::
 testAddRow1()
 {
   ptrSTO->addRow("Ma ligne");
@@ -885,18 +908,24 @@ testEditElemUDLR1()
 
   ASSERT_TRUE(ptrSTO->editElem("Ma colonne 2", "Ma ligne 2", 5));
   ASSERT_TRUE(ptrSTO->editElemDown(8));
+  ASSERT_EQUAL(5., ptrSTO->getElemUp());
   ASSERT_FALSE(ptrSTO->editElemDown(99));
   ASSERT_TRUE(ptrSTO->editElemLeft(7));
+  ASSERT_EQUAL(8., ptrSTO->getElemRight());
   ASSERT_FALSE(ptrSTO->editElemLeft(99));
   ASSERT_TRUE(ptrSTO->editElemUp(4));
   ASSERT_TRUE(ptrSTO->editElemUp(1));
+  ASSERT_EQUAL(4., ptrSTO->getElemDown());
   ASSERT_FALSE(ptrSTO->editElemUp(99));
   ASSERT_TRUE(ptrSTO->editElemRight(2));
+  ASSERT_EQUAL(1., ptrSTO->getElemLeft());
   ASSERT_TRUE(ptrSTO->editElemRight(3));
   ASSERT_FALSE(ptrSTO->editElemRight(99));
   ASSERT_TRUE(ptrSTO->editElemDown(6));
   ASSERT_TRUE(ptrSTO->editElemDown(9));
   ASSERT_FALSE(ptrSTO->editElemDown(99));
+  ASSERT_EQUAL(6., ptrSTO->getElemUp());
+
 
   ASSERT_EQUAL_ARRAY(result1, ptrSTO->getRow("Ma ligne 1"));
   ASSERT_EQUAL_ARRAY(result2, ptrSTO->getRow("Ma ligne 2"));

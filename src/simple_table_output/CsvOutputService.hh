@@ -77,17 +77,24 @@ public:
   bool addElemsSameColumn(ConstArrayView<Real> elems) override;
 
 
-  bool editElemUp(Real elem) override;
-  bool editElemDown(Real elem) override;
-  bool editElemLeft(Real elem) override;
-  bool editElemRight(Real elem) override;
+  bool editElemUp(Real elem, bool update_last_pos) override;
+  bool editElemDown(Real elem, bool update_last_pos) override;
+  bool editElemLeft(Real elem, bool update_last_pos) override;
+  bool editElemRight(Real elem, bool update_last_pos) override;
+
+  Real getElemUp(bool update_last_pos) override;
+  Real getElemDown(bool update_last_pos) override;
+  Real getElemLeft(bool update_last_pos) override;
+  Real getElemRight(bool update_last_pos) override;
 
 
+  bool editElem(Real elem) override;
   bool editElem(Integer pos_x, Integer pos_y, Real elem) override;
   bool editElem(String name_column, String name_row, Real elem) override;
 
-  Real getElem(Integer pos_x, Integer pos_y) override;
-  Real getElem(String name_column, String name_row) override;
+  Real getElem() override;
+  Real getElem(Integer pos_x, Integer pos_y, bool update_last_pos) override;
+  Real getElem(String name_column, String name_row, bool update_last_pos) override;
 
 
   RealUniqueArray getRow(Integer pos) override;

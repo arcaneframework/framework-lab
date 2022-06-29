@@ -8,6 +8,8 @@
   </variables>
 
   <tests class-set-up="setUpForClass" test-set-up="setUp" class-tear-down="tearDownForClass" test-tear-down="tearDown">
+    <test name="Test initial" method-name="testInit"/>
+
     <test name="Test addRow() 1" method-name="testAddRow1"/>
     <test name="Test addRow() 2" method-name="testAddRow2"/>
     <test name="Test addRow() 3" method-name="testAddRow3"/>

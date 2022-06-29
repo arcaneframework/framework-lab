@@ -74,7 +74,7 @@ Placer ces lignes dans le .axl de votre module :
   </service-instance>
 <!-- </options> -->
 ```
-Dans le .arc, vous pouvez configurer les options du services. Par exemple :
+Dans le .arc, vous pouvez configurer les options du service. Par exemple :
 ```xml
 <!-- <mon-module> -->
   <csv-output name="CsvOutput">
@@ -127,7 +127,7 @@ Cela permet, entre autres, de :
 ____
 ### Utilisation des exemples/du testeur
 Pour lancer les exemples, il suffit de :
-- installer Arcane
+- installer Arcane (v3.6.6.0+)
 - cloner le dépôt
 - modifier le fichier *csv.config* (commenter/décommenter les lignes correspondantes à l'exemple voulu)
 - compiler le projet

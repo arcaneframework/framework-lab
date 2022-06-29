@@ -27,7 +27,13 @@ public:
   ISimpleTableOutput() {};
   virtual ~ISimpleTableOutput() {};
   
+  /*
+   * - La position de la première case doit être (0, 0).
+   * 
+   */
+
 public:
+
   /**
    * @brief Méthode permettant d'initialiser le tableau.
    */
@@ -214,35 +220,101 @@ public:
   /**
    * @brief Méthode permettant d'éditer un élément au-dessus du dernier élement dernièrement manipulé (ligne du dessus/même colonne).
    * 
+   * L'élement que l'on modifie devient donc le dernier élement modifié à la fin de cette méthode (si update_last_pos = true).
+   * 
    * @param elem L'élement à modifier.
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
    * @return true Si l'élément a été modifié.
    * @return false Si l'élément n'a pas pu être modifié.
    */
-  virtual bool editElemUp(Real elem) = 0;
-    /**
+  virtual bool editElemUp(Real elem, bool update_last_pos = true) = 0;
+  
+  /**
    * @brief Méthode permettant d'éditer un élément en-dessous du dernier élement dernièrement manipulé (ligne du dessous/même colonne).
    * 
+   * L'élement que l'on modifie devient donc le dernier élement modifié à la fin de cette méthode (si update_last_pos = true).
+   * 
    * @param elem L'élement à modifier.
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
    * @return true Si l'élément a été modifié.
    * @return false Si l'élément n'a pas pu être modifié.
    */
-  virtual bool editElemDown(Real elem) = 0;
-    /**
+  virtual bool editElemDown(Real elem, bool update_last_pos = true) = 0;
+  
+  /**
    * @brief Méthode permettant d'éditer un élément à gauche du dernier élement dernièrement manipulé (même ligne/colonne à gauche).
    * 
-   * @param elem L'élement à modifier.
-   * @return true Si l'élément a été modifié.
-   * @return false Si l'élément n'a pas pu être modifié.
-   */
-  virtual bool editElemLeft(Real elem) = 0;
-    /**
-   * @brief Méthode permettant d'éditer un élément à droite du dernier élement dernièrement manipulé (même ligne/colonne à droite).
+   * L'élement que l'on modifie devient donc le dernier élement modifié à la fin de cette méthode (si update_last_pos = true).
    * 
    * @param elem L'élement à modifier.
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
    * @return true Si l'élément a été modifié.
    * @return false Si l'élément n'a pas pu être modifié.
    */
-  virtual bool editElemRight(Real elem) = 0;
+  virtual bool editElemLeft(Real elem, bool update_last_pos = true) = 0;
+  
+  /**
+   * @brief Méthode permettant d'éditer un élément à droite du dernier élement dernièrement manipulé (même ligne/colonne à droite).
+   * 
+   * L'élement que l'on modifie devient donc le dernier élement modifié à la fin de cette méthode (si update_last_pos = true).
+   * 
+   * @param elem L'élement à modifier.
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
+   * @return true Si l'élément a été modifié.
+   * @return false Si l'élément n'a pas pu être modifié.
+   */
+  virtual bool editElemRight(Real elem, bool update_last_pos = true) = 0;
+
+  /**
+   * @brief Méthode permettant de récupérer un élément au-dessus du dernier élement dernièrement manipulé (ligne du dessus/même colonne).
+   * 
+   * L'élement que l'on récupère devient donc le dernier élement "modifié" à la fin de cette méthode (si update_last_pos = true).
+   * 
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
+   * @return Real L'élement trouvé (0 si non trouvé).
+   */
+  virtual Real getElemUp(bool update_last_pos = false) = 0;
+
+  /**
+   * @brief Méthode permettant de récupérer un élément en-dessous du dernier élement dernièrement manipulé (ligne du dessous/même colonne).
+   * 
+   * L'élement que l'on récupère devient donc le dernier élement "modifié" à la fin de cette méthode (si update_last_pos = true).
+   * 
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
+   * @return Real L'élement trouvé (0 si non trouvé).
+   */
+  virtual Real getElemDown(bool update_last_pos = false) = 0;
+
+  /**
+   * @brief Méthode permettant de récupérer un élément à gauche du dernier élement dernièrement manipulé (même ligne/colonne à gauche).
+   * 
+   * L'élement que l'on récupère devient donc le dernier élement "modifié" à la fin de cette méthode (si update_last_pos = true).
+   * 
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
+   * @return Real L'élement trouvé (0 si non trouvé).
+   */
+  virtual Real getElemLeft(bool update_last_pos = false) = 0;
+
+  /**
+   * @brief Méthode permettant de récupérer un élément à droite du dernier élement dernièrement manipulé (même ligne/colonne à droite).
+   * 
+   * L'élement que l'on récupère devient donc le dernier élement "modifié" à la fin de cette méthode (si update_last_pos = true).
+   * 
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
+   * @return Real L'élement trouvé (0 si non trouvé).
+   */
+  virtual Real getElemRight(bool update_last_pos = false) = 0;
+
+  /**
+   * @brief Méthode permettant de modifier un élement dans le tableau.
+   * 
+   * Les positions x et y correspondent à l'emplacement du dernier élement manipulé.
+   * 
+   * @param elem L'élement remplaçant.
+   * @return true Si l'élement a bien été remplacé.
+   * @return false Si l'élement n'a pas été remplacé.
+   */
+  virtual bool editElem(Real elem) = 0;
 
   /**
    * @brief Méthode permettant de modifier un élement dans le tableau.
@@ -268,19 +340,30 @@ public:
   /**
    * @brief Méthode permettant d'obtenir une copie d'un élement.
    * 
-   * @param pos_x La position de la colonne où se trouve l'élement.
-   * @param pos_y La position de la ligne où se trouve l'élement.
+   * Les positions x et y correspondent à l'emplacement du dernier élement manipulé.
+   * 
    * @return Real L'élement trouvé (0 si non trouvé).
    */
-  virtual Real getElem(Integer pos_x, Integer pos_y) = 0;
+  virtual Real getElem() = 0;
+
+  /**
+   * @brief Méthode permettant d'obtenir une copie d'un élement.
+   * 
+   * @param pos_x La position de la colonne où se trouve l'élement.
+   * @param pos_y La position de la ligne où se trouve l'élement.
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
+   * @return Real L'élement trouvé (0 si non trouvé).
+   */
+  virtual Real getElem(Integer pos_x, Integer pos_y, bool update_last_pos = false) = 0;
   /**
    * @brief Méthode permettant d'obtenir une copie d'un élement.
    * 
    * @param name_column Le nom de la colonne où se trouve l'élement.
    * @param name_row Le nom de la ligne où se trouve l'élement.
+   * @param update_last_pos Doit-on déplacer le curseur "dernier élement modifié" ?
    * @return Real L'élement trouvé (0 si non trouvé).
    */
-  virtual Real getElem(String name_column, String name_row) = 0;
+  virtual Real getElem(String name_column, String name_row, bool update_last_pos = false) = 0;
 
   /**
    * @brief Méthode permettant d'obtenir une copie d'une ligne.
