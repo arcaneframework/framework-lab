@@ -30,7 +30,6 @@ public:
 public:
   /**
    * @brief Méthode permettant d'initialiser le tableau.
-   * 
    */
   virtual void init() = 0;
   
@@ -43,7 +42,6 @@ public:
 
   /**
    * @brief Méthode permettant de nettoyer le tableau. Nécessite un init() après.
-   * 
    */
   virtual void clear() = 0;
 

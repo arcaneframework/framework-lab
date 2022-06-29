@@ -44,7 +44,14 @@ Placer ces lignes dans le .config de votre projet :
   <service name="CsvOutput" need="required" />
 </singleton-services>
 ```
-Et dans votre/vos module(s) :
+Dans votre/vos module(s), pour récupérer un pointeur vers le singleton :
+```c
+#include "simple_table_output/ISimpleTableOutput.hh"
+
+ISimpleTableOutput* table = ServiceBuilder<ISimpleTableOutput>(subDomain()).getSingleton();
+```
+
+Enfin, l'initialisation et l'écriture dans un fichier doivent être faite par un seul module (inutile de le faire plusieurs fois) :
 ```c
 #include "simple_table_output/ISimpleTableOutput.hh"
 
@@ -73,7 +80,7 @@ Dans le .arc, vous pouvez configurer les options du services. Par exemple :
   <csv-output name="CsvOutput">
     <!-- Le nom du répertoire à créer/utiliser. -->
     <tableDir>./example/</tableDir>
-    <!-- Le nom du fichier à créer/écraser. -->
+    <!-- Le nom du tableau et du fichier à créer/écraser. -->
     <tableName>Results_Example</tableName>
 
     <!-- Au final, on aura un fichier ayant comme chemin : ./example/Results_Example.csv -->
@@ -94,11 +101,35 @@ Vous pouvez aussi utiliser le service des deux façons en même temps, selon vos
 Pour un exemple plus concret, voir la [mini-app Quicksilver](https://github.com/arcaneframework/arcane-benchs/)
 
 ____
+### Symboles de nom pour l'exécution parallèle (implémentation CSV)
+Dans le nom du repértoire ou dans le nom du tableau, que ce soit en mode singleton ou en mode service, il est possible d'ajouter des "*symboles*" qui seront remplacés lors de l'exécution.
+
+Les *symboles* disponibles sont :
+- **@proc_id@** : Sera remplacé par le rank du processus.
+- **@num_procs@** : Sera remplacé par le nombre total de processus.
+
+Par exemple, si l'on a :
+```xml
+<tableDir>./N_@num_procs@/</tableDir>
+<tableName>Results_P@proc_id@</tableName>
+```
+Et que l'on lance le programme avec 2 processus (ID = 0 et 1), on va obtenir deux csv ayant comme chemin :
+- ./N_2/Results_P0.csv
+- ./N_2/Results_P1.csv
+
+(en séquentiel, on aura ./N_1/Results_P0.csv)
+
+Cela permet, entre autres, de :
+- créer un tableau par processus et de les nommer facilement,
+- créer des fichiers .arc "générique" où le nombre de processus n'importe pas,
+- avoir un nom différent pour chaque tableau, dans le cas où un *cat* est effectué (rappel : *tableName* donne le nom du fichier csv mais est aussi placé sur la première case du tableau).
+
+____
 ### Utilisation des exemples/du testeur
 Pour lancer les exemples, il suffit de :
 - installer Arcane
 - cloner le dépôt
-- modifier le fichier *csv.config* (commenter/décommenter les lignes correspndantes à l'exemple voulu)
+- modifier le fichier *csv.config* (commenter/décommenter les lignes correspondantes à l'exemple voulu)
 - compiler le projet
 - choisir le *.arc* correspondant à l'exemple
 - lancer
