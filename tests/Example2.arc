@@ -30,12 +30,14 @@
   </meshes>
 
   <table-example2>
+    <!-- Attention, les noms sont utilisés par le module TableExample2Module,
+    pas directement par le service CSV. -->
     <!-- Le nom du répertoire à créer/utiliser. -->
     <tableDir>./example2/</tableDir>
     <!-- Le nom du fichier à créer/écraser. -->
     <tableName>Results_Example2</tableName>
 
-    <!-- Au final, on aura un fichier ayant comme chemin : ./example2/Results.csv -->
+    <!-- Au final, on aura un fichier ayant comme chemin : ./example2/Results_Example2.csv -->
   </table-example2>
 
 </case>

@@ -31,7 +31,13 @@
 
   <table-example3>
     <csv-output name="CsvOutput">
-      <path>./example3/</path>
+      <!-- Les noms sont utilisés directement par le service CSV. -->
+      <!-- Le nom du répertoire à créer/utiliser. -->
+      <tableDir>./example3/</tableDir>
+      <!-- Le nom du fichier à créer/écraser. -->
+      <tableName>Results_Example3</tableName>
+
+      <!-- Au final, on aura un fichier ayant comme chemin : ./example3/Results_Example3.csv -->
     </csv-output>
   </table-example3>
 

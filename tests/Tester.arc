@@ -35,7 +35,6 @@
     <!-- Test du module implémentant l'interface (csv ou non). -->
     <xml-test name="SimpleTableOutputTesterService">
       <csv-output name="CsvOutput">
-        <path>./</path>
       </csv-output>
     </xml-test>
 

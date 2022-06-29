@@ -5,13 +5,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* TableExample3Module.cc                                        (C) 2000-2022 */
+/* TableExample3Module.cc                                      (C) 2000-2022 */
 /*                                                                           */
-/* Exemple de module utilisant ISimpleTableOutput en tant que singleton.     */
+/* Exemple 3 de module utilisant ISimpleTableOutput en tant que service.     */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
 #include "TableExample3Module.hh"
+
 #include <iostream>
 #include <random>
 
@@ -27,11 +28,8 @@ initModule()
   // Initialisation du service.
 
   // On initialise le tableau grâce à un des initialisateurs.
-  // Le nom du tableau sera par défaut "Results" ou le nom choisi dans le .arc 
-  // et le nom du fichier sortant sera "Results.X" (ou Y.X avec Y le nom choisi dans le .arc).
-  // X étant selon le format choisi (.csv par exemple).
-
-  options()->csvOutput()->init("Results_Example3", ";");
+  // Le nom du tableau sera le nom choisi dans le .arc.
+  options()->csvOutput()->init();
 
   // On print le tableau dans son état actuel (vide, avec un titre).
   options()->csvOutput()->print();
@@ -66,11 +64,8 @@ endModule()
   // On print le tableau dans son état actuel.
   options()->csvOutput()->print();
   
-  // On enregistre le résultat dans le dossier par défaut "example3" ou le dossier choisi
+  // On enregistre le résultat dans le dossier choisi
   // par l'utilisateur dans le .arc.
-  // Si l'utilisateur n'a mis ni tableName, ni tableDir dans le .arc,
-  // il n'y aura aucune sortie.
-
   options()->csvOutput()->writeFile();
   
 }

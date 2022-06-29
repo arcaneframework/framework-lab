@@ -5,9 +5,9 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* TableExample2Module.hh                                        (C) 2000-2022 */
+/* TableExample2Module.hh                                      (C) 2000-2022 */
 /*                                                                           */
-/* Exemple de module utilisant ISimpleTableOutput en tant que singleton.     */
+/* Exemple 2 de module utilisant ISimpleTableOutput en tant que singleton.   */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 

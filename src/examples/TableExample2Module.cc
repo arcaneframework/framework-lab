@@ -5,13 +5,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* TableExample2Module.cc                                        (C) 2000-2022 */
+/* TableExample2Module.cc                                      (C) 2000-2022 */
 /*                                                                           */
-/* Exemple de module utilisant ISimpleTableOutput en tant que singleton.     */
+/* Exemple 2 de module utilisant ISimpleTableOutput en tant que singleton.   */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
 #include "TableExample2Module.hh"
+
 #include <iostream>
 #include <random>
 
@@ -33,9 +34,9 @@ initModule()
   // et le nom du fichier sortant sera "Results.X" (ou Y.X avec Y le nom choisi dans le .arc).
   // X étant selon le format choisi (.csv par exemple).
   if(options()->getTableName() != "")
-    table->init(options()->getTableName(), ";");
+    table->init(options()->getTableName());
   else
-    table->init("Results_Example2_default", ";");
+    table->init("Results_Example2_default");
 
   // On print le tableau dans son état actuel (vide, avec un titre).
   table->print();

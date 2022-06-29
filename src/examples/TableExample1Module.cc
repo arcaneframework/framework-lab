@@ -5,13 +5,14 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* TableExample1Module.cc                                        (C) 2000-2022 */
+/* TableExample1Module.cc                                      (C) 2000-2022 */
 /*                                                                           */
-/* Exemple de module utilisant ISimpleTableOutput en tant que singleton.     */
+/* Exemple 1 de module utilisant ISimpleTableOutput en tant que singleton.   */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
 #include "TableExample1Module.hh"
+
 #include <iostream>
 #include <random>
 
@@ -31,7 +32,7 @@ initModule()
   // On initialise le tableau grâce à un des initialisateurs.
   // Le nom du tableau sera "Results" et le nom du fichier sortant sera "Results.X".
   // X étant selon le format choisi (.csv par exemple).
-  table->init("Results_Example1", ";");
+  table->init("Results_Example1");
 
   // On print le tableau dans son état actuel (vide, avec un titre).
   table->print();

@@ -12,6 +12,7 @@
 /*---------------------------------------------------------------------------*/
 
 #include "ISimpleTableOutput.hh"
+
 #include "arcane/BasicUnitTest.h"
 #include <arcane/ServiceBuilder.h>
 #include <arcane/ServiceFactory.h>
@@ -45,7 +46,6 @@ public:
 public:
   void init() override;
   void init(String name_table) override;
-  void init(String name_table, String separator) override;
 
   void clear() override;
 

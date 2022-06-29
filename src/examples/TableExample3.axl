@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" ?>
 <module name="TableExample3" version="1.0">
-  <description>Exemple de module utilisant ISimpleTableOutput en tant que singleton</description>
+  <description>Exemple de module utilisant ISimpleTableOutput en tant que service</description>
 
   <variables>
   </variables>
