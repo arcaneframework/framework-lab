@@ -529,6 +529,60 @@ int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+
+#define MPI_Request MPA::MPI_Request
+#define MPI_Status MPA::MPI_Status
+
+#define MPI_Comm MPA::MPI_Comm
+
+#define MPI_Init MPA::MPI_Init
+#define MPI_Initialized MPA::MPI_Initialized
+#define MPI_Finalize MPA::MPI_Finalize
+
+#define MPI_Comm_split MPA::MPI_Comm_split
+
+#define MPI_Comm_size MPA::MPI_Comm_size
+#define MPI_Comm_rank MPA::MPI_Comm_rank
+
+#define MPI_Send MPA::MPI_Send
+#define MPI_Recv MPA::MPI_Recv
+
+#define MPI_Isend MPA::MPI_Isend
+#define MPI_Irecv MPA::MPI_Irecv
+
+#define MPI_Type_size MPA::MPI_Type_size
+
+#define MPI_Wait MPA::MPI_Wait
+#define MPI_Waitall MPA::MPI_Waitall
+#define MPI_Waitany MPA::MPI_Waitany
+
+#define MPI_Test MPA::MPI_Test
+#define MPI_Testall MPA::MPI_Testall
+
+#define MPI_Barrier MPA::MPI_Barrier
+
+#define MPI_Bcast MPA::MPI_Bcast
+
+#define MPI_Gather MPA::MPI_Gather
+#define MPI_Gatherv MPA::MPI_Gatherv
+
+#define MPI_Allgather MPA::MPI_Allgather
+#define MPI_Allgatherv MPA::MPI_Allgatherv
+
+#define MPI_Reduce MPA::MPI_Reduce
+#define MPI_Allreduce MPA::MPI_Allreduce
+
+#define MPI_Scatter MPA::MPI_Scatter
+#define MPI_Scatterv MPA::MPI_Scatterv
+
+#define MPI_Probe MPA::MPI_Probe
+#define MPI_Iprobe MPA::MPI_Iprobe
+
+#define MPI_Get_count MPA::MPI_Get_count
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
 #endif
 
 /*---------------------------------------------------------------------------*/
