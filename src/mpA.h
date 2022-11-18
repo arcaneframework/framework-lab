@@ -104,6 +104,11 @@ using MPI_Comm = MPA_Comm;
 #undef MPI_COMM_WORLD
 #define MPI_COMM_WORLD MPA_COMM_WORLD
 
+#define MPI_Status_sizeof() sizeof(MPI_Status)
+#define MPI_Status_source(a) ((a)->sourceInfo().rank().value())
+#define MPI_Status_error(a) (MPI_SUCCESS)
+#define MPI_Status_tag(a) ((a)->sourceInfo().tag().value())
+
 MPI_Status* MPA_STATUS;
 
 int MPI_Init(int *, char ***);

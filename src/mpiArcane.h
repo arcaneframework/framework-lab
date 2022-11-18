@@ -29,6 +29,8 @@
 #define MPA_Comm int
 #define MPA_COMM_WORLD 0
 
+#define PRINT_CALL true
+
 using namespace Arccore;
 using namespace Arccore::MessagePassing;
 
@@ -110,7 +112,7 @@ class MpiArcane
   bool isInit;
   UniqueArray<IMessagePassingMng*> iMPMng;
   UniqueArray<MPI_Comm> commOfMPMng;
-
+  int world_rank;
 };
 
 /*---------------------------------------------------------------------------*/
@@ -119,6 +121,10 @@ class MpiArcane
 int MpiArcane::
 MpiArcane_Init(int *argc, char ***argv)
 {
+  #ifdef PRINT_CALL
+  std::cout << "--------------- MpiArcane_Init()" << std::endl;
+  #endif
+
   int ret = MPI_Init(argc, argv);
   
   if(ret == MPI_SUCCESS){
@@ -127,6 +133,8 @@ MpiArcane_Init(int *argc, char ***argv)
 
     iMPMng[MPA_COMM_WORLD] = Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
     commOfMPMng[MPA_COMM_WORLD] = MPI_COMM_WORLD;
+
+    world_rank = iMPMng[MPA_COMM_WORLD]->commRank();
 
     isInit = true;
   }
@@ -137,6 +145,10 @@ MpiArcane_Init(int *argc, char ***argv)
 int MpiArcane::
 MpiArcane_Finalize()
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Finalize()" << std::endl;
+  #endif
+
   if(!isInit) return MPI_SUCCESS;
   isInit = false;
 
@@ -153,6 +165,10 @@ MpiArcane_Finalize()
 int MpiArcane::
 MpiArcane_Abort(MPA_Comm comm, int errorcode)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Abort()" << std::endl;
+  #endif
+
   if(!isInit) return MPI_SUCCESS;
   isInit = false;
 
@@ -175,6 +191,10 @@ MpiArcane_Abort(MPA_Comm comm, int errorcode)
 int MpiArcane::
 MpiArcane_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Comm_split()" << std::endl;
+  #endif
+
   MPI_Comm new_comm;
   MPI_Comm mpi_comm = commOfMPMng[comm];
 
@@ -189,9 +209,13 @@ MpiArcane_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
   return MPI_SUCCESS;
 }
 
+
 int MpiArcane::
 MpiArcane_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Comm_dup()" << std::endl;
+  #endif
   MPI_Comm mpi_new_comm;
   MPI_Comm mpi_old_comm = commOfMPMng[comm];
 
@@ -213,6 +237,10 @@ MpiArcane_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 int MpiArcane::
 MpiArcane_Comm_size(MPA_Comm comm, int *size)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Comm_size()" << std::endl;
+  #endif
+
   *size = iMPMng[comm]->commSize();
   return MPI_SUCCESS;
 }
@@ -220,6 +248,10 @@ MpiArcane_Comm_size(MPA_Comm comm, int *size)
 int MpiArcane::
 MpiArcane_Comm_rank(MPA_Comm comm, int *rank)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Comm_rank()" << std::endl;
+  #endif
+
   *rank = iMPMng[comm]->commRank();
   return MPI_SUCCESS;
 }
@@ -230,6 +262,10 @@ MpiArcane_Comm_rank(MPA_Comm comm, int *rank)
 int MpiArcane::
 MpiArcane_Send(const void *buf, int sizeof_msg, int dest, int tag, MPA_Comm comm, Request *request, bool blocking)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Send()" << std::endl;
+  #endif
+
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
@@ -245,6 +281,10 @@ MpiArcane_Send(const void *buf, int sizeof_msg, int dest, int tag, MPA_Comm comm
 int MpiArcane::
 MpiArcane_Recv(void *buf, int sizeof_msg, int source, int tag, MPA_Comm comm, Request *request, MessageId *status, bool blocking)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Recv()" << std::endl;
+  #endif
+
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
@@ -270,12 +310,20 @@ MpiArcane_Recv(void *buf, int sizeof_msg, int source, int tag, MPA_Comm comm, Re
 int MpiArcane::
 MpiArcane_Type_size(MPI_Datatype datatype, int *size)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Type_size()" << std::endl;
+  #endif
+
   return MPI_Type_size(datatype, size);
 }
 
 int MpiArcane::
 MpiArcane_Wait(Request *request)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Wait()" << std::endl;
+  #endif
+  
   mpWait(iMPMng[MPA_COMM_WORLD], *request);
   return MPI_SUCCESS;
 }
@@ -283,6 +331,10 @@ MpiArcane_Wait(Request *request)
 int MpiArcane::
 MpiArcane_Waitall(int count, Request *array_of_requests)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Waitall()" << std::endl;
+  #endif
+
   ArrayView<Request> reqs(count, array_of_requests);
   mpWaitAll(iMPMng[MPA_COMM_WORLD], reqs);
   return MPI_SUCCESS;
@@ -291,6 +343,10 @@ MpiArcane_Waitall(int count, Request *array_of_requests)
 int MpiArcane::
 MpiArcane_Waitany(int count, Request *array_of_requests, int *index)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Waitany()" << std::endl;
+  #endif
+
   // TODO : Faire mieux.
   int i = 0;
   for(;;){
@@ -309,6 +365,10 @@ MpiArcane_Waitany(int count, Request *array_of_requests, int *index)
 int MpiArcane::
 MpiArcane_Test(Request *request, int *flag)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Test()" << std::endl;
+  #endif
+
   ArrayView<Request> reqs(1, request);
   bool bFlag;
   ArrayView<bool> avFlag(1, &bFlag);
@@ -322,6 +382,10 @@ MpiArcane_Test(Request *request, int *flag)
 int MpiArcane::
 MpiArcane_Testall(int count, Request *array_of_requests, int *flag)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Testall()" << std::endl;
+  #endif
+
   ArrayView<Request> reqs(count, array_of_requests);
   UniqueArray<bool> flags(count);
 
@@ -338,6 +402,10 @@ MpiArcane_Testall(int count, Request *array_of_requests, int *flag)
 int MpiArcane::
 MpiArcane_Barrier(MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Barrier()" << std::endl;
+  #endif
+
   mpBarrier(iMPMng[comm]);
   return MPI_SUCCESS;
 }
@@ -345,6 +413,10 @@ MpiArcane_Barrier(MPA_Comm comm)
 int MpiArcane::
 MpiArcane_Bcast(void *buffer, int sizeof_msg, int root, MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Bcast()" << std::endl;
+  #endif
+
   ByteArrayView avBuf(sizeof_msg, (Byte*)buffer);
 
   mpBroadcast(iMPMng[comm], avBuf, root);
@@ -357,6 +429,10 @@ MpiArcane_Gather(const void *sendbuf, int sizeof_sentmsg,
                  void *recvbuf, int sizeof_recvmsg,
                  int root, MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Gather()" << std::endl;
+  #endif
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
 
@@ -370,6 +446,10 @@ MpiArcane_Gatherv(const void *sendbuf, int sizeof_sentmsg,
                   void *recvbuf, const int *recvcounts, const int *displs,
                   int sizeof_recvtype, int root, MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Gatherv()" << std::endl;
+  #endif
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   UniqueArray<Byte> uaRecv;
   mpGatherVariable(iMPMng[comm], avSendBuf, uaRecv, root);
@@ -402,6 +482,10 @@ MpiArcane_Allgather(const void *sendbuf, int sizeof_sentmsg,
                     void *recvbuf, int sizeof_recvmsg,
                     MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Allgather()" << std::endl;
+  #endif
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
 
@@ -415,6 +499,10 @@ MpiArcane_Allgatherv(const void *sendbuf, int sizeof_sentmsg,
                                        void *recvbuf, const int *recvcounts, const int *displs,
                                        int sizeof_recvtype, MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Allgatherv()" << std::endl;
+  #endif
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   UniqueArray<Byte> uaRecv;
   mpAllGatherVariable(iMPMng[comm], avSendBuf, uaRecv);
@@ -442,6 +530,10 @@ int MpiArcane::
 MpiArcane_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
                      MPI_Op op, MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Allreduce()" << std::endl;
+  #endif
+
   eReduceType rtype;
   if(op == MPI_MIN)
     rtype = ReduceMin;
@@ -469,6 +561,10 @@ MpiArcane_Scatter(const void *sendbuf, int sizeof_sentmsg,
                             void *recvbuf, int sizeof_recvmsg,
                             int root, MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Scatter()" << std::endl;
+  #endif
+
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
@@ -498,6 +594,10 @@ MpiArcane_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs
                        void *recvbuf, int sizeof_recvmsg,
                        int root, MPA_Comm comm)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Scatterv()" << std::endl;
+  #endif
+
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
@@ -526,6 +626,10 @@ MpiArcane_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs
 int MpiArcane::
 MpiArcane_Probe(int source, int tag, MPA_Comm comm, MessageId *status)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Probe()" << std::endl;
+  #endif
+
   PointToPointMessageInfo p2pMsgInfo = PointToPointMessageInfo(MessageRank(source), MessageTag(tag), Blocking);
   *status = mpProbe(iMPMng[comm], p2pMsgInfo);
 
@@ -536,6 +640,10 @@ MpiArcane_Probe(int source, int tag, MPA_Comm comm, MessageId *status)
 int MpiArcane::
 MpiArcane_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MessageId *status)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Iprobe()" << std::endl;
+  #endif
+
   PointToPointMessageInfo p2pMsgInfo = PointToPointMessageInfo(MessageRank(source), MessageTag(tag), NonBlocking);
   *status = mpProbe(iMPMng[comm], p2pMsgInfo);
   *flag = status->isValid();
@@ -546,6 +654,10 @@ MpiArcane_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MessageId *statu
 int MpiArcane::
 MpiArcane_Get_count(const MessageId *status, int sizeof_type, int *count)
 {
+  #ifdef PRINT_CALL
+  std::cout << "[World Rank " << world_rank << "] --------------- MpiArcane_Get_count()" << std::endl;
+  #endif
+
   *count = int(status->sourceInfo().size() / sizeof_type);
 
   return MPI_SUCCESS;
