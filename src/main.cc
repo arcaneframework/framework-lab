@@ -1,3 +1,5 @@
+// File with MPI examples to test mpA.
+
 #include <iostream>
 #include <mpA.h>
 
@@ -13,12 +15,12 @@ int main(int argc, char* argv[])
   std::cout << "Hello from " << world_rank << "/" << world_size << std::endl; 
 
 
-  // Determine root's process rank
   int root_rank = 0;
 
 
 
 
+  // Examples from RookieHPC :
 
   // -------------------- 1 -----------------------
 
