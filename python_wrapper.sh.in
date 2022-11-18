@@ -1,4 +1,0 @@
-#!/bin/sh
-PYTHONPATH=@CMAKE_CURRENT_BINARY_DIR@
-export PYTHONPATH
-python3 "$@"
