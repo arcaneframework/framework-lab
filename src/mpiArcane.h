@@ -50,6 +50,7 @@ class MpiArcane
   int MpiArcane_Abort(MPA_Comm comm, int errorcode);
 
   int MpiArcane_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm);
+  int MpiArcane_Comm_dup(MPA_Comm old_comm, MPA_Comm* new_comm);
 
   int MpiArcane_Comm_size(MPA_Comm comm, int *size);
   int MpiArcane_Comm_rank(MPA_Comm comm, int *rank);
@@ -187,6 +188,24 @@ MpiArcane_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 
   return MPI_SUCCESS;
 }
+
+int MpiArcane::
+MpiArcane_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
+{
+  MPI_Comm mpi_new_comm;
+  MPI_Comm mpi_old_comm = commOfMPMng[comm];
+
+  int error = MPI_Comm_dup(mpi_old_comm, &mpi_new_comm);
+  if(error != MPI_SUCCESS) return error;
+
+  iMPMng.add(Mpi::StandaloneMpiMessagePassingMng::create(mpi_new_comm));
+  commOfMPMng.add(mpi_new_comm);
+
+  *newcomm = commOfMPMng.size() - 1;
+
+  return MPI_SUCCESS;
+}
+
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/

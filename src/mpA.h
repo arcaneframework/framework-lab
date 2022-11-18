@@ -44,6 +44,8 @@ using ::MPI_Finalize;
 using ::MPI_Abort;
 
 using ::MPI_Comm_split;
+using ::MPI_Comm_dup;
+
 
 using ::MPI_Comm_size;
 using ::MPI_Comm_rank;
@@ -110,6 +112,7 @@ int MPI_Finalize(void);
 int MPI_Abort(MPI_Comm, int);
 
 int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
+int MPI_Comm_dup(MPI_Comm, MPI_Comm *);
 
 int MPI_Comm_size(MPI_Comm, int *);
 int MPI_Comm_rank(MPI_Comm, int *);
@@ -206,6 +209,12 @@ int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
   return mpiArcane->MpiArcane_Comm_split(comm, color, key, newcomm);
+}
+
+int MPI_Comm_dup(MPI_Comm comm, MPI_Comm *newcomm)
+{
+  if(mpiArcane == nullptr) return MPI_ERR_COMM;
+  return mpiArcane->MpiArcane_Comm_dup(comm, newcomm);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -549,6 +558,7 @@ int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 #define MPI_Abort MPA::MPI_Abort
 
 #define MPI_Comm_split MPA::MPI_Comm_split
+#define MPI_Comm_dup MPA::MPI_Comm_dup
 
 #define MPI_Comm_size MPA::MPI_Comm_size
 #define MPI_Comm_rank MPA::MPI_Comm_rank
