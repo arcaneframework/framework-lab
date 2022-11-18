@@ -41,6 +41,7 @@ using ::MPI_Status;
 using ::MPI_Init;
 using ::MPI_Initialized;
 using ::MPI_Finalize;
+using ::MPI_Abort;
 
 using ::MPI_Comm_split;
 
@@ -106,6 +107,7 @@ MPI_Status* MPA_STATUS;
 int MPI_Init(int *, char ***);
 int MPI_Initialized(int *);
 int MPI_Finalize(void);
+int MPI_Abort(MPI_Comm, int);
 
 int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
 
@@ -190,6 +192,12 @@ int MPI_Finalize(void)
 
   return MPI_SUCCESS;
 }
+
+int MPI_Abort(MPI_Comm comm, int errorcode)
+{
+  return mpiArcane->MpiArcane_Abort(comm, errorcode);
+}
+
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -538,6 +546,7 @@ int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 #define MPI_Init MPA::MPI_Init
 #define MPI_Initialized MPA::MPI_Initialized
 #define MPI_Finalize MPA::MPI_Finalize
+#define MPI_Abort MPA::MPI_Abort
 
 #define MPI_Comm_split MPA::MPI_Comm_split
 

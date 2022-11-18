@@ -616,6 +616,19 @@ int main(int argc, char* argv[])
   // Print my new rank and new communicator
   printf("[MPI process %d] I am now MPI process %d/%d in subcommunicator %c.\n", world_rank, my_new_comm_rank, new_comm_size, subcommunicator);
   
+  
+
+
+
+
+
+
+  // -------------------- 15 -----------------------
+  //MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
+
+
+
+
 
 
 
