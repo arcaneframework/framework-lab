@@ -541,8 +541,52 @@ MpiArcane_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
     rtype = ReduceMax;
   else if(op == MPI_SUM)
     rtype = ReduceSum;
+  else if(op == MPI_OP_NULL){
+    std::cout << "[MPI_ERR_TYPE] MPI_OP_NULL not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_PROD){
+    std::cout << "[MPI_ERR_TYPE] MPI_PROD not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_LAND){
+    std::cout << "[MPI_ERR_TYPE] MPI_LAND not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_BAND){
+    std::cout << "[MPI_ERR_TYPE] MPI_BAND not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_LOR){
+    std::cout << "[MPI_ERR_TYPE] MPI_LOR not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_BOR){
+    std::cout << "[MPI_ERR_TYPE] MPI_BOR not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_LXOR){
+    std::cout << "[MPI_ERR_TYPE] MPI_LXOR not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_BXOR){
+    std::cout << "[MPI_ERR_TYPE] MPI_BXOR not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_MINLOC){
+    std::cout << "[MPI_ERR_TYPE] MPI_MINLOC not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_MAXLOC){
+    std::cout << "[MPI_ERR_TYPE] MPI_MAXLOC not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
+  else if(op == MPI_REPLACE){
+    std::cout << "[MPI_ERR_TYPE] MPI_REPLACE not supported yet" << std::endl;
+    return MPI_ERR_TYPE;
+  }
   else {
-    std::cout << "Op not supported yet" << std::endl;
+    std::cout << "[MPI_ERR_TYPE] Invalid op" << std::endl;
     return MPI_ERR_TYPE;
   }
 
