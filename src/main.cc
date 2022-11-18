@@ -14,6 +14,10 @@ int main(int argc, char* argv[])
 
   std::cout << "Hello from " << world_rank << "/" << world_size << std::endl; 
 
+  if(world_size != 3) {
+    std::cout << "Error: Work only with 3 procs" << std::endl;
+    return 1;
+  }
 
   int root_rank = 0;
 
