@@ -14,17 +14,8 @@
 #ifndef MPA_H
 #define MPA_H
 
-#include <mpiArcane.h>
-
 // #define useMPI
 
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-MpiArcane* mpiArcane = nullptr;
-
-namespace MPA
-{
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -33,159 +24,116 @@ namespace MPA
 
 #include <mpi.h>
 
-using ::MPI_Comm;
-
-using ::MPI_Request;
-using ::MPI_Status;
-
-using ::MPI_Init;
-using ::MPI_Initialized;
-using ::MPI_Finalize;
-using ::MPI_Abort;
-
-using ::MPI_Comm_split;
-using ::MPI_Comm_dup;
-
-
-using ::MPI_Comm_size;
-using ::MPI_Comm_rank;
-
-using ::MPI_Send;
-using ::MPI_Recv;
-
-using ::MPI_Isend;
-using ::MPI_Irecv;
-
-using ::MPI_Type_size;
-
-using ::MPI_Wait;
-using ::MPI_Waitall;
-using ::MPI_Waitany;
-
-using ::MPI_Test;
-using ::MPI_Testall;
-
-using ::MPI_Barrier;
-
-using ::MPI_Bcast;
-
-using ::MPI_Gather;
-using ::MPI_Gatherv;
-
-using ::MPI_Allgather;
-using ::MPI_Allgatherv;
-
-using ::MPI_Reduce;
-using ::MPI_Allreduce;
-
-using ::MPI_Scatter;
-using ::MPI_Scatterv;
-
-using ::MPI_Probe;
-using ::MPI_Iprobe;
-
-using ::MPI_Get_count;
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 #else
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-using MPI_Request = Arccore::MessagePassing::Request;
-using MPI_Status  = Arccore::MessagePassing::MessageId;
-using MPI_Comm = MPA_Comm;
+#include <mpiArcane.h>
+
+MpiArcane* mpiArcane = nullptr;
+
+using MPA_Request = Arccore::MessagePassing::Request;
+using MPA_Status  = Arccore::MessagePassing::MessageId;
 
 #undef MPI_STATUS_IGNORE
-#define MPI_STATUS_IGNORE MPA::MPA_STATUS
+#define MPI_STATUS_IGNORE MPA_STATUS
 
 #undef MPI_STATUSES_IGNORE
-#define MPI_STATUSES_IGNORE MPA::MPA_STATUS
+#define MPI_STATUSES_IGNORE MPA_STATUS
 
 #undef MPI_COMM_WORLD
 #define MPI_COMM_WORLD MPA_COMM_WORLD
 
-#define MPI_Status_sizeof() sizeof(MPI_Status)
+#define MPI_Request MPA_Request
+#define MPI_Status MPA_Status
+#define MPI_Comm MPA_Comm
+
+#define MPI_Status_sizeof() sizeof(MPA_Status)
 #define MPI_Status_source(a) ((a)->sourceInfo().rank().value())
 #define MPI_Status_error(a) (MPI_SUCCESS)
 #define MPI_Status_tag(a) ((a)->sourceInfo().tag().value())
 
-MPI_Status* MPA_STATUS;
+MPA_Status* MPA_STATUS;
 
-int MPI_Init(int *, char ***);
-int MPI_Initialized(int *);
-int MPI_Finalize(void);
-int MPI_Abort(MPI_Comm, int);
+int MPA_Init(int *, char ***);
+int MPA_Initialized(int *);
+int MPA_Finalize(void);
+int MPA_Abort(MPA_Comm, int);
 
-int MPI_Comm_split(MPI_Comm, int, int, MPI_Comm *);
-int MPI_Comm_dup(MPI_Comm, MPI_Comm *);
+int MPA_Comm_split(MPA_Comm, int, int, MPA_Comm *);
+int MPA_Comm_dup(MPA_Comm, MPA_Comm *);
 
-int MPI_Comm_size(MPI_Comm, int *);
-int MPI_Comm_rank(MPI_Comm, int *);
+int MPA_Comm_size(MPA_Comm, int *);
+int MPA_Comm_rank(MPA_Comm, int *);
 
-int MPI_Send(const void*, int, MPI_Datatype, int, int, MPI_Comm);
-int MPI_Recv(void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status *);
+int MPA_Send(const void*, int, MPI_Datatype, int, int, MPA_Comm);
+int MPA_Recv(void*, int, MPI_Datatype, int, int, MPA_Comm, MPA_Status *);
 
-int MPI_Isend(const void *, int, MPI_Datatype, int, int, MPI_Comm, MPI_Request *);
-int MPI_Irecv(void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Request *);
+int MPA_Isend(const void *, int, MPI_Datatype, int, int, MPA_Comm, MPA_Request *);
+int MPA_Irecv(void*, int, MPI_Datatype, int, int, MPA_Comm, MPA_Request *);
 
-int MPI_Type_size(MPI_Datatype , int *);
+int MPA_Type_size(MPI_Datatype , int *);
 
-int MPI_Wait(MPI_Request *, MPI_Status *);
-int MPI_Waitall(int, MPI_Request *, MPI_Status *);
-int MPI_Waitany(int, MPI_Request *, int *, MPI_Status *);
+int MPA_Wait(MPA_Request *, MPA_Status *);
+int MPA_Waitall(int, MPA_Request *, MPA_Status *);
+int MPA_Waitany(int, MPA_Request *, int *, MPA_Status *);
 
-int MPI_Test(MPI_Request *, int *, MPI_Status *);
-int MPI_Testall(int, MPI_Request *, int *, MPI_Status *);
+int MPA_Test(MPA_Request *, int *, MPA_Status *);
+int MPA_Testall(int, MPA_Request *, int *, MPA_Status *);
 
-int MPI_Barrier(MPI_Comm);
+int MPA_Barrier(MPA_Comm);
 
-int MPI_Bcast(void *, int, MPI_Datatype, int, MPI_Comm);
+int MPA_Bcast(void *, int, MPI_Datatype, int, MPA_Comm);
 
-int MPI_Gather(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPI_Comm);
-int MPI_Gatherv(const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, int, MPI_Comm);
+int MPA_Gather(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPA_Comm);
+int MPA_Gatherv(const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, int, MPA_Comm);
 
-int MPI_Allgather(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPI_Comm);
-int MPI_Allgatherv(const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, MPI_Comm);
+int MPA_Allgather(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPA_Comm);
+int MPA_Allgatherv(const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, MPA_Comm);
 
-int MPI_Reduce(const void *, void *, int, MPI_Datatype, MPI_Op, int, MPI_Comm);
-int MPI_Allreduce(const void *, void *, int, MPI_Datatype, MPI_Op, MPI_Comm);
+int MPA_Reduce(const void *, void *, int, MPI_Datatype, MPI_Op, int, MPA_Comm);
+int MPA_Allreduce(const void *, void *, int, MPI_Datatype, MPI_Op, MPA_Comm);
 
-int MPI_Scatter(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPI_Comm);
-int MPI_Scatterv(const void *, const int *, const int *, MPI_Datatype, void *, int, MPI_Datatype, int, MPI_Comm);
+int MPA_Scatter(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPA_Comm);
+int MPA_Scatterv(const void *, const int *, const int *, MPI_Datatype, void *, int, MPI_Datatype, int, MPA_Comm);
 
-int MPI_Probe(int, int, MPI_Comm, MPI_Status *);
-int MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status);
+int MPA_Probe(int, int, MPA_Comm, MPA_Status *);
+int MPA_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MPA_Status *status);
 
-int MPI_Get_count(const MPI_Status *, MPI_Datatype, int *);
+int MPA_Get_count(const MPA_Status *, MPI_Datatype, int *);
 
 
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-int MPI_Init(int *argc, char ***argv)
+int MPA_Init(int *argc, char ***argv)
 {
   int isInit = false;
-  MPI_Initialized(&isInit);
+  MPA_Initialized(&isInit);
   if(isInit){
     return MPI_ERR_OTHER;
   }
 
-  MPA_STATUS = new MPI_Status();
+  MPA_STATUS = new MPA_Status();
   mpiArcane = new MpiArcane();
   return mpiArcane->MpiArcane_Init(argc, argv);
 }
 
-int MPI_Initialized(int *flag)
+int MPA_Initialized(int *flag)
 {
   *flag = (mpiArcane != nullptr);
   return MPI_SUCCESS;
 }
 
-int MPI_Finalize(void)
+int MPA_Finalize(void)
 {
   int isInit = false;
-  MPI_Initialized(&isInit);
+  MPA_Initialized(&isInit);
   if(!isInit){
     return MPI_SUCCESS;
   }
@@ -201,7 +149,7 @@ int MPI_Finalize(void)
   return MPI_SUCCESS;
 }
 
-int MPI_Abort(MPI_Comm comm, int errorcode)
+int MPA_Abort(MPA_Comm comm, int errorcode)
 {
   return mpiArcane->MpiArcane_Abort(comm, errorcode);
 }
@@ -210,13 +158,13 @@ int MPI_Abort(MPI_Comm comm, int errorcode)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-int MPI_Comm_split(MPI_Comm comm, int color, int key, MPI_Comm *newcomm)
+int MPA_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
   return mpiArcane->MpiArcane_Comm_split(comm, color, key, newcomm);
 }
 
-int MPI_Comm_dup(MPI_Comm comm, MPI_Comm *newcomm)
+int MPA_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
   return mpiArcane->MpiArcane_Comm_dup(comm, newcomm);
@@ -225,13 +173,13 @@ int MPI_Comm_dup(MPI_Comm comm, MPI_Comm *newcomm)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-int MPI_Comm_size(MPI_Comm comm, int *size)
+int MPA_Comm_size(MPA_Comm comm, int *size)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
   return mpiArcane->MpiArcane_Comm_size(comm, size);
 }
 
-int MPI_Comm_rank(MPI_Comm comm, int *rank)
+int MPA_Comm_rank(MPA_Comm comm, int *rank)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
   return mpiArcane->MpiArcane_Comm_rank(comm, rank);
@@ -240,7 +188,7 @@ int MPI_Comm_rank(MPI_Comm comm, int *rank)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
+int MPA_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
 
@@ -253,7 +201,7 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
   return mpiArcane->MpiArcane_Send(buf, sizeof_type*count, dest, tag, comm, &req, true);
 }
 
-int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *status)
+int MPA_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm comm, MPA_Status *status)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
 
@@ -269,7 +217,7 @@ int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, M
 
 
 
-int MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request)
+int MPA_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_Comm comm, MPA_Request *request)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
 
@@ -280,7 +228,7 @@ int MPI_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
   return mpiArcane->MpiArcane_Send(buf, sizeof_type*count, dest, tag, comm, request, false);
 }
 
-int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request)
+int MPA_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm comm, MPA_Request *request)
 {
   if(mpiArcane == nullptr) return MPI_ERR_COMM;
 
@@ -296,49 +244,49 @@ int MPI_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-int MPI_Type_size(MPI_Datatype datatype, int *size)
+int MPA_Type_size(MPI_Datatype datatype, int *size)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   return mpiArcane->MpiArcane_Type_size(datatype, size);
 }
 
-int MPI_Wait(MPI_Request *request, MPI_Status *status)
+int MPA_Wait(MPA_Request *request, MPA_Status *status)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   return mpiArcane->MpiArcane_Wait(request);
 }
 
-int MPI_Waitall(int count, MPI_Request *array_of_requests, MPI_Status *array_of_statuses)
+int MPA_Waitall(int count, MPA_Request *array_of_requests, MPA_Status *array_of_statuses)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   return mpiArcane->MpiArcane_Waitall(count, array_of_requests);
 }
 
-int MPI_Waitany(int count, MPI_Request *array_of_requests, int *index, MPI_Status *status)
+int MPA_Waitany(int count, MPA_Request *array_of_requests, int *index, MPA_Status *status)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   return mpiArcane->MpiArcane_Waitany(count, array_of_requests, index);
 }
 
-int MPI_Test(MPI_Request *request, int *flag, MPI_Status *status)
+int MPA_Test(MPA_Request *request, int *flag, MPA_Status *status)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   return mpiArcane->MpiArcane_Test(request, flag);
 }
 
-int MPI_Testall(int count, MPI_Request *array_of_requests, int *flag, MPI_Status *array_of_statuses)
+int MPA_Testall(int count, MPA_Request *array_of_requests, int *flag, MPA_Status *array_of_statuses)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   return mpiArcane->MpiArcane_Testall(count, array_of_requests, flag);
 }
 
-int MPI_Barrier(MPI_Comm comm)
+int MPA_Barrier(MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   return mpiArcane->MpiArcane_Barrier(comm);
 }
 
-int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)
+int MPA_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
@@ -349,9 +297,9 @@ int MPI_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm
   return mpiArcane->MpiArcane_Bcast(buffer, sizeof_type*count, root, comm);
 }
 
-int MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+int MPA_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                void *recvbuf, int recvcount, MPI_Datatype recvtype,
-               int root, MPI_Comm comm)
+               int root, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
@@ -370,9 +318,9 @@ int MPI_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 }
 
 
-int MPI_Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+int MPA_Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                 void *recvbuf, const int *recvcounts, const int *displs,
-                MPI_Datatype recvtype, int root, MPI_Comm comm)
+                MPI_Datatype recvtype, int root, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
@@ -390,9 +338,9 @@ int MPI_Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     root, comm);
 }
 
-int MPI_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+int MPA_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                   void *recvbuf, int recvcount, MPI_Datatype recvtype,
-                  MPI_Comm comm)
+                  MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
@@ -410,9 +358,9 @@ int MPI_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     comm);
 }
 
-int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+int MPA_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                    void *recvbuf, const int *recvcounts, const int *displs,
-                   MPI_Datatype recvtype, MPI_Comm comm)
+                   MPI_Datatype recvtype, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
@@ -430,14 +378,14 @@ int MPI_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     comm);
 }
 
-int MPI_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-               MPI_Op op, int root, MPI_Comm comm)
+int MPA_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
+               MPI_Op op, int root, MPA_Comm comm)
 {
-  return MPA::MPI_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+  return MPA_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
 }
 
-int MPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
-                  MPI_Datatype datatype, MPI_Op op, MPI_Comm comm)
+int MPA_Allreduce(const void *sendbuf, void *recvbuf, int count,
+                  MPI_Datatype datatype, MPI_Op op, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   
@@ -473,9 +421,9 @@ int MPI_Allreduce(const void *sendbuf, void *recvbuf, int count,
     return MPI_ERR_TYPE;
 }
 
-int MPI_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
+int MPA_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                void *recvbuf, int recvcount, MPI_Datatype recvtype, int root,
-               MPI_Comm comm)
+               MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
@@ -493,10 +441,10 @@ int MPI_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     root, comm);
 }
 
-int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
+int MPA_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
                  MPI_Datatype sendtype, void *recvbuf, int recvcount,
                  MPI_Datatype recvtype,
-                 int root, MPI_Comm comm)
+                 int root, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
@@ -514,21 +462,21 @@ int MPI_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
     root, comm);
 }
 
-int MPI_Probe(int source, int tag, MPI_Comm comm, MPI_Status *status)
+int MPA_Probe(int source, int tag, MPA_Comm comm, MPA_Status *status)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   status->reset();
   return mpiArcane->MpiArcane_Probe(source, tag, comm, status);
 }
 
-int MPI_Iprobe(int source, int tag, MPI_Comm comm, int *flag, MPI_Status *status)
+int MPA_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MPA_Status *status)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   status->reset();
   return mpiArcane->MpiArcane_Iprobe(source, tag, comm, flag, status);
 }
 
-int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
+int MPA_Get_count(const MPA_Status *status, MPI_Datatype datatype, int *count)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
   
@@ -544,65 +492,57 @@ int MPI_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+
+/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+
+#define MPI_Init MPA_Init
+#define MPI_Initialized MPA_Initialized
+#define MPI_Finalize MPA_Finalize
+#define MPI_Abort MPA_Abort
+
+#define MPI_Comm_split MPA_Comm_split
+#define MPI_Comm_dup MPA_Comm_dup
+
+#define MPI_Comm_size MPA_Comm_size
+#define MPI_Comm_rank MPA_Comm_rank
+
+#define MPI_Send MPA_Send
+#define MPI_Recv MPA_Recv
+
+#define MPI_Isend MPA_Isend
+#define MPI_Irecv MPA_Irecv
+
+#define MPI_Type_size MPA_Type_size
+
+#define MPI_Wait MPA_Wait
+#define MPI_Waitall MPA_Waitall
+#define MPI_Waitany MPA_Waitany
+
+#define MPI_Test MPA_Test
+#define MPI_Testall MPA_Testall
+
+#define MPI_Barrier MPA_Barrier
+
+#define MPI_Bcast MPA_Bcast
+
+#define MPI_Gather MPA_Gather
+#define MPI_Gatherv MPA_Gatherv
+
+#define MPI_Allgather MPA_Allgather
+#define MPI_Allgatherv MPA_Allgatherv
+
+#define MPI_Reduce MPA_Reduce
+#define MPI_Allreduce MPA_Allreduce
+
+#define MPI_Scatter MPA_Scatter
+#define MPI_Scatterv MPA_Scatterv
+
+#define MPI_Probe MPA_Probe
+#define MPI_Iprobe MPA_Iprobe
+
+#define MPI_Get_count MPA_Get_count
 #endif
-
-}; // End namespace MPA
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-
-#define MPI_Request MPA::MPI_Request
-#define MPI_Status MPA::MPI_Status
-
-#define MPI_Comm MPA::MPI_Comm
-
-#define MPI_Init MPA::MPI_Init
-#define MPI_Initialized MPA::MPI_Initialized
-#define MPI_Finalize MPA::MPI_Finalize
-#define MPI_Abort MPA::MPI_Abort
-
-#define MPI_Comm_split MPA::MPI_Comm_split
-#define MPI_Comm_dup MPA::MPI_Comm_dup
-
-#define MPI_Comm_size MPA::MPI_Comm_size
-#define MPI_Comm_rank MPA::MPI_Comm_rank
-
-#define MPI_Send MPA::MPI_Send
-#define MPI_Recv MPA::MPI_Recv
-
-#define MPI_Isend MPA::MPI_Isend
-#define MPI_Irecv MPA::MPI_Irecv
-
-#define MPI_Type_size MPA::MPI_Type_size
-
-#define MPI_Wait MPA::MPI_Wait
-#define MPI_Waitall MPA::MPI_Waitall
-#define MPI_Waitany MPA::MPI_Waitany
-
-#define MPI_Test MPA::MPI_Test
-#define MPI_Testall MPA::MPI_Testall
-
-#define MPI_Barrier MPA::MPI_Barrier
-
-#define MPI_Bcast MPA::MPI_Bcast
-
-#define MPI_Gather MPA::MPI_Gather
-#define MPI_Gatherv MPA::MPI_Gatherv
-
-#define MPI_Allgather MPA::MPI_Allgather
-#define MPI_Allgatherv MPA::MPI_Allgatherv
-
-#define MPI_Reduce MPA::MPI_Reduce
-#define MPI_Allreduce MPA::MPI_Allreduce
-
-#define MPI_Scatter MPA::MPI_Scatter
-#define MPI_Scatterv MPA::MPI_Scatterv
-
-#define MPI_Probe MPA::MPI_Probe
-#define MPI_Iprobe MPA::MPI_Iprobe
-
-#define MPI_Get_count MPA::MPI_Get_count
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
