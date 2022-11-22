@@ -238,7 +238,7 @@ MpiArcane_Send(const void *buf, int sizeof_msg, int dest, int tag, MPA_Comm comm
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
-  PointToPointMessageInfo p2pMsgInfo(MessageRank(rank), MessageRank(dest), MessageTag(tag), (blocking ? Blocking : NonBlocking));
+  PointToPointMessageInfo p2pMsgInfo(MessageRank(dest), MessageTag(tag), (blocking ? Blocking : NonBlocking));
 
   ByteArrayView avBuf(sizeof_msg, (Byte*)buf);
 
@@ -265,7 +265,7 @@ MpiArcane_Recv(void *buf, int sizeof_msg, int source, int tag, MPA_Comm comm, MP
     p2pMsgInfo = PointToPointMessageInfo(*status);
   }
   else{
-    p2pMsgInfo = PointToPointMessageInfo(MessageRank(rank), MessageRank(source), MessageTag(tag), (blocking ? Blocking : NonBlocking));
+    p2pMsgInfo = PointToPointMessageInfo(MessageRank(source), MessageTag(tag), (blocking ? Blocking : NonBlocking));
   }
 
   ByteArrayView avBuf(sizeof_msg, (Byte*)buf);
