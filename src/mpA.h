@@ -28,6 +28,11 @@ int world_rank = -1;
 
 #include <mpi.h>
 
+#define MPI_Status_sizeof() sizeof(MPI_Status)
+#define MPI_Status_source(a) ((a)->MPI_SOURCE)
+#define MPI_Status_error(a) ((a)->MPI_ERROR)
+#define MPI_Status_tag(a) ((a)->MPI_TAG)
+
 int MPA_Init(int *argc, char ***argv)
 {
   #ifdef PRINT_CALL
@@ -392,7 +397,6 @@ int MPA_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 
 MpiArcane* mpiArcane = nullptr;
 
-using MPA_Request = Arccore::MessagePassing::Request;
 using MPA_Status  = Arccore::MessagePassing::MessageId;
 
 #undef MPI_STATUS_IGNORE
@@ -605,7 +609,7 @@ int MPA_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
   int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
   if(error != MPI_SUCCESS) return error;
 
-  Request req;
+  MPA_Request req;
 
   return mpiArcane->MpiArcane_Send(buf, sizeof_type*count, dest, tag, comm, &req, true);
 }
@@ -629,7 +633,7 @@ int MPA_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, M
   int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
   if(error != MPI_SUCCESS) return error;
 
-  Request req;
+  MPA_Request req;
 
   error = mpiArcane->MpiArcane_Recv(buf, sizeof_type*count, source, tag, comm, &req, status, true);
   return error;

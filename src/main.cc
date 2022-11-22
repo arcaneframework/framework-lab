@@ -14,14 +14,14 @@ int main(int argc, char* argv[])
 
   std::cout << "Hello from " << world_rank << "/" << world_size << std::endl; 
 
+  int root_rank = 0;
+
+
+
   if(world_size != 3) {
     std::cout << "Error: Work only with 3 procs" << std::endl;
     return 1;
   }
-
-  int root_rank = 0;
-
-
 
 
   // Examples from RookieHPC :
@@ -442,7 +442,7 @@ int main(int argc, char* argv[])
     {
         int buffer[3] = {123, 456, 789};
         printf("Process %d: sending a message containing 3 ints (%d, %d, %d), but the receiver is not aware of the length.\n", world_rank, buffer[0], buffer[1], buffer[2]);
-        MPI_Send(buffer, 3, MPI_INT, 1, 0, MPI_COMM_WORLD);
+        MPI_Send(buffer, 3, MPI_INT, 1, 1234, MPI_COMM_WORLD);
         break;
     }
 
@@ -450,8 +450,14 @@ int main(int argc, char* argv[])
     {
         // Retrieve information about the incoming message
         MPI_Status status;
-        MPI_Probe(0, 0, MPI_COMM_WORLD, &status);
+        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         printf("Process %d: obtained message status by probing it.\n", world_rank);
+
+        printf("Process %d: Status infos -- Source : %i -- Tag : %i\n", world_rank, MPI_Status_source(&status), MPI_Status_tag(&status));
+
+        if(MPI_Status_source(&status) != 0 || MPI_Status_tag(&status) != 1234){
+          printf("!!!!!!!!!!!!!!!!!!!! Erreur au niveau du probe !!!!!!!!!!!!!!!!!!!!!!\n");
+        }
 
         // Get the number of integers in the message probed
         int count;
@@ -461,7 +467,57 @@ int main(int argc, char* argv[])
         int* buffer = (int*)malloc(sizeof(int) * count);
 
         // Finally receive the message
-        MPI_Recv(buffer, count, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
+        MPI_Recv(buffer, count, MPI_INT, MPI_Status_source(&status), MPI_Status_tag(&status), MPI_COMM_WORLD, &status);
+        printf("Process %d: received message with all %d ints:", world_rank, count);
+
+        for(int i = 0; i < count; i++)
+        {
+            printf(" %d", buffer[i]);
+        }
+        printf(".\n");
+        break;
+    }
+  }
+
+  // -------------------- 11.5 -----------------------
+
+
+  switch(world_rank)
+
+  {
+    case 0:
+    {
+        int buffer[3] = {123, 456, 789};
+        printf("Process %d: sending a message containing 3 ints (%d, %d, %d), but the receiver is not aware of the length.\n", world_rank, buffer[0], buffer[1], buffer[2]);
+        MPI_Send(buffer, 3, MPI_INT, 1, 1234, MPI_COMM_WORLD);
+        break;
+    }
+
+    case 1:
+    {
+        // Retrieve information about the incoming message
+        MPI_Status status;
+        MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        printf("Process %d: obtained message status by probing it.\n", world_rank);
+
+        int source = MPI_Status_source(&status);
+        int tag = MPI_Status_tag(&status);
+
+        printf("Process %d: Status infos -- Source : %i -- Tag : %i\n", world_rank, source, tag);
+
+
+
+        MPI_Probe(source, tag, MPI_COMM_WORLD, &status);
+
+        // Get the number of integers in the message probed
+        int count;
+        MPI_Get_count(&status, MPI_INT, &count);
+
+        // Allocate the buffer now that we know how many elements there are
+        int* buffer = (int*)malloc(sizeof(int) * count);
+
+        // Finally receive the message
+        MPI_Recv(buffer, count, MPI_INT, MPI_Status_source(&status), MPI_Status_tag(&status), MPI_COMM_WORLD, &status);
         printf("Process %d: received message with all %d ints:", world_rank, count);
 
         for(int i = 0; i < count; i++)
