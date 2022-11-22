@@ -1,0 +1,17 @@
+<?xml version="1.0" ?>
+<module name="SayHello" version="1.0">
+ 
+  <description>Descripteur du module SayHello</description>
+ 
+  <variables>
+  </variables>
+ 
+  <entry-points>
+    <entry-point method-name="compute" name="Compute" where="compute-loop" property="none" />
+    <entry-point method-name="endCompute" name="EndCompute" where="compute-loop" property="none" />
+  </entry-points>
+ 
+  <options>
+  </options>
+ 
+</module>

@@ -14,7 +14,7 @@
 #ifndef MPA_H
 #define MPA_H
 
-//#define useMPI
+#define useMPI
 #define PRINT_CALL
 
 #ifdef PRINT_CALL
