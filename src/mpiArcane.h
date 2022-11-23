@@ -46,7 +46,7 @@ class MpiArcane
   virtual ~MpiArcane(){};
 
  public:
-  int MpiArcane_Init(int *argc, char ***argv);
+  int MpiArcane_Init(IMessagePassingMng *iMPMng);
   int MpiArcane_Finalize();
   int MpiArcane_Abort(MPA_Comm comm, int errorcode);
 
@@ -110,7 +110,6 @@ class MpiArcane
  protected:
   bool isInit;
   UniqueArray<IMessagePassingMng*> m_iMPMng;
-  UniqueArray<MPI_Comm> m_commOfMPMng;
   UniqueArray<Request> m_requests;
 };
 
@@ -118,22 +117,18 @@ class MpiArcane
 /*---------------------------------------------------------------------------*/
 
 int MpiArcane::
-MpiArcane_Init(int *argc, char ***argv)
+MpiArcane_Init(IMessagePassingMng *iMPMng)
 {
-  int ret = MPI_Init(argc, argv);
-  
-  if(ret == MPI_SUCCESS){
-    m_requests.resize(1);
-    m_iMPMng.resize(1);
-    m_commOfMPMng.resize(1);
+  if(isInit) return MPI_SUCCESS;
 
-    m_iMPMng[MPA_COMM_WORLD] = Mpi::StandaloneMpiMessagePassingMng::create(MPI_COMM_WORLD);
-    m_commOfMPMng[MPA_COMM_WORLD] = MPI_COMM_WORLD;
+  m_requests.resize(1);
+  m_iMPMng.resize(1);
 
-    isInit = true;
-  }
+  m_iMPMng[MPA_COMM_WORLD] = iMPMng;
 
-  return ret;
+  isInit = true;
+
+  return MPI_SUCCESS;
 }
 
 int MpiArcane::
@@ -142,15 +137,14 @@ MpiArcane_Finalize()
   if(!isInit) return MPI_SUCCESS;
   isInit = false;
 
-  for(int i = 0; i < m_iMPMng.size(); i++) {
+  for(int i = 1; i < m_iMPMng.size(); i++) {
     mpDelete(m_iMPMng[i]);
   }
 
   m_requests.clear();
   m_iMPMng.clear();
-  m_commOfMPMng.clear();
   
-  return MPI_Finalize();
+  return MPI_SUCCESS;
 }
 
 int MpiArcane::
@@ -159,17 +153,16 @@ MpiArcane_Abort(MPA_Comm comm, int errorcode)
   if(!isInit) return MPI_SUCCESS;
   isInit = false;
 
-  MPI_Comm comm_abort = m_commOfMPMng[comm];
-
-  for(int i = 0; i < m_iMPMng.size(); i++) {
+  for(int i = 1; i < m_iMPMng.size(); i++) {
     mpDelete(m_iMPMng[i]);
   }
 
   m_requests.clear();
   m_iMPMng.clear();
-  m_commOfMPMng.clear();
 
-  return MPI_Abort(comm_abort, errorcode);
+  ARCANE_FATAL("MPI_Abort() with error code: ");
+
+  return MPI_SUCCESS;
 }
 
 
@@ -179,17 +172,19 @@ MpiArcane_Abort(MPA_Comm comm, int errorcode)
 int MpiArcane::
 MpiArcane_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 {
-  MPI_Comm new_comm;
-  MPI_Comm mpi_comm = m_commOfMPMng[comm];
+  int min = mpAllReduce(m_iMPMng[comm], ReduceMin, color);
+  int max = mpAllReduce(m_iMPMng[comm], ReduceMax, color);
 
-  int error = MPI_Comm_split(mpi_comm, color, key, &new_comm);
-  if(error != MPI_SUCCESS) return error;
+  if(color == min){
+    m_iMPMng.add(mpSplit(m_iMPMng[comm], true));
+    delete(mpSplit(m_iMPMng[comm], false));
+  }
+  else{
+    delete(mpSplit(m_iMPMng[comm], false));
+    m_iMPMng.add(mpSplit(m_iMPMng[comm], true));
+  }
 
-  m_iMPMng.add(Mpi::StandaloneMpiMessagePassingMng::create(new_comm));
-  m_commOfMPMng.add(new_comm);
-
-  *newcomm = m_commOfMPMng.size() - 1;
-
+  *newcomm = m_iMPMng.size() - 1;
   return MPI_SUCCESS;
 }
 
@@ -197,17 +192,10 @@ MpiArcane_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 int MpiArcane::
 MpiArcane_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 {
-  MPI_Comm mpi_new_comm;
-  MPI_Comm mpi_old_comm = m_commOfMPMng[comm];
+  // TODO : Voir pour faire mieux.
+  m_iMPMng.add(mpSplit(m_iMPMng[comm], true));
 
-  int error = MPI_Comm_dup(mpi_old_comm, &mpi_new_comm);
-  if(error != MPI_SUCCESS) return error;
-
-  m_iMPMng.add(Mpi::StandaloneMpiMessagePassingMng::create(mpi_new_comm));
-  m_commOfMPMng.add(mpi_new_comm);
-
-  *newcomm = m_commOfMPMng.size() - 1;
-
+  *newcomm = m_iMPMng.size() - 1;
   return MPI_SUCCESS;
 }
 
@@ -600,10 +588,9 @@ MpiArcane_Probe(int source, int tag, MPA_Comm comm, MessageId *status)
 
   // TODO : Faire autrement.
 
-  MPI_Comm mpi_comm = m_commOfMPMng[comm];
   MPI_Status mpi_status;
 
-  int error = MPI_Probe(source, tag, mpi_comm, &mpi_status);
+  int error = MPI_Probe(source, tag, MPI_COMM_WORLD, &mpi_status);
 
   if(error != MPI_SUCCESS) return error;
 
@@ -624,10 +611,9 @@ MpiArcane_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MessageId *statu
 
   // return MPI_SUCCESS;
 
-  MPI_Comm mpi_comm = m_commOfMPMng[comm];
   MPI_Status mpi_status;
 
-  int error = MPI_Iprobe(source, tag, mpi_comm, flag, &mpi_status);
+  int error = MPI_Iprobe(source, tag, MPI_COMM_WORLD, flag, &mpi_status);
 
   if(error != MPI_SUCCESS) return error;
 

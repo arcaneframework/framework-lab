@@ -14,7 +14,7 @@
 #ifndef MPA_H
 #define MPA_H
 
-#define useMPI
+//#define useMPI
 #define PRINT_CALL
 
 #ifdef PRINT_CALL
@@ -33,22 +33,22 @@ int world_rank = -1;
 #define MPI_Status_error(a) ((a)->MPI_ERROR)
 #define MPI_Status_tag(a) ((a)->MPI_TAG)
 
-int MPA_Init(int *argc, char ***argv)
+int MPA_Init(IMessagePassingMng *)
 {
   #ifdef PRINT_CALL
 
   std::cout << "--------------- MPA_Init()" << std::endl;
 
-  int fin = MPI_Init(argc, argv);
+  //int fin = MPI_Init(argc, argv);
 
-  if(fin == MPI_SUCCESS){
+  //if(fin == MPI_SUCCESS){
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-  }
+  //}
 
-  return fin;
+  return MPI_SUCCESS;
 
   #else
-  return MPI_Init(argc, argv);
+  return MPI_SUCCESS;
   #endif
 
 }
@@ -68,7 +68,7 @@ int MPA_Finalize(void)
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Finalize()" << std::endl;
   #endif
 
-  return MPI_Finalize();
+  return MPI_SUCCESS;
 }
 
 int MPA_Abort(MPI_Comm comm, int errorcode)
@@ -419,7 +419,7 @@ using MPA_Status  = Arccore::MessagePassing::MessageId;
 
 MPA_Status* MPA_STATUS;
 
-int MPA_Init(int *, char ***);
+int MPA_Init(IMessagePassingMng *);
 int MPA_Initialized(int *);
 int MPA_Finalize(void);
 int MPA_Abort(MPA_Comm, int);
@@ -471,7 +471,7 @@ int MPA_Get_count(const MPA_Status *, MPI_Datatype, int *);
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-int MPA_Init(int *argc, char ***argv)
+int MPA_Init(IMessagePassingMng *iMPMng)
 {
 
   #ifdef PRINT_CALL
@@ -488,13 +488,13 @@ int MPA_Init(int *argc, char ***argv)
   mpiArcane = new MpiArcane();
 
   #ifdef PRINT_CALL
-  int fin = mpiArcane->MpiArcane_Init(argc, argv);
+  int fin = mpiArcane->MpiArcane_Init(iMPMng);
   if(fin == MPI_SUCCESS){
     mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
   }
   return fin;
   #else
-  return mpiArcane->MpiArcane_Init(argc, argv);
+  return mpiArcane->MpiArcane_Init(iMPMng);
   #endif
 }
 
