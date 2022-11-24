@@ -25,9 +25,13 @@
 #include <arccore/base/ArrayView.h>
 #include <arccore/base/Span.h>
 #include <arccore/collections/Array.h>
+#include <arcane/utils/IThreadMng.h>
+
+#include <thread>
+#include <map>
 
 #define MPA_Comm int
-#define MPA_COMM_WORLD 0
+#define MPA_COMM_WORLD -1
 #define MPA_Request unsigned long
 
 using namespace Arccore;
@@ -40,13 +44,13 @@ class MpiArcane
 {
  public:
   MpiArcane()
-  : isInit(false)
+  : m_isInit(false)
   {};
 
   virtual ~MpiArcane(){};
 
  public:
-  int MpiArcane_Init(IMessagePassingMng *iMPMng);
+  int MpiArcane_Init(IParallelMng *iMPMng);
   int MpiArcane_Finalize();
   int MpiArcane_Abort(MPA_Comm comm, int errorcode);
 
@@ -108,41 +112,62 @@ class MpiArcane
 
 
  protected:
-  bool isInit;
-  UniqueArray<IMessagePassingMng*> m_iMPMng;
+  bool m_isInit;
+  UniqueArray<IParallelMng*> m_iPMng;
   UniqueArray<Request> m_requests;
+  std::map<std::thread::id, int> m_tids;
 };
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
 int MpiArcane::
-MpiArcane_Init(IMessagePassingMng *iMPMng)
+MpiArcane_Init(IParallelMng *iPMng)
 {
-  if(isInit) return MPI_SUCCESS;
+  if(m_isInit) return MPI_SUCCESS;
 
-  m_requests.resize(1);
-  m_iMPMng.resize(1);
+  iPMng->barrier();
 
-  m_iMPMng[MPA_COMM_WORLD] = iMPMng;
+  if(iPMng->commRank() == 0){
+    m_requests.resize(iPMng->commSize());
+    m_iPMng.resize(iPMng->commSize());
+    m_isInit = true;
+  }
 
-  isInit = true;
+  iPMng->barrier();
 
+  iPMng->threadMng()->beginCriticalSection();
+  m_iPMng[iPMng->commRank()] = iPMng;
+  m_tids[std::this_thread::get_id()] = iPMng->commRank();
+  iPMng->threadMng()->endCriticalSection();
+
+  std::cout << "Tid : " << std::this_thread::get_id() << " id : " << m_tids[std::this_thread::get_id()] << std::endl;
+
+  iPMng->barrier();
   return MPI_SUCCESS;
 }
 
 int MpiArcane::
 MpiArcane_Finalize()
 {
-  if(!isInit) return MPI_SUCCESS;
-  isInit = false;
+  if(!m_isInit) return MPI_SUCCESS;
 
-  for(int i = 1; i < m_iMPMng.size(); i++) {
-    mpDelete(m_iMPMng[i]);
+  int rank, size;
+  MpiArcane_Comm_rank(MPA_COMM_WORLD, &rank);
+  MpiArcane_Comm_size(MPA_COMM_WORLD, &size);
+
+  MpiArcane_Barrier(MPA_COMM_WORLD);
+
+  if(rank == 0){
+
+    for(int i = size; i < m_iPMng.size(); i++) {
+      delete(m_iPMng[i]);
+    }
+
+    m_requests.clear();
+    m_iPMng.clear();
+    m_isInit = false;
   }
-
-  m_requests.clear();
-  m_iMPMng.clear();
   
   return MPI_SUCCESS;
 }
@@ -150,16 +175,23 @@ MpiArcane_Finalize()
 int MpiArcane::
 MpiArcane_Abort(MPA_Comm comm, int errorcode)
 {
-  if(!isInit) return MPI_SUCCESS;
-  isInit = false;
+  if(!m_isInit) return MPI_SUCCESS;
+  m_isInit = false;
 
-  for(int i = 1; i < m_iMPMng.size(); i++) {
-    mpDelete(m_iMPMng[i]);
+  int rank;
+  MpiArcane_Comm_rank(comm, &rank);
+
+  MpiArcane_Barrier(comm);
+
+  if(rank == 0){
+
+    for(int i = 1; i < m_iPMng.size(); i++) {
+      delete(m_iPMng[i]);
+    }
+
+    m_requests.clear();
+    m_iPMng.clear();
   }
-
-  m_requests.clear();
-  m_iMPMng.clear();
-
   ARCANE_FATAL("MPI_Abort() with error code: ");
 
   return MPI_SUCCESS;
@@ -172,30 +204,77 @@ MpiArcane_Abort(MPA_Comm comm, int errorcode)
 int MpiArcane::
 MpiArcane_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 {
-  int min = mpAllReduce(m_iMPMng[comm], ReduceMin, color);
-  int max = mpAllReduce(m_iMPMng[comm], ReduceMax, color);
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
 
+  int min = m_iPMng[comm]->reduce(ReduceMin, color);
+  int max = m_iPMng[comm]->reduce(ReduceMax, color);
+
+  UniqueArray<Integer> truc(1);
+  truc[0] = (color == min ? m_iPMng[comm]->commRank() : -1);
+
+  UniqueArray<Integer> truc2(m_iPMng[comm]->commSize());
+
+  m_iPMng[comm]->allGather(truc, truc2);
+
+  UniqueArray<Integer> final_min;
+  for(Integer elem : truc2){
+    if(elem != -1)
+      final_min.add(elem);
+  }
+
+  truc[0] = (color == max ? m_iPMng[comm]->commRank() : -1);
+  m_iPMng[comm]->allGather(truc, truc2);
+
+  UniqueArray<Integer> final_max;
+  for(Integer elem : truc2){
+    if(elem != -1)
+      final_max.add(elem);
+  }
+
+  IParallelMng* new_iPMng;
+
+  // TODO : A thread-safiser.
   if(color == min){
-    m_iMPMng.add(mpSplit(m_iMPMng[comm], true));
-    delete(mpSplit(m_iMPMng[comm], false));
+    new_iPMng = m_iPMng[comm]->createSubParallelMng(final_min);
+    delete(m_iPMng[comm]->createSubParallelMng(final_max));
   }
   else{
-    delete(mpSplit(m_iMPMng[comm], false));
-    m_iMPMng.add(mpSplit(m_iMPMng[comm], true));
+    delete(m_iPMng[comm]->createSubParallelMng(final_min));
+    new_iPMng = m_iPMng[comm]->createSubParallelMng(final_max);
   }
 
-  *newcomm = m_iMPMng.size() - 1;
-  return MPI_SUCCESS;
+  m_iPMng[comm]->threadMng()->beginCriticalSection();
+  m_iPMng.add(new_iPMng);
+  *newcomm = m_iPMng.size() - 1;
+  m_iPMng[comm]->threadMng()->endCriticalSection();
+  
+   return MPI_SUCCESS;
 }
 
 
 int MpiArcane::
 MpiArcane_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 {
-  // TODO : Voir pour faire mieux.
-  m_iMPMng.add(mpSplit(m_iMPMng[comm], true));
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
 
-  *newcomm = m_iMPMng.size() - 1;
+  UniqueArray<Integer> truc(1);
+  truc[0] = m_iPMng[comm]->commRank();
+
+  UniqueArray<Integer> truc2(m_iPMng[comm]->commSize());
+
+  m_iPMng[comm]->allGather(truc, truc2);
+
+  IParallelMng* new_iPMng = m_iPMng[comm]->createSubParallelMng(truc2);
+
+  // TODO : Voir pour faire mieux.
+  // TODO : A thread-safiser.
+  m_iPMng[comm]->threadMng()->beginCriticalSection();
+  m_iPMng.add(new_iPMng);
+  *newcomm = m_iPMng.size() - 1;
+  m_iPMng[comm]->threadMng()->endCriticalSection();
+
   return MPI_SUCCESS;
 }
 
@@ -206,14 +285,18 @@ MpiArcane_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 int MpiArcane::
 MpiArcane_Comm_size(MPA_Comm comm, int *size)
 {
-  *size = m_iMPMng[comm]->commSize();
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+  *size = m_iPMng[comm]->commSize();
   return MPI_SUCCESS;
 }
 
 int MpiArcane::
 MpiArcane_Comm_rank(MPA_Comm comm, int *rank)
 {
-  *rank = m_iMPMng[comm]->commRank();
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+  *rank = m_iPMng[comm]->commRank();
   return MPI_SUCCESS;
 }
 
@@ -223,6 +306,9 @@ MpiArcane_Comm_rank(MPA_Comm comm, int *rank)
 int MpiArcane::
 MpiArcane_Send(const void *buf, int sizeof_msg, int dest, int tag, MPA_Comm comm, MPA_Request *request, bool blocking)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
@@ -230,12 +316,22 @@ MpiArcane_Send(const void *buf, int sizeof_msg, int dest, int tag, MPA_Comm comm
 
   ByteArrayView avBuf(sizeof_msg, (Byte*)buf);
 
-  Request arc_request = mpSend(m_iMPMng[comm], avBuf, p2pMsgInfo);
+  Request arc_request = m_iPMng[comm]->send(avBuf, p2pMsgInfo);
+  //Request arc_request = m_iPMng[comm]->send(avBuf, dest, blocking);
+  //Request arc_request = mpSend(m_iPMng[comm]->messagePassingMng(), avBuf, p2pMsgInfo);
 
   // Pas besoin de save la request si bloquant.
   if(!blocking){
+    // TODO : A thread-safiser.
+    m_iPMng[comm]->threadMng()->beginCriticalSection();
     m_requests.add(arc_request);
     *request = m_requests.size()-1;
+    m_iPMng[comm]->threadMng()->endCriticalSection();
+  }
+  else{
+    UniqueArray<Request> reqs(1);
+    reqs[0] = arc_request;
+    //m_iPMng[comm]->freeRequests(reqs);
   }
 
   return MPI_SUCCESS;
@@ -244,26 +340,39 @@ MpiArcane_Send(const void *buf, int sizeof_msg, int dest, int tag, MPA_Comm comm
 int MpiArcane::
 MpiArcane_Recv(void *buf, int sizeof_msg, int source, int tag, MPA_Comm comm, MPA_Request *request, MessageId *status, bool blocking)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+    
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
   PointToPointMessageInfo p2pMsgInfo;
   
   if(status->isValid()) {
-    p2pMsgInfo = PointToPointMessageInfo(*status);
+   p2pMsgInfo = PointToPointMessageInfo(*status);
   }
   else{
-    p2pMsgInfo = PointToPointMessageInfo(MessageRank(source), MessageTag(tag), (blocking ? Blocking : NonBlocking));
+   p2pMsgInfo = PointToPointMessageInfo(MessageRank(source), MessageTag(tag), (blocking ? Blocking : NonBlocking));
   }
 
   ByteArrayView avBuf(sizeof_msg, (Byte*)buf);
 
-  Request arc_request = mpReceive(m_iMPMng[comm], avBuf, p2pMsgInfo);
+  Request arc_request = m_iPMng[comm]->receive(avBuf, p2pMsgInfo);
+  //Request arc_request = m_iPMng[comm]->recv(avBuf, source, blocking);
+  //Request arc_request = mpReceive(m_iPMng[comm]->messagePassingMng() , avBuf, p2pMsgInfo);
 
   // Pas besoin de save la request si bloquant.
   if(!blocking){
+    // TODO : A thread-safiser.
+    m_iPMng[comm]->threadMng()->beginCriticalSection();
     m_requests.add(arc_request);
     *request = m_requests.size()-1;
+    m_iPMng[comm]->threadMng()->endCriticalSection();
+  }
+  else{
+    UniqueArray<Request> reqs(1);
+    reqs[0] = arc_request;
+    //m_iPMng[comm]->freeRequests(reqs);
   }
 
   return MPI_SUCCESS;
@@ -281,8 +390,7 @@ MpiArcane_Type_size(MPI_Datatype datatype, int *size)
 int MpiArcane::
 MpiArcane_Wait(MPA_Request *request)
 {
-  mpWait(m_iMPMng[MPA_COMM_WORLD], m_requests[*request]);
-  return MPI_SUCCESS;
+  return MpiArcane_Waitall(1, request);
 }
 
 int MpiArcane::
@@ -292,7 +400,7 @@ MpiArcane_Waitall(int count, MPA_Request *array_of_requests)
   for(int i = 0; i < count; i++){
     arc_reqs[i] = m_requests[array_of_requests[i]];
   }
-  mpWaitAll(m_iMPMng[MPA_COMM_WORLD], arc_reqs);
+  m_iPMng[m_tids[std::this_thread::get_id()]]->waitAllRequests(arc_reqs);
   return MPI_SUCCESS;
 }
 
@@ -308,8 +416,6 @@ MpiArcane_Waitany(int count, MPA_Request *array_of_requests, int *index)
     if(i++ >= count) i = 0;
   }
 
-  
-
   *index = i;
   return MPI_SUCCESS;
 }
@@ -320,11 +426,7 @@ MpiArcane_Test(MPA_Request *request, int *flag)
   UniqueArray<Request> arc_reqs(1);
   arc_reqs[0] = m_requests[*request];
 
-  bool bFlag;
-  ArrayView<bool> avFlag(1, &bFlag);
-
-  mpTestSome(m_iMPMng[MPA_COMM_WORLD], arc_reqs, avFlag);
-  *flag = bFlag;
+  *flag = m_iPMng[m_tids[std::this_thread::get_id()]]->testSomeRequests(arc_reqs)[0];
 
   return MPI_SUCCESS;
 }
@@ -337,14 +439,13 @@ MpiArcane_Testall(int count, MPA_Request *array_of_requests, int *flag)
     arc_reqs[i] = m_requests[array_of_requests[i]];
   }
 
-  UniqueArray<bool> flags(count);
+  UniqueArray<Integer> flags = m_iPMng[m_tids[std::this_thread::get_id()]]->testSomeRequests(arc_reqs);
 
-  mpTestSome(m_iMPMng[MPA_COMM_WORLD], arc_reqs, flags);
+  *flag = 0;
 
-  for(int i = 1; i < count; i++){
-    flags[0] += flags[i];
+  for(int i = 0; i < flags.size(); i++){
+    *flag += flags[i];
   }
-  *flag = flags[0];
 
   return MPI_SUCCESS;
 }
@@ -352,16 +453,21 @@ MpiArcane_Testall(int count, MPA_Request *array_of_requests, int *flag)
 int MpiArcane::
 MpiArcane_Barrier(MPA_Comm comm)
 {
-  mpBarrier(m_iMPMng[comm]);
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+  m_iPMng[comm]->barrier();
   return MPI_SUCCESS;
 }
 
 int MpiArcane::
 MpiArcane_Bcast(void *buffer, int sizeof_msg, int root, MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   ByteArrayView avBuf(sizeof_msg, (Byte*)buffer);
 
-  mpBroadcast(m_iMPMng[comm], avBuf, root);
+  m_iPMng[comm]->broadcast(avBuf, root);
 
   return MPI_SUCCESS;
 }
@@ -371,10 +477,13 @@ MpiArcane_Gather(const void *sendbuf, int sizeof_sentmsg,
                  void *recvbuf, int sizeof_recvmsg,
                  int root, MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
 
-  mpGather(m_iMPMng[comm], avSendBuf, avRecvBuf, root);
+  m_iPMng[comm]->gather(avSendBuf, avRecvBuf, root);
 
   return MPI_SUCCESS;
 }
@@ -384,9 +493,13 @@ MpiArcane_Gatherv(const void *sendbuf, int sizeof_sentmsg,
                   void *recvbuf, const int *recvcounts, const int *displs,
                   int sizeof_recvtype, int root, MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   UniqueArray<Byte> uaRecv;
-  mpGatherVariable(m_iMPMng[comm], avSendBuf, uaRecv, root);
+
+  m_iPMng[comm]->gatherVariable(avSendBuf, uaRecv, root);
 
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
@@ -416,10 +529,13 @@ MpiArcane_Allgather(const void *sendbuf, int sizeof_sentmsg,
                     void *recvbuf, int sizeof_recvmsg,
                     MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
 
-  mpAllGather(m_iMPMng[comm], avSendBuf, avRecvBuf);
+  m_iPMng[comm]->allGather(avSendBuf, avRecvBuf);
 
   return MPI_SUCCESS;
 }
@@ -429,9 +545,13 @@ MpiArcane_Allgatherv(const void *sendbuf, int sizeof_sentmsg,
                                        void *recvbuf, const int *recvcounts, const int *displs,
                                        int sizeof_recvtype, MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   UniqueArray<Byte> uaRecv;
-  mpAllGatherVariable(m_iMPMng[comm], avSendBuf, uaRecv);
+
+  m_iPMng[comm]->allGatherVariable(avSendBuf, uaRecv);
 
   int size;
   MpiArcane_Comm_size(comm, &size);
@@ -512,12 +632,15 @@ MpiArcane_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
     return MPI_ERR_TYPE;
   }
 
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   ArrayView<T> avSendBuf(sizeof_msg, (T*)sendbuf);
   ArrayView<T> avRecvBuf(sizeof_msg, (T*)recvbuf);
 
   avRecvBuf.copy(avSendBuf);
 
-  mpAllReduce(m_iMPMng[comm], rtype, avRecvBuf);
+  m_iPMng[comm]->reduce(rtype, avRecvBuf);
 
   return MPI_SUCCESS;
 }
@@ -527,6 +650,9 @@ MpiArcane_Scatter(const void *sendbuf, int sizeof_sentmsg,
                             void *recvbuf, int sizeof_recvmsg,
                             int root, MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
@@ -534,18 +660,20 @@ MpiArcane_Scatter(const void *sendbuf, int sizeof_sentmsg,
     int size;
     MpiArcane_Comm_size(comm, &size);
 
-    int pos = 0;
-    for(int i = 0; i < size; i++){        
+    for(int i = 0; i < size; i++){
+      if(i == root) continue;
       MPA_Request req;
       MpiArcane_Send(((Byte*)sendbuf) + (i*sizeof_recvmsg), sizeof_recvmsg, i, 0, comm, &req, false);
     }
+    for(int i = 0; i < sizeof_recvmsg; i++){
+      ((Byte*)recvbuf)[i] = *(((Byte*)sendbuf) + (rank*sizeof_recvmsg+i));
+    }
   }
-  MPA_Request req;
-  MessageId mId;
-  MpiArcane_Recv(recvbuf, sizeof_recvmsg, root, 0, comm, &req, &mId, false);
-
-  MpiArcane_Barrier(comm);
-
+  else{
+    MPA_Request req;
+    MessageId mId;
+    MpiArcane_Recv(recvbuf, sizeof_recvmsg, root, 0, comm, &req, &mId, true);
+  }
   return MPI_SUCCESS;
 }
 
@@ -554,6 +682,9 @@ MpiArcane_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs
                        void *recvbuf, int sizeof_recvmsg,
                        int root, MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
 
@@ -563,16 +694,19 @@ MpiArcane_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs
 
     int pos = 0;
     for(int i = 0; i < size; i++){
+      if(i == root) continue;
       MPA_Request req;
       MpiArcane_Send(((Byte*)sendbuf) + (displs[i]*sizeof_sendtype), sendcounts[i]*sizeof_sendtype, i, 0, comm, &req, false);
     }
+    for(int i = 0; i < sizeof_recvmsg; i++){
+      ((Byte*)recvbuf)[i] = *(((Byte*)sendbuf) + (displs[rank]*sizeof_recvmsg+i));
+    }
   }
-
-  MPA_Request req;
-  MessageId mId;
-  MpiArcane_Recv(recvbuf, sizeof_recvmsg, root, 0, comm, &req, &mId, false);
-
-  MpiArcane_Barrier(comm);
+  else{
+    MPA_Request req;
+    MessageId mId;
+    MpiArcane_Recv(recvbuf, sizeof_recvmsg, root, 0, comm, &req, &mId, false);
+  }
 
   return MPI_SUCCESS;
 }
