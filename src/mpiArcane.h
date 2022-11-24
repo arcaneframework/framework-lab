@@ -705,7 +705,7 @@ MpiArcane_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs
   else{
     MPA_Request req;
     MessageId mId;
-    MpiArcane_Recv(recvbuf, sizeof_recvmsg, root, 0, comm, &req, &mId, false);
+    MpiArcane_Recv(recvbuf, sizeof_recvmsg, root, 0, comm, &req, &mId, true);
   }
 
   return MPI_SUCCESS;
