@@ -932,36 +932,8 @@ int MPA_Allreduce(const void *sendbuf, void *recvbuf, int count,
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allreduce()" << std::endl;
   #endif
   
-  if(datatype == MPI_CHAR || datatype == MPI_SIGNED_CHAR)
-    return mpiArcane->MpiArcane_Allreduce((const char*)sendbuf, (char*)recvbuf, count, op, comm);
-  else if(datatype == MPI_SHORT)
-    return mpiArcane->MpiArcane_Allreduce((const short*)sendbuf, (short*)recvbuf, count, op, comm);
-  else if(datatype == MPI_INT)
-    return mpiArcane->MpiArcane_Allreduce((const int*)sendbuf, (int*)recvbuf, count, op, comm);
-  else if(datatype == MPI_LONG)
-    return mpiArcane->MpiArcane_Allreduce((const long*)sendbuf, (long*)recvbuf, count, op, comm);
-  else if(datatype == MPI_LONG_LONG)
-    return mpiArcane->MpiArcane_Allreduce((const long long*)sendbuf, (long long*)recvbuf, count, op, comm);
-  else if(datatype == MPI_UNSIGNED_CHAR)
-    return mpiArcane->MpiArcane_Allreduce((const unsigned char*)sendbuf, (unsigned char*)recvbuf, count, op, comm);
-  else if(datatype == MPI_UNSIGNED_SHORT)
-    return mpiArcane->MpiArcane_Allreduce((const unsigned short*)sendbuf, (unsigned short*)recvbuf, count, op, comm);
-  else if(datatype == MPI_UNSIGNED)
-    return mpiArcane->MpiArcane_Allreduce((const unsigned int*)sendbuf, (unsigned int*)recvbuf, count, op, comm);
-  else if(datatype == MPI_UNSIGNED_LONG)
-    return mpiArcane->MpiArcane_Allreduce((const unsigned long*)sendbuf, (unsigned long*)recvbuf, count, op, comm);
-  else if(datatype == MPI_UNSIGNED_LONG_LONG)
-    return mpiArcane->MpiArcane_Allreduce((const unsigned long long*)sendbuf, (unsigned long long*)recvbuf, count, op, comm);
-  else if(datatype == MPI_FLOAT)
-    return mpiArcane->MpiArcane_Allreduce((const float*)sendbuf, (float*)recvbuf, count, op, comm);
-  else if(datatype == MPI_DOUBLE)
-    return mpiArcane->MpiArcane_Allreduce((const double*)sendbuf, (double*)recvbuf, count, op, comm);
-  else if(datatype == MPI_LONG_DOUBLE)
-    return mpiArcane->MpiArcane_Allreduce((const long double*)sendbuf, (long double*)recvbuf, count, op, comm);
-  else if(datatype == MPI_BYTE)
-    return mpiArcane->MpiArcane_Allreduce((const Byte*)sendbuf, (Byte*)recvbuf, count, op, comm);
-  else
-    return MPI_ERR_TYPE;
+  return mpiArcane->MpiArcane_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+
 }
 
 int MPA_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,

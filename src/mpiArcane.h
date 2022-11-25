@@ -94,9 +94,12 @@ class MpiArcane
                                  void *recvbuf, const int *recvcounts, const int *displs,
                                  int sizeof_recvtype, MPA_Comm comm);
 
+  int MpiArcane_Allreduce(const void *sendbuf, void *recvbuf, int sizeof_msg,
+                          MPI_Datatype datatype, MPI_Op op, MPA_Comm comm);
+
   template<class T>
-  int MpiArcane_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
-                          MPI_Op op, MPA_Comm comm);
+  int _Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
+                          eReduceType op, MPA_Comm comm);
 
   int MpiArcane_Scatter(const void *sendbuf, int sizeof_sentmsg,
                               void *recvbuf, int sizeof_recvmsg,
@@ -146,8 +149,6 @@ MpiArcane_Init(IParallelMng *iPMng)
   m_tids[std::this_thread::get_id()] = iPMng->commRank();
   iPMng->threadMng()->endCriticalSection();
 
-  std::cout << "Tid : " << std::this_thread::get_id() << " id : " << m_tids[std::this_thread::get_id()] << std::endl;
-
   iPMng->barrier();
   return MPI_SUCCESS;
 }
@@ -166,17 +167,10 @@ MpiArcane_Finalize()
   MpiArcane_Barrier(MPA_COMM_WORLD);
 
   if(rank == 0){
-
-    // for(int i = size; i < m_iPMng.size(); i++) {
-    //   delete(m_iPMng[i].get());
-    //   m_iPMng[i].reset();
-    // }
-
     delete[] m_requests;
     m_iPMng.clear();
     m_isInit = false;
   }
-
   
   return MPI_SUCCESS;
 }
@@ -185,7 +179,6 @@ int MpiArcane::
 MpiArcane_Abort(MPA_Comm comm, int errorcode)
 {
   if(!m_isInit) return MPI_SUCCESS;
-  m_isInit = false;
 
   int rank;
   MpiArcane_Comm_rank(comm, &rank);
@@ -195,13 +188,9 @@ MpiArcane_Abort(MPA_Comm comm, int errorcode)
   MpiArcane_Barrier(comm);
 
   if(rank == 0){
-
-    // for(int i = 1; i < m_iPMng.size(); i++) {
-    //   delete(m_iPMng[i]);
-    // }
-
     delete[] m_requests;
     m_iPMng.clear();
+    m_isInit = false;
   }
   ARCANE_FATAL("MPI_Abort() with error code: ");
 
@@ -593,10 +582,9 @@ MpiArcane_Allgatherv(const void *sendbuf, int sizeof_sentmsg,
   return MPI_SUCCESS;
 }
 
-template<class T>
 int MpiArcane::
-MpiArcane_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
-                     MPI_Op op, MPA_Comm comm)
+MpiArcane_Allreduce(const void *sendbuf, void *recvbuf, int sizeof_msg,
+                     MPI_Datatype datatype, MPI_Op op, MPA_Comm comm)
 {
   eReduceType rtype;
   if(op == MPI_MIN)
@@ -654,6 +642,43 @@ MpiArcane_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
     return MPI_ERR_TYPE;
   }
 
+  if(datatype == MPI_CHAR || datatype == MPI_SIGNED_CHAR)
+    return _Allreduce((const char*)sendbuf, (char*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_SHORT)
+    return _Allreduce((const short*)sendbuf, (short*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_INT)
+    return _Allreduce((const int*)sendbuf, (int*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_LONG)
+    return _Allreduce((const long*)sendbuf, (long*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_LONG_LONG)
+    return _Allreduce((const long long*)sendbuf, (long long*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_UNSIGNED_CHAR)
+    return _Allreduce((const unsigned char*)sendbuf, (unsigned char*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_UNSIGNED_SHORT)
+    return _Allreduce((const unsigned short*)sendbuf, (unsigned short*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_UNSIGNED)
+    return _Allreduce((const unsigned int*)sendbuf, (unsigned int*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_UNSIGNED_LONG)
+    return _Allreduce((const unsigned long*)sendbuf, (unsigned long*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_UNSIGNED_LONG_LONG)
+    return _Allreduce((const unsigned long long*)sendbuf, (unsigned long long*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_FLOAT)
+    return _Allreduce((const float*)sendbuf, (float*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_DOUBLE)
+    return _Allreduce((const double*)sendbuf, (double*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_LONG_DOUBLE)
+    return _Allreduce((const long double*)sendbuf, (long double*)recvbuf, sizeof_msg, rtype, comm);
+  else if(datatype == MPI_BYTE)
+    return _Allreduce((const Byte*)sendbuf, (Byte*)recvbuf, sizeof_msg, rtype, comm);
+
+  return MPI_ERR_TYPE;
+}
+
+template<class T>
+int MpiArcane::
+_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
+           eReduceType op, MPA_Comm comm)
+{
   if(comm == MPA_COMM_WORLD)
     comm = m_tids[std::this_thread::get_id()];
 
@@ -662,7 +687,7 @@ MpiArcane_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
 
   avRecvBuf.copy(avSendBuf);
 
-  m_iPMng[comm]->reduce(rtype, avRecvBuf);
+  m_iPMng[comm]->reduce(op, avRecvBuf);
 
   return MPI_SUCCESS;
 }
