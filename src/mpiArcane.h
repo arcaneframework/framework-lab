@@ -142,8 +142,7 @@ MpiArcane_Init(IParallelMng *iPMng)
   m_requests[iPMng->commRank()][0].reset();
 
   iPMng->threadMng()->beginCriticalSection();
-
-  m_iPMng[iPMng->commRank()] = Ref<IParallelMng>::create(iPMng);
+  m_iPMng[iPMng->commRank()] = makeRef(iPMng);
   m_tids[std::this_thread::get_id()] = iPMng->commRank();
   iPMng->threadMng()->endCriticalSection();
 
@@ -270,17 +269,8 @@ MpiArcane_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
   if(comm == MPA_COMM_WORLD)
     comm = m_tids[std::this_thread::get_id()];
 
-  UniqueArray<Integer> truc(1);
-  truc[0] = m_iPMng[comm]->commRank();
-
-  UniqueArray<Integer> truc2(m_iPMng[comm]->commSize());
-
-  m_iPMng[comm]->allGather(truc, truc2);
-
-  Ref<IParallelMng> new_iPMng = m_iPMng[comm]->createSubParallelMngRef(truc2);
-
   m_iPMng[comm]->threadMng()->beginCriticalSection();
-  m_iPMng.add(new_iPMng);
+  m_iPMng.add(Ref<IParallelMng>(m_iPMng[comm]));
   *newcomm = m_iPMng.size() - 1;
   m_iPMng[comm]->threadMng()->endCriticalSection();
 
