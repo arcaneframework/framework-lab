@@ -15,10 +15,9 @@ class SayHelloModule
   : ArcaneSayHelloObject(mbi) { }
  
  public:
+  void beginCompute() override;
+  void endCompute() override;
   void compute() override;
-  void endCompute() override {
-    subDomain()->timeLoopMng()->stopComputeLoop(true);
-  }
   VersionInfo versionInfo() const override { return VersionInfo(1, 0, 0); }
 };
  
