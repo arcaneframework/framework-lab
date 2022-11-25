@@ -98,7 +98,7 @@ class MpiArcane
                           MPI_Datatype datatype, MPI_Op op, MPA_Comm comm);
 
   template<class T>
-  int _Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
+  int _allReduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
                           eReduceType op, MPA_Comm comm);
 
   int MpiArcane_Scatter(const void *sendbuf, int sizeof_sentmsg,
@@ -586,6 +586,9 @@ int MpiArcane::
 MpiArcane_Allreduce(const void *sendbuf, void *recvbuf, int sizeof_msg,
                      MPI_Datatype datatype, MPI_Op op, MPA_Comm comm)
 {
+  if(comm == MPA_COMM_WORLD)
+    comm = m_tids[std::this_thread::get_id()];
+
   eReduceType rtype;
   if(op == MPI_MIN)
     rtype = ReduceMin;
@@ -593,101 +596,79 @@ MpiArcane_Allreduce(const void *sendbuf, void *recvbuf, int sizeof_msg,
     rtype = ReduceMax;
   else if(op == MPI_SUM)
     rtype = ReduceSum;
-  else if(op == MPI_OP_NULL){
-    std::cout << "[MPI_ERR_TYPE] MPI_OP_NULL not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_PROD){
-    std::cout << "[MPI_ERR_TYPE] MPI_PROD not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_LAND){
-    std::cout << "[MPI_ERR_TYPE] MPI_LAND not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_BAND){
-    std::cout << "[MPI_ERR_TYPE] MPI_BAND not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_LOR){
-    std::cout << "[MPI_ERR_TYPE] MPI_LOR not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_BOR){
-    std::cout << "[MPI_ERR_TYPE] MPI_BOR not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_LXOR){
-    std::cout << "[MPI_ERR_TYPE] MPI_LXOR not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_BXOR){
-    std::cout << "[MPI_ERR_TYPE] MPI_BXOR not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_MINLOC){
-    std::cout << "[MPI_ERR_TYPE] MPI_MINLOC not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_MAXLOC){
-    std::cout << "[MPI_ERR_TYPE] MPI_MAXLOC not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
-  else if(op == MPI_REPLACE){
-    std::cout << "[MPI_ERR_TYPE] MPI_REPLACE not supported yet" << std::endl;
-    return MPI_ERR_TYPE;
-  }
+
   else {
-    std::cout << "[MPI_ERR_TYPE] Invalid op" << std::endl;
+    if(op == MPI_OP_NULL)
+      std::cout << "[MPI_ERR_TYPE] MPI_OP_NULL not supported yet" << std::endl;
+    else if(op == MPI_PROD)
+      std::cout << "[MPI_ERR_TYPE] MPI_PROD not supported yet" << std::endl;
+    else if(op == MPI_LAND)
+      std::cout << "[MPI_ERR_TYPE] MPI_LAND not supported yet" << std::endl;
+    else if(op == MPI_BAND)
+      std::cout << "[MPI_ERR_TYPE] MPI_BAND not supported yet" << std::endl;
+    else if(op == MPI_LOR)
+      std::cout << "[MPI_ERR_TYPE] MPI_LOR not supported yet" << std::endl;
+    else if(op == MPI_BOR)
+      std::cout << "[MPI_ERR_TYPE] MPI_BOR not supported yet" << std::endl;
+    else if(op == MPI_LXOR)
+      std::cout << "[MPI_ERR_TYPE] MPI_LXOR not supported yet" << std::endl;
+    else if(op == MPI_BXOR)
+      std::cout << "[MPI_ERR_TYPE] MPI_BXOR not supported yet" << std::endl;
+    else if(op == MPI_MINLOC)
+      std::cout << "[MPI_ERR_TYPE] MPI_MINLOC not supported yet" << std::endl;
+    else if(op == MPI_MAXLOC)
+      std::cout << "[MPI_ERR_TYPE] MPI_MAXLOC not supported yet" << std::endl;
+    else if(op == MPI_REPLACE)
+      std::cout << "[MPI_ERR_TYPE] MPI_REPLACE not supported yet" << std::endl;
+    else
+      std::cout << "[MPI_ERR_TYPE] Invalid op" << std::endl;
     return MPI_ERR_TYPE;
   }
 
   if(datatype == MPI_CHAR || datatype == MPI_SIGNED_CHAR)
-    return _Allreduce((const char*)sendbuf, (char*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const char*)sendbuf, (char*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_SHORT)
-    return _Allreduce((const short*)sendbuf, (short*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const short*)sendbuf, (short*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_INT)
-    return _Allreduce((const int*)sendbuf, (int*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const int*)sendbuf, (int*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_LONG)
-    return _Allreduce((const long*)sendbuf, (long*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const long*)sendbuf, (long*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_LONG_LONG)
-    return _Allreduce((const long long*)sendbuf, (long long*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const long long*)sendbuf, (long long*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_UNSIGNED_CHAR)
-    return _Allreduce((const unsigned char*)sendbuf, (unsigned char*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const unsigned char*)sendbuf, (unsigned char*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_UNSIGNED_SHORT)
-    return _Allreduce((const unsigned short*)sendbuf, (unsigned short*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const unsigned short*)sendbuf, (unsigned short*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_UNSIGNED)
-    return _Allreduce((const unsigned int*)sendbuf, (unsigned int*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const unsigned int*)sendbuf, (unsigned int*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_UNSIGNED_LONG)
-    return _Allreduce((const unsigned long*)sendbuf, (unsigned long*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const unsigned long*)sendbuf, (unsigned long*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_UNSIGNED_LONG_LONG)
-    return _Allreduce((const unsigned long long*)sendbuf, (unsigned long long*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const unsigned long long*)sendbuf, (unsigned long long*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_FLOAT)
-    return _Allreduce((const float*)sendbuf, (float*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const float*)sendbuf, (float*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_DOUBLE)
-    return _Allreduce((const double*)sendbuf, (double*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const double*)sendbuf, (double*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_LONG_DOUBLE)
-    return _Allreduce((const long double*)sendbuf, (long double*)recvbuf, sizeof_msg, rtype, comm);
+    return _allReduce((const long double*)sendbuf, (long double*)recvbuf, sizeof_msg, rtype, comm);
   else if(datatype == MPI_BYTE)
-    return _Allreduce((const Byte*)sendbuf, (Byte*)recvbuf, sizeof_msg, rtype, comm);
-
+    return _allReduce((const Byte*)sendbuf, (Byte*)recvbuf, sizeof_msg, rtype, comm);
+  else
+    std::cout << "[MPI_ERR_TYPE] Invalid datatype" << std::endl;
   return MPI_ERR_TYPE;
 }
 
 template<class T>
 int MpiArcane::
-_Allreduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
-           eReduceType op, MPA_Comm comm)
+_allReduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
+           eReduceType reduceType, MPA_Comm comm)
 {
-  if(comm == MPA_COMM_WORLD)
-    comm = m_tids[std::this_thread::get_id()];
-
   ArrayView<T> avSendBuf(sizeof_msg, (T*)sendbuf);
   ArrayView<T> avRecvBuf(sizeof_msg, (T*)recvbuf);
 
   avRecvBuf.copy(avSendBuf);
 
-  m_iPMng[comm]->reduce(op, avRecvBuf);
+  m_iPMng[comm]->reduce(reduceType, avRecvBuf);
 
   return MPI_SUCCESS;
 }
