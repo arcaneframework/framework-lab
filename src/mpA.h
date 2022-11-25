@@ -21,6 +21,9 @@
 int world_rank = -1;
 #endif
 
+#include <mpiArcane.h>
+MpiArcane* mpiArcane = nullptr;
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -32,14 +35,6 @@ int world_rank = -1;
 #define MPI_Status_source(a) ((a)->MPI_SOURCE)
 #define MPI_Status_error(a) ((a)->MPI_ERROR)
 #define MPI_Status_tag(a) ((a)->MPI_TAG)
-
-int MPA_Init(IParallelMng *)
-{
-  #ifdef PRINT_CALL
-  std::cout << "--------------- MPA_Init()" << std::endl;
-  #endif
-  return MPI_SUCCESS;
-}
 
 int MPA_Init(int *argc, char ***argv)
 {
@@ -401,9 +396,7 @@ int MPA_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-#include <mpiArcane.h>
 
-MpiArcane* mpiArcane = nullptr;
 
 using MPA_Status  = Arccore::MessagePassing::MessageId;
 
@@ -427,7 +420,6 @@ using MPA_Status  = Arccore::MessagePassing::MessageId;
 
 MPA_Status* MPA_STATUS;
 
-int MPA_Init(IParallelMng *);
 int MPA_Init(int*, char***);
 int MPA_Initialized(int *);
 int MPA_Finalize(void);
@@ -479,29 +471,6 @@ int MPA_Get_count(const MPA_Status *, MPI_Datatype, int *);
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
-
-int MPA_Init(IParallelMng *iPMng)
-{
-
-  #ifdef PRINT_CALL
-  std::cout << "--------------- MPA_Init()" << std::endl;
-  #endif
-
-  int isInit = false;
-  MPA_Initialized(&isInit);
-  if(isInit){
-    return MPI_ERR_OTHER;
-  }
-  iPMng->barrier();
-
-  if(iPMng->commRank() == 0){
-    mpiArcane = new MpiArcane();
-    MPA_STATUS = new MPA_Status();
-  }
-  iPMng->barrier();
-
-  return mpiArcane->MpiArcane_Init(iPMng);
-}
 
 int MPA_Init(int *argc, char ***argv)
 {
