@@ -3,7 +3,7 @@ project(mpA LANGUAGES CXX C)
 
 find_package(Arcane REQUIRED)
 
-add_executable(mpA main.cc
+add_executable(mpA main.cc ShMemArcane.cc MpiArcane.cc
   SayHelloModule.cc SayHello_axl.h)
 
 arcane_generate_axl(SayHello)

@@ -14,6 +14,9 @@
 #ifndef MPA_H
 #define MPA_H
 
+#include <IPMngArcane.h>
+IPMngArcane* mpiArcane = nullptr;
+
 //#define useMPI
 #define PRINT_CALL
 
@@ -21,8 +24,6 @@
 int world_rank = -1;
 #endif
 
-#include <mpiArcane.h>
-MpiArcane* mpiArcane = nullptr;
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -420,57 +421,6 @@ using MPA_Status  = Arccore::MessagePassing::MessageId;
 
 MPA_Status* MPA_STATUS;
 
-int MPA_Init(int*, char***);
-int MPA_Initialized(int *);
-int MPA_Finalize(void);
-int MPA_Abort(MPA_Comm, int);
-
-int MPA_Comm_split(MPA_Comm, int, int, MPA_Comm *);
-int MPA_Comm_dup(MPA_Comm, MPA_Comm *);
-
-int MPA_Comm_size(MPA_Comm, int *);
-int MPA_Comm_rank(MPA_Comm, int *);
-
-int MPA_Send(const void*, int, MPI_Datatype, int, int, MPA_Comm);
-int MPA_Recv(void*, int, MPI_Datatype, int, int, MPA_Comm, MPA_Status *);
-
-int MPA_Isend(const void *, int, MPI_Datatype, int, int, MPA_Comm, MPA_Request *);
-int MPA_Irecv(void*, int, MPI_Datatype, int, int, MPA_Comm, MPA_Request *);
-
-int MPA_Type_size(MPI_Datatype , int *);
-
-int MPA_Wait(MPA_Request *, MPA_Status *);
-int MPA_Waitall(int, MPA_Request *, MPA_Status *);
-int MPA_Waitany(int, MPA_Request *, int *, MPA_Status *);
-
-int MPA_Test(MPA_Request *, int *, MPA_Status *);
-int MPA_Testall(int, MPA_Request *, int *, MPA_Status *);
-
-int MPA_Barrier(MPA_Comm);
-
-int MPA_Bcast(void *, int, MPI_Datatype, int, MPA_Comm);
-
-int MPA_Gather(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPA_Comm);
-int MPA_Gatherv(const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, int, MPA_Comm);
-
-int MPA_Allgather(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, MPA_Comm);
-int MPA_Allgatherv(const void *, int, MPI_Datatype, void *, const int *, const int *, MPI_Datatype, MPA_Comm);
-
-int MPA_Reduce(const void *, void *, int, MPI_Datatype, MPI_Op, int, MPA_Comm);
-int MPA_Allreduce(const void *, void *, int, MPI_Datatype, MPI_Op, MPA_Comm);
-
-int MPA_Scatter(const void *, int, MPI_Datatype, void *, int, MPI_Datatype, int, MPA_Comm);
-int MPA_Scatterv(const void *, const int *, const int *, MPI_Datatype, void *, int, MPI_Datatype, int, MPA_Comm);
-
-int MPA_Probe(int, int, MPA_Comm, MPA_Status *);
-int MPA_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MPA_Status *status);
-
-int MPA_Get_count(const MPA_Status *, MPI_Datatype, int *);
-
-
-
-/*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 int MPA_Init(int *argc, char ***argv)
 {
@@ -496,15 +446,15 @@ int MPA_Finalize(void)
   }
 
   int rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &rank);
 
-  mpiArcane->MpiArcane_Barrier(MPA_COMM_WORLD);
+  mpiArcane->Barrier(MPA_COMM_WORLD);
 
   #ifdef PRINT_CALL
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Finalize()" << std::endl;
   #endif
 
-  mpiArcane->MpiArcane_Finalize();
+  mpiArcane->Finalize();
 
 
   if(rank == 0){
@@ -524,7 +474,7 @@ int MPA_Abort(MPA_Comm comm, int errorcode)
   std::cout << "--------------- MPA_Abort()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Abort(comm, errorcode);
+  return mpiArcane->Abort(comm, errorcode);
 }
 
 
@@ -537,11 +487,11 @@ int MPA_Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Comm_split()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Comm_split(comm, color, key, newcomm);
+  return mpiArcane->Comm_split(comm, color, key, newcomm);
 }
 
 int MPA_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
@@ -550,11 +500,11 @@ int MPA_Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Comm_dup()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Comm_dup(comm, newcomm);
+  return mpiArcane->Comm_dup(comm, newcomm);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -566,11 +516,11 @@ int MPA_Comm_size(MPA_Comm comm, int *size)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Comm_size()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Comm_size(comm, size);
+  return mpiArcane->Comm_size(comm, size);
 }
 
 int MPA_Comm_rank(MPA_Comm comm, int *rank)
@@ -581,7 +531,7 @@ int MPA_Comm_rank(MPA_Comm comm, int *rank)
   std::cout << "--------------- MPA_Comm_rank()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Comm_rank(comm, rank);
+  return mpiArcane->Comm_rank(comm, rank);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -593,9 +543,9 @@ int MPA_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
-  mpiArcane->MpiArcane_Comm_rank(comm, &rank);
+  mpiArcane->Comm_rank(comm, &rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Send("
             << "source=" << rank
             << ", dest=" << dest
@@ -604,13 +554,8 @@ int MPA_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
             << ")" << std::endl;
   #endif
 
-  int sizeof_type;
-  int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
-  if(error != MPI_SUCCESS) return error;
-
   MPA_Request req;
-
-  return mpiArcane->MpiArcane_Send(buf, sizeof_type*count, dest, tag, comm, &req, true);
+  return mpiArcane->Send(buf, count, datatype, dest, tag, comm, &req, true);
 }
 
 int MPA_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm comm, MPA_Status *status)
@@ -619,9 +564,9 @@ int MPA_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, M
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
-  mpiArcane->MpiArcane_Comm_rank(comm, &rank);
+  mpiArcane->Comm_rank(comm, &rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Recv("
             << "source=" << source
             << ", dest=" << rank
@@ -630,14 +575,8 @@ int MPA_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, M
             << ")" << std::endl;
   #endif
 
-  int sizeof_type;
-  int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
-  if(error != MPI_SUCCESS) return error;
-
   MPA_Request req;
-
-  error = mpiArcane->MpiArcane_Recv(buf, sizeof_type*count, source, tag, comm, &req, status, true);
-  return error;
+  return mpiArcane->Recv(buf, count, datatype, source, tag, comm, &req, status, true);
 }
 
 
@@ -648,9 +587,9 @@ int MPA_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
-  mpiArcane->MpiArcane_Comm_rank(comm, &rank);
+  mpiArcane->Comm_rank(comm, &rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Isend("
             << "source=" << rank
             << ", dest=" << dest
@@ -659,11 +598,7 @@ int MPA_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
             << ")" << std::endl;
   #endif
 
-  int sizeof_type;
-  int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Send(buf, sizeof_type*count, dest, tag, comm, request, false);
+  return mpiArcane->Send(buf, count, datatype, dest, tag, comm, request, false);
 }
 
 int MPA_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm comm, MPA_Request *request)
@@ -672,9 +607,9 @@ int MPA_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, 
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
-  mpiArcane->MpiArcane_Comm_rank(comm, &rank);
+  mpiArcane->Comm_rank(comm, &rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Irecv("
             << "source=" << source
             << ", dest=" << rank
@@ -683,12 +618,8 @@ int MPA_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, 
             << ")" << std::endl;
   #endif
 
-  int sizeof_type;
-  int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
-  if(error != MPI_SUCCESS) return error;
   MessageId mId;
-
-  return mpiArcane->MpiArcane_Recv(buf, sizeof_type*count, source, tag, comm, request, &mId, false);
+  return mpiArcane->Recv(buf, count, datatype, source, tag, comm, request, &mId, false);
 }
 
 
@@ -701,11 +632,11 @@ int MPA_Type_size(MPI_Datatype datatype, int *size)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Type_size()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Type_size(datatype, size);
+  return mpiArcane->Type_size(datatype, size);
 }
 
 int MPA_Wait(MPA_Request *request, MPA_Status *status)
@@ -714,11 +645,11 @@ int MPA_Wait(MPA_Request *request, MPA_Status *status)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Wait()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Wait(request);
+  return mpiArcane->Wait(request);
 }
 
 int MPA_Waitall(int count, MPA_Request *array_of_requests, MPA_Status *array_of_statuses)
@@ -727,11 +658,11 @@ int MPA_Waitall(int count, MPA_Request *array_of_requests, MPA_Status *array_of_
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Waitall()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Waitall(count, array_of_requests);
+  return mpiArcane->Waitall(count, array_of_requests);
 }
 
 int MPA_Waitany(int count, MPA_Request *array_of_requests, int *index, MPA_Status *status)
@@ -740,11 +671,11 @@ int MPA_Waitany(int count, MPA_Request *array_of_requests, int *index, MPA_Statu
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Waitany()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Waitany(count, array_of_requests, index);
+  return mpiArcane->Waitany(count, array_of_requests, index);
 }
 
 int MPA_Test(MPA_Request *request, int *flag, MPA_Status *status)
@@ -753,11 +684,11 @@ int MPA_Test(MPA_Request *request, int *flag, MPA_Status *status)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Test()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Test(request, flag);
+  return mpiArcane->Test(request, flag);
 }
 
 int MPA_Testall(int count, MPA_Request *array_of_requests, int *flag, MPA_Status *array_of_statuses)
@@ -766,11 +697,11 @@ int MPA_Testall(int count, MPA_Request *array_of_requests, int *flag, MPA_Status
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Testall()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Testall(count, array_of_requests, flag);
+  return mpiArcane->Testall(count, array_of_requests, flag);
 }
 
 int MPA_Barrier(MPA_Comm comm)
@@ -779,11 +710,11 @@ int MPA_Barrier(MPA_Comm comm)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Barrier()" << std::endl;
   #endif
 
-  return mpiArcane->MpiArcane_Barrier(comm);
+  return mpiArcane->Barrier(comm);
 }
 
 int MPA_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPA_Comm comm)
@@ -792,16 +723,13 @@ int MPA_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPA_Comm
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Bcast()" << std::endl;
   #endif
 
 
-  int sizeof_type;
-  int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Bcast(buffer, sizeof_type*count, root, comm);
+  
+  return mpiArcane->Bcast(buffer, count, datatype, root, comm);
 }
 
 int MPA_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
@@ -812,21 +740,13 @@ int MPA_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Gather()" << std::endl;
   #endif
 
-  int sizeof_sendtype;
-  int error = mpiArcane->MpiArcane_Type_size(sendtype, &sizeof_sendtype);
-  if(error != MPI_SUCCESS) return error;
-
-  int sizeof_recvtype;
-  error = mpiArcane->MpiArcane_Type_size(recvtype, &sizeof_recvtype);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Gather(
-    sendbuf, sizeof_sendtype*sendcount, 
-    recvbuf, sizeof_recvtype*recvcount, 
+  return mpiArcane->Gather(
+    sendbuf, sendcount, sendtype,
+    recvbuf, recvcount, recvtype,
     root, comm);
 }
 
@@ -839,21 +759,13 @@ int MPA_Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Gatherv()" << std::endl;
   #endif
 
-  int sizeof_sendtype;
-  int error = mpiArcane->MpiArcane_Type_size(sendtype, &sizeof_sendtype);
-  if(error != MPI_SUCCESS) return error;
-
-  int sizeof_recvtype;
-  error = mpiArcane->MpiArcane_Type_size(recvtype, &sizeof_recvtype);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Gatherv(
-    sendbuf, sizeof_sendtype*sendcount, 
-    recvbuf, recvcounts, displs, sizeof_recvtype,
+  return mpiArcane->Gatherv(
+    sendbuf, sendcount, sendtype,
+    recvbuf, recvcounts, displs, recvtype,
     root, comm);
 }
 
@@ -865,21 +777,14 @@ int MPA_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allgather()" << std::endl;
   #endif
 
-  int sizeof_sendtype;
-  int error = mpiArcane->MpiArcane_Type_size(sendtype, &sizeof_sendtype);
-  if(error != MPI_SUCCESS) return error;
-
-  int sizeof_recvtype;
-  error = mpiArcane->MpiArcane_Type_size(recvtype, &sizeof_recvtype);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Allgather(
-    sendbuf, sizeof_sendtype*sendcount, 
-    recvbuf, sizeof_recvtype*recvcount, 
+  
+  return mpiArcane->Allgather(
+    sendbuf, sendcount, sendtype,
+    recvbuf, recvcount, recvtype,
     comm);
 }
 
@@ -891,34 +796,14 @@ int MPA_Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allgatherv()" << std::endl;
   #endif
-
-  int sizeof_sendtype;
-  int error = mpiArcane->MpiArcane_Type_size(sendtype, &sizeof_sendtype);
-  if(error != MPI_SUCCESS) return error;
-
-  int sizeof_recvtype;
-  error = mpiArcane->MpiArcane_Type_size(recvtype, &sizeof_recvtype);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Allgatherv(
-    sendbuf, sizeof_sendtype*sendcount, 
-    recvbuf, recvcounts, displs, sizeof_recvtype,
+  
+  return mpiArcane->Allgatherv(
+    sendbuf, sendcount, sendtype,
+    recvbuf, recvcounts, displs, recvtype,
     comm);
-}
-
-int MPA_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-               MPI_Op op, int root, MPA_Comm comm)
-{
-  #ifdef PRINT_CALL
-  int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Reduce()" << std::endl;
-  #endif
-
-  return MPA_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
 }
 
 int MPA_Allreduce(const void *sendbuf, void *recvbuf, int count,
@@ -928,64 +813,61 @@ int MPA_Allreduce(const void *sendbuf, void *recvbuf, int count,
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allreduce()" << std::endl;
   #endif
   
-  return mpiArcane->MpiArcane_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+  return mpiArcane->Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
 
 }
 
-int MPA_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-               void *recvbuf, int recvcount, MPI_Datatype recvtype, int root,
-               MPA_Comm comm)
+int MPA_Reduce(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
+               MPI_Op op, int root, MPA_Comm comm)
+{
+  #ifdef PRINT_CALL
+  int world_rank;
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Reduce()" << std::endl;
+  #endif
+
+  return MPA_Allreduce(sendbuf, recvbuf, count, datatype, op, comm);
+}
+
+int MPA_Scatter(const void *sendbuf, int sendcount,
+                MPI_Datatype sendtype,
+                void *recvbuf, int recvcount, MPI_Datatype recvtype,
+                int root, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Scatter()" << std::endl;
   #endif
 
-  int sizeof_sendtype;
-  int error = mpiArcane->MpiArcane_Type_size(sendtype, &sizeof_sendtype);
-  if(error != MPI_SUCCESS) return error;
-
-  int sizeof_recvtype;
-  error = mpiArcane->MpiArcane_Type_size(recvtype, &sizeof_recvtype);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Scatter(
-    sendbuf, sizeof_sendtype*sendcount, 
-    recvbuf, sizeof_recvtype*recvcount, 
+  return mpiArcane->Scatter(
+    sendbuf, sendcount, sendtype,
+    recvbuf, recvcount, recvtype,
     root, comm);
 }
 
 int MPA_Scatterv(const void *sendbuf, const int *sendcounts, const int *displs,
-                 MPI_Datatype sendtype, void *recvbuf, int recvcount,
-                 MPI_Datatype recvtype,
+                 MPI_Datatype sendtype, 
+                 void *recvbuf, int recvcount, MPI_Datatype recvtype,
                  int root, MPA_Comm comm)
 {
   if(mpiArcane == nullptr) return MPI_ERR_ARG;
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Scatterv()" << std::endl;
   #endif
 
-  int sizeof_sendtype;
-  int error = mpiArcane->MpiArcane_Type_size(sendtype, &sizeof_sendtype);
-  if(error != MPI_SUCCESS) return error;
-
-  int sizeof_recvtype;
-  error = mpiArcane->MpiArcane_Type_size(recvtype, &sizeof_recvtype);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Scatterv(
-    sendbuf, sendcounts, displs, sizeof_sendtype,
-    recvbuf, sizeof_recvtype*recvcount,
+  return mpiArcane->Scatterv(
+    sendbuf, sendcounts, displs, sendtype,
+    recvbuf, recvcount, recvtype,
     root, comm);
 }
 
@@ -995,7 +877,7 @@ int MPA_Probe(int source, int tag, MPA_Comm comm, MPA_Status *status)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Probe(" 
             << "provenance=" << source
             << ", tag=" << tag 
@@ -1003,8 +885,7 @@ int MPA_Probe(int source, int tag, MPA_Comm comm, MPA_Status *status)
             << ")" << std::endl;
   #endif
 
-  status->reset();
-  return mpiArcane->MpiArcane_Probe(source, tag, comm, status);
+  return mpiArcane->Probe(source, tag, comm, status);
 }
 
 int MPA_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MPA_Status *status)
@@ -1013,7 +894,7 @@ int MPA_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MPA_Status *status
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Iprobe(" 
             << "provenance=" << source
             << ", tag=" << tag 
@@ -1021,8 +902,7 @@ int MPA_Iprobe(int source, int tag, MPA_Comm comm, int *flag, MPA_Status *status
             << ")" << std::endl;
   #endif
 
-  status->reset();
-  return mpiArcane->MpiArcane_Iprobe(source, tag, comm, flag, status);
+  return mpiArcane->Iprobe(source, tag, comm, flag, status);
 }
 
 int MPA_Get_count(const MPA_Status *status, MPI_Datatype datatype, int *count)
@@ -1031,15 +911,11 @@ int MPA_Get_count(const MPA_Status *status, MPI_Datatype datatype, int *count)
 
   #ifdef PRINT_CALL
   int world_rank;
-  mpiArcane->MpiArcane_Comm_rank(MPA_COMM_WORLD, &world_rank);
+  mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Get_count()" << std::endl;
   #endif
   
-  int sizeof_type;
-  int error = mpiArcane->MpiArcane_Type_size(datatype, &sizeof_type);
-  if(error != MPI_SUCCESS) return error;
-
-  return mpiArcane->MpiArcane_Get_count(status, sizeof_type, count);
+  return mpiArcane->Get_count(status, datatype, count);
 }
 
 

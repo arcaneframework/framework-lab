@@ -5,6 +5,8 @@
 #include <arcane/IParallelMng.h>
 #include <arcane/impl/ArcaneMain.h>
 #include "mpA.h"
+#include "ShMemArcane.h"
+#include "MpiArcane.h"
 
 using namespace Arcane;
 
@@ -23,13 +25,23 @@ beginCompute()
 
   parallelMng()->barrier();
 
-  if(parallelMng()->commRank() == 0){
+  if(!parallelMng()->isThreadImplementation())
+  {
+    std::cout << "---- Mode Mpi" << std::endl;
     mpiArcane = new MpiArcane();
     MPA_STATUS = new MPA_Status();
   }
-  parallelMng()->barrier();
+  else{
+    std::cout << "---- Mode ShMem" << std::endl;
+    if(parallelMng()->commRank() == 0){
+      mpiArcane = new ShMemArcane();
+      MPA_STATUS = new MPA_Status();
+    }
+    parallelMng()->barrier();
+  }
 
-  mpiArcane->MpiArcane_Init(parallelMng());
+
+  mpiArcane->Init(parallelMng());
 
 
   // Test :
