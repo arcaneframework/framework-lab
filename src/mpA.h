@@ -33,10 +33,18 @@ IPMngArcane* mpiArcane = nullptr;
 int world_rank = -1;
 #endif
 
+using MPA_Status = MPI_Status;
+
+
 #define MPI_Status_sizeof() sizeof(MPI_Status)
 #define MPI_Status_source(a) ((a)->MPI_SOURCE)
 #define MPI_Status_error(a) ((a)->MPI_ERROR)
 #define MPI_Status_tag(a) ((a)->MPI_TAG)
+
+MPA_Status* MPA_STATUS;
+
+
+
 
 int MPA_Init(int *argc, char ***argv)
 {
@@ -44,16 +52,14 @@ int MPA_Init(int *argc, char ***argv)
 
   std::cout << "--------------- MPA_Init(argc, argv)" << std::endl;
 
-  int fin = MPI_Init(argc, argv);
 
-  if(fin == MPI_SUCCESS){
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-  }
+  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  
 
-  return fin;
+  return MPI_SUCCESS;
 
   #else
-  return MPI_Init(argc, argv);
+  return MPI_SUCCESS;
   #endif
 }
 

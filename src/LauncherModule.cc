@@ -59,19 +59,13 @@ endCompute()
   if(parallelMng()->isThreadImplementation())
   {
     if(parallelMng()->commRank() == 0){
-      free(mpiArcane);
-      mpiArcane = nullptr;
-
-      free(MPA_STATUS);
-      MPA_STATUS = nullptr;
+      delete mpiArcane;
+      delete MPA_STATUS;
     }
   }
   else{
-    free(mpiArcane);
-    mpiArcane = nullptr;
-
-    free(MPA_STATUS);
-    MPA_STATUS = nullptr;
+    delete mpiArcane;
+    delete MPA_STATUS;
   }
 
 

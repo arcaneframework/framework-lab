@@ -783,6 +783,197 @@ int mMain(int argc, char* argv[])
 
 
 
+
+
+
+
+  // // -------------------- 16 -----------------------
+  // // (deadlock en shmem)
+
+  // {
+  //   switch (world_rank)
+  //   {
+  //   case 0:
+  //   {
+  //     MPI_Comm comm01[2];
+
+  //     MPI_Comm_dup(MPI_COMM_WORLD, &comm01[0]);
+  //     MPI_Comm_dup(MPI_COMM_WORLD, &comm01[1]);
+
+  //     int* buffer = (int*)malloc(sizeof(int) * 1);
+
+  //     int buffer0 = 10;
+
+  //     MPI_Status status;
+  //     MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, comm01[0], &status);
+
+  //     int source = MPI_Status_source(&status);
+  //     int tag = MPI_Status_tag(&status);
+
+
+  //     MPI_Probe(source, tag, comm01[0], &status);
+
+  //     int count;
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 1, 40, comm01[0]);
+
+
+  //     MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, comm01[0], &status);
+
+  //     source = MPI_Status_source(&status);
+  //     tag = MPI_Status_tag(&status);
+
+  //     MPI_Probe(source, tag, comm01[0], &status);
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 1, 40, comm01[0]);
+
+
+  //     MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, comm01[0], &status);
+
+  //     source = MPI_Status_source(&status);
+  //     tag = MPI_Status_tag(&status);
+
+  //     MPI_Probe(source, tag, comm01[0], &status);
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 1, 40, comm01[0]);
+
+
+  //     MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, comm01[0], &status);
+
+  //     source = MPI_Status_source(&status);
+  //     tag = MPI_Status_tag(&status);
+
+  //     MPI_Probe(source, tag, comm01[0], &status);
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 1, 4300001, comm01[1]);
+
+
+  //     MPI_Request req;
+  //     MPI_Isend(&buffer0, 1, MPI_INT, 1, 4300001, comm01[1], &req);
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 1, 4300001, comm01[0]);
+
+
+  //     MPI_Wait(&req, &status);
+
+  //     free(buffer);
+
+  //     break;
+  //   }
+
+
+  //   case 1:
+  //   {
+  //     MPI_Comm comm01[2];
+
+  //     MPI_Comm_dup(MPI_COMM_WORLD, &comm01[0]);
+  //     MPI_Comm_dup(MPI_COMM_WORLD, &comm01[1]);
+  //     int* buffer = (int*)malloc(sizeof(int) * 1);
+
+
+  //     int buffer0 = 10;
+  //     MPI_Send(&buffer0, 1, MPI_INT, 0, 41, comm01[0]);
+
+
+  //     MPI_Status status;
+  //     MPI_Probe(MPI_ANY_SOURCE, 40, comm01[0], &status);
+
+  //     int source = MPI_Status_source(&status);
+  //     int tag = MPI_Status_tag(&status);
+
+  //     int count;
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 0, 41, comm01[0]);
+
+
+  //     MPI_Probe(MPI_ANY_SOURCE, 40, comm01[0], &status);
+
+  //     source = MPI_Status_source(&status);
+  //     tag = MPI_Status_tag(&status);
+
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 0, 41, comm01[0]);
+
+
+  //     MPI_Probe(MPI_ANY_SOURCE, 40, comm01[0], &status);
+
+  //     source = MPI_Status_source(&status);
+  //     tag = MPI_Status_tag(&status);
+
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+
+  //     MPI_Request requests;
+
+  //     MPI_Irecv(buffer, 1, MPI_INT, 0, 4300001, comm01[1], &requests);
+
+
+  //     MPI_Send(&buffer0, 1, MPI_INT, 0, 43, comm01[0]);
+
+
+  //     MPI_Probe(MPI_ANY_SOURCE, 4300001, comm01[0], &status);
+
+  //     source = MPI_Status_source(&status);
+  //     tag = MPI_Status_tag(&status);
+
+  //     MPI_Get_count(&status, MPI_INT, &count);
+
+  //     MPI_Recv(buffer, count, MPI_INT, source, tag, comm01[0], &status);
+
+
+  //     MPI_Wait(&requests, &status);
+
+
+  //     MPI_Irecv(buffer, 1, MPI_INT, 0, 4300001, comm01[1], &requests);
+
+  //     free(buffer);
+  //     break;
+  //   }
+    
+  //   default:
+  //   {
+  //     MPI_Comm comm01[2];
+
+  //     MPI_Comm_dup(MPI_COMM_WORLD, &comm01[0]);
+  //     MPI_Comm_dup(MPI_COMM_WORLD, &comm01[1]);
+  //     break;
+  //   }
+  //   }
+  // }
+
+
+
+
+
   // -------------------- 99 -----------------------
   //MPI_Abort(MPI_COMM_WORLD, EXIT_FAILURE);
 

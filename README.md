@@ -26,5 +26,7 @@ cmake \
   -DCMAKE_BUILD_TYPE=${POINTH_BUILD_TYPE}
 
 ninja
-${POINTH_EXE}
+${POINTH_EXE} -A,S=3 ${POINTH_PROJECT_DIR}/src/nbPart3.arc
+mpirun -n 3 ${POINTH_EXE} ${POINTH_PROJECT_DIR}/src/nbPart3.arc
+
 ```

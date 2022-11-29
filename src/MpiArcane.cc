@@ -688,7 +688,7 @@ Get_count(const MessageId *status, MPI_Datatype datatype, int *count)
   if(*count * sizeof_type != status->sourceInfo().size()){
     *count = MPI_UNDEFINED;
   }
-  
+
   return MPI_SUCCESS;
 }
 
