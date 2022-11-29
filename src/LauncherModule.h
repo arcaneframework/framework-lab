@@ -1,18 +1,18 @@
 // -*- tab-width: 2; indent-tabs-mode: nil; coding: utf-8-with-signature -*-
-#ifndef SAYHELLOMODULE_H
-#define SAYHELLOMODULE_H
+#ifndef LAUNCHERMODULE_H
+#define LAUNCHERMODULE_H
  
 #include <arcane/ITimeLoopMng.h>
-#include "SayHello_axl.h"
+#include "Launcher_axl.h"
  
 using namespace Arcane;
  
-class SayHelloModule
-: public ArcaneSayHelloObject
+class LauncherModule
+: public ArcaneLauncherObject
 {
  public:
-  explicit SayHelloModule(const ModuleBuildInfo& mbi) 
-  : ArcaneSayHelloObject(mbi) { }
+  explicit LauncherModule(const ModuleBuildInfo& mbi) 
+  : ArcaneLauncherObject(mbi) { }
  
  public:
   void beginCompute() override;

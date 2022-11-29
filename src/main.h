@@ -500,15 +500,15 @@ int mMain(int argc, char* argv[])
         MPI_Probe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         printf("Process %d: obtained message status by probing it.\n", world_rank);
 
-        printf("Process %d: Status infos -- Source : %i -- Tag : %i\n", world_rank, MPI_Status_source(&status), MPI_Status_tag(&status));
+        // Get the number of integers in the message probed
+        int count;
+        MPI_Get_count(&status, MPI_INT, &count);
+
+        printf("Process %d: Status infos -- Source : %i -- Tag : %i -- Size : %i\n", world_rank, MPI_Status_source(&status), MPI_Status_tag(&status), count);
 
         if(MPI_Status_source(&status) != 0 || MPI_Status_tag(&status) != 1234){
           printf("!!!!!!!!!!!!!!!!!!!! Erreur au niveau du probe !!!!!!!!!!!!!!!!!!!!!!\n");
         }
-
-        // Get the number of integers in the message probed
-        int count;
-        MPI_Get_count(&status, MPI_INT, &count);
 
         // Allocate the buffer now that we know how many elements there are
         int* buffer = (int*)malloc(sizeof(int) * count);
@@ -528,6 +528,8 @@ int mMain(int argc, char* argv[])
       }
     }
   }
+
+
   // -------------------- 11.5 -----------------------
 
   {
@@ -551,15 +553,16 @@ int mMain(int argc, char* argv[])
           int source = MPI_Status_source(&status);
           int tag = MPI_Status_tag(&status);
 
-          printf("Process %d: Status infos -- Source : %i -- Tag : %i\n", world_rank, source, tag);
-
-
 
           MPI_Probe(source, tag, MPI_COMM_WORLD, &status);
 
           // Get the number of integers in the message probed
           int count;
           MPI_Get_count(&status, MPI_INT, &count);
+
+          printf("Process %d: Status infos -- Source : %i -- Tag : %i -- Size : %i\n", world_rank, MPI_Status_source(&status), MPI_Status_tag(&status), count);
+
+
 
           // Allocate the buffer now that we know how many elements there are
           int* buffer = (int*)malloc(sizeof(int) * count);

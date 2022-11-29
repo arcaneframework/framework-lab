@@ -113,12 +113,7 @@ Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 int MpiArcane::
 Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
-  m_iPMng.add(Ref<IParallelMng>(m_iPMng[comm]));
-  *newcomm = m_iPMng.size() - 1;
-
-  return MPI_SUCCESS;
+  return Comm_split(comm, 0, 0, newcomm);
 }
 
 
@@ -689,6 +684,11 @@ Get_count(const MessageId *status, MPI_Datatype datatype, int *count)
   if(error != MPI_SUCCESS) return error;
 
   *count = int(status->sourceInfo().size() / sizeof_type);
+
+  if(*count * sizeof_type != status->sourceInfo().size()){
+    *count = MPI_UNDEFINED;
+  }
+  
   return MPI_SUCCESS;
 }
 

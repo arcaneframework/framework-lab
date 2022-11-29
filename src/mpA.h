@@ -456,15 +456,6 @@ int MPA_Finalize(void)
 
   mpiArcane->Finalize();
 
-
-  if(rank == 0){
-    free(mpiArcane);
-    mpiArcane = nullptr;
-
-    free(MPA_STATUS);
-    MPA_STATUS = nullptr;
-  }
-
   return MPI_SUCCESS;
 }
 

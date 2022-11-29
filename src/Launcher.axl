@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
-<module name="SayHello" version="1.0">
+<module name="Launcher" version="1.0">
  
-  <description>Descripteur du module SayHello</description>
+  <description>Descripteur du module Launcher</description>
  
   <variables>
   </variables>

@@ -1,7 +1,7 @@
-# mpA: Message Passing Arccore
+# ParallelMngArcane
 
 ## Description
-Ce projet permet d'utiliser l'API Message Passing d'Arccore dans un programme
+Ce projet permet d'utiliser le ParallelMng d'Arcane dans un programme
 utilisant MPI.
 
 ## Compilation
@@ -13,7 +13,7 @@ POINTH_BUILD_TYPE=${ARCANE_BUILD_TYPE}
 POINTH_PROJECT_DIR=framework-lab # your project path
 POINTH_SOURCE_DIR=${POINTH_PROJECT_DIR}
 POINTH_BUILD_DIR=build_lab # your build dir
-POINTH_EXE=${POINTH_BUILD_DIR}/src/mpA
+POINTH_EXE=${POINTH_BUILD_DIR}/src/ParallelMngArcane
 mkdir -p ${POINTH_BUILD_DIR}
 
 cd ${POINTH_BUILD_DIR}
