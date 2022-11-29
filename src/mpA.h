@@ -20,9 +20,6 @@ IPMngArcane* mpiArcane = nullptr;
 //#define useMPI
 #define PRINT_CALL
 
-#ifdef PRINT_CALL
-int world_rank = -1;
-#endif
 
 
 /*---------------------------------------------------------------------------*/
@@ -31,6 +28,10 @@ int world_rank = -1;
 #ifdef useMPI
 
 #include <mpi.h>
+
+#ifdef PRINT_CALL
+int world_rank = -1;
+#endif
 
 #define MPI_Status_sizeof() sizeof(MPI_Status)
 #define MPI_Status_source(a) ((a)->MPI_SOURCE)
@@ -451,7 +452,7 @@ int MPA_Finalize(void)
   mpiArcane->Barrier(MPA_COMM_WORLD);
 
   #ifdef PRINT_CALL
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Finalize()" << std::endl;
+  std::cout << "[World Rank " << rank << "] --------------- MPA_Finalize()" << std::endl;
   #endif
 
   mpiArcane->Finalize();

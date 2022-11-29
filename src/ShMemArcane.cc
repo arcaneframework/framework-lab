@@ -145,14 +145,7 @@ Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 int ShMemArcane::
 Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 {
-  SMA_VERIF_COMM_WORLD(comm);
-
-  m_iPMng[comm]->threadMng()->beginCriticalSection();
-  m_iPMng.add(Ref<IParallelMng>(m_iPMng[comm]));
-  *newcomm = m_iPMng.size() - 1;
-  m_iPMng[comm]->threadMng()->endCriticalSection();
-
-  return MPI_SUCCESS;
+  return Comm_split(comm, 0, 0, newcomm);
 }
 
 
