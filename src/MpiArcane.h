@@ -46,9 +46,6 @@ using namespace Arccore::MessagePassing;
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-#define MA_COMM_WORLD 0
-#define MA_VERIF_COMM_WORLD(comm)   if(comm == MPA_COMM_WORLD) comm = MA_COMM_WORLD;
-
 class MpiArcane : 
 public IPMngArcane
 {

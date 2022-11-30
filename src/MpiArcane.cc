@@ -27,7 +27,7 @@ Init(IParallelMng *iPMng)
   m_isInit = true;
 
   m_requests[0].reset();
-  m_iPMng[MA_COMM_WORLD] = makeRef(iPMng);
+  m_iPMng[MPA_COMM_WORLD] = makeRef(iPMng);
 
   return MPI_SUCCESS;
 }
@@ -47,14 +47,8 @@ Finalize()
 int MpiArcane::
 Abort(MPA_Comm comm, int errorcode)
 {
-  if(!m_isInit) return MPI_SUCCESS;
-
-  m_requests.clear();
-  m_iPMng.clear();
-  m_isInit = false;
-
+  Finalize();
   ARCANE_FATAL("MPI_Abort() with error code: ");
-
   return MPI_SUCCESS;
 }
 
@@ -65,8 +59,6 @@ Abort(MPA_Comm comm, int errorcode)
 int MpiArcane::
 Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int min = m_iPMng[comm]->reduce(ReduceMin, color);
   int max = m_iPMng[comm]->reduce(ReduceMax, color);
 
@@ -123,8 +115,6 @@ Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 int MpiArcane::
 Comm_size(MPA_Comm comm, int *size)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   *size = m_iPMng[comm]->commSize();
   return MPI_SUCCESS;
 }
@@ -132,8 +122,6 @@ Comm_size(MPA_Comm comm, int *size)
 int MpiArcane::
 Comm_rank(MPA_Comm comm, int *rank)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   *rank = m_iPMng[comm]->commRank();
   return MPI_SUCCESS;
 }
@@ -144,8 +132,6 @@ Comm_rank(MPA_Comm comm, int *rank)
 int MpiArcane::
 Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_Comm comm, MPA_Request *request, bool blocking)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int rank;
   Comm_rank(comm, &rank);
 
@@ -178,8 +164,6 @@ Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_C
 int MpiArcane::
 Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm comm, MPA_Request *request, MessageId *status, bool blocking)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int rank;
   Comm_rank(comm, &rank);
 
@@ -238,7 +222,7 @@ Waitall(int count, MPA_Request *array_of_requests)
   for(int i = 0; i < count; i++){
     arc_reqs[i] = m_requests[array_of_requests[i]];
   }
-  m_iPMng[MA_COMM_WORLD]->waitAllRequests(arc_reqs);
+  m_iPMng[MPA_COMM_WORLD]->waitAllRequests(arc_reqs);
   return MPI_SUCCESS;
 }
 
@@ -269,7 +253,7 @@ Test(MPA_Request *request, int *flag)
   UniqueArray<Request> arc_reqs(1);
   arc_reqs[0] = m_requests[*request];
 
-  UniqueArray<Integer> done_requests = m_iPMng[MA_COMM_WORLD]->testSomeRequests(arc_reqs);
+  UniqueArray<Integer> done_requests = m_iPMng[MPA_COMM_WORLD]->testSomeRequests(arc_reqs);
 
 
   if(done_requests.size() == 1){
@@ -301,7 +285,7 @@ Testall(int count, MPA_Request *array_of_requests, int *flag)
     }
   }
 
-  UniqueArray<Integer> done_requests = m_iPMng[MA_COMM_WORLD]->testSomeRequests(arc_reqs);
+  UniqueArray<Integer> done_requests = m_iPMng[MPA_COMM_WORLD]->testSomeRequests(arc_reqs);
 
   for(int i = 0; i < done_requests.size(); i++){
     num_of_done_requests++;
@@ -316,8 +300,6 @@ Testall(int count, MPA_Request *array_of_requests, int *flag)
 int MpiArcane::
 Barrier(MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   m_iPMng[comm]->barrier();
   return MPI_SUCCESS;
 }
@@ -325,8 +307,6 @@ Barrier(MPA_Comm comm)
 int MpiArcane::
 Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int sizeof_type;
   int error = Type_size(datatype, &sizeof_type);
   if(error != MPI_SUCCESS) return error;
@@ -345,8 +325,6 @@ Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                  void *recvbuf, int recvcount, MPI_Datatype recvtype,
                  int root, MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int sizeof_sendtype;
   int error = Type_size(sendtype, &sizeof_sendtype);
   if(error != MPI_SUCCESS) return error;
@@ -371,8 +349,6 @@ Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                   void *recvbuf, const int *recvcounts, const int *displs,
                   MPI_Datatype recvtype, int root, MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int sizeof_sendtype;
   int error = Type_size(sendtype, &sizeof_sendtype);
   if(error != MPI_SUCCESS) return error;
@@ -396,7 +372,9 @@ Gatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     int size;
     Comm_size(comm, &size);
 
-    ByteArrayView avRecvBuf(uaRecv.size(), (Byte*)recvbuf);
+    int recv_size = (recvcounts[size-1] + displs[size-1]) * sizeof_recvtype;
+    ByteArrayView avRecvBuf(recv_size, (Byte*)recvbuf);
+
     int pos = 0;
     for(int i = 0; i < size; i++){
       for(
@@ -417,8 +395,6 @@ Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                     void *recvbuf, int recvcount, MPI_Datatype recvtype,
                     MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int sizeof_sendtype;
   int error = Type_size(sendtype, &sizeof_sendtype);
   if(error != MPI_SUCCESS) return error;
@@ -443,8 +419,6 @@ Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                      void *recvbuf, const int *recvcounts, const int *displs,
                      MPI_Datatype recvtype, MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int sizeof_sendtype;
   int error = Type_size(sendtype, &sizeof_sendtype);
   if(error != MPI_SUCCESS) return error;
@@ -463,7 +437,10 @@ Allgatherv(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
   int size;
   Comm_size(comm, &size);
 
-  ByteArrayView avRecvBuf(uaRecv.size(), (Byte*)recvbuf);
+  int recv_size = (recvcounts[size-1] + displs[size-1]) * sizeof_recvtype;
+
+
+  ByteArrayView avRecvBuf(recv_size, (Byte*)recvbuf);
   int pos = 0;
   for(int i = 0; i < size; i++){
     for(
@@ -482,8 +459,6 @@ int MpiArcane::
 Allreduce(const void *sendbuf, void *recvbuf, int sizeof_msg,
                      MPI_Datatype datatype, MPI_Op op, MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   eReduceType rtype;
   if(op == MPI_MIN)
     rtype = ReduceMin;
@@ -558,8 +533,6 @@ Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                             void *recvbuf, int recvcount, MPI_Datatype recvtype,
                             int root, MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int sizeof_recvtype;
   int error = Type_size(recvtype, &sizeof_recvtype);
   if(error != MPI_SUCCESS) return error;
@@ -598,8 +571,6 @@ Scatterv(const void *sendbuf, const int *sendcounts, const int *displs, MPI_Data
                        void *recvbuf, int recvcount, MPI_Datatype recvtype,
                        int root, MPA_Comm comm)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   int sizeof_sendtype;
   int error = Type_size(sendtype, &sizeof_sendtype);
   if(error != MPI_SUCCESS) return error;
@@ -644,8 +615,6 @@ Scatterv(const void *sendbuf, const int *sendcounts, const int *displs, MPI_Data
 int MpiArcane::
 Probe(int source, int tag, MPA_Comm comm, MessageId *status)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   status->reset();
 
   PointToPointMessageInfo p2pMsgInfo = PointToPointMessageInfo(MessageRank(source), MessageTag(tag), NonBlocking);
@@ -665,8 +634,6 @@ Probe(int source, int tag, MPA_Comm comm, MessageId *status)
 int MpiArcane::
 Iprobe(int source, int tag, MPA_Comm comm, int *flag, MessageId *status)
 {
-  MA_VERIF_COMM_WORLD(comm);
-
   status->reset();
 
   PointToPointMessageInfo p2pMsgInfo = PointToPointMessageInfo(MessageRank(source), MessageTag(tag), NonBlocking);

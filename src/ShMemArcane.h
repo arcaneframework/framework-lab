@@ -46,8 +46,7 @@ using namespace Arccore::MessagePassing;
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-#define SMA_COMM_WORLD m_tids[std::this_thread::get_id()]
-#define SMA_VERIF_COMM_WORLD(comm)   if(comm == MPA_COMM_WORLD) comm = SMA_COMM_WORLD;
+#define TID m_tids[std::this_thread::get_id()]
 
 class ShMemArcane : 
 public IPMngArcane
@@ -126,7 +125,7 @@ public IPMngArcane
 
  protected:
   bool m_isInit;
-  UniqueArray<Ref<IParallelMng>> m_iPMng;
+  UniqueArray<Ref<IParallelMng>>* m_iPMng;
   UniqueArray<Request>* m_requests;
   std::map<std::thread::id, int> m_tids;
 };
@@ -144,7 +143,7 @@ _allReduce(const T *sendbuf, T *recvbuf, int sizeof_msg,
 
   avRecvBuf.copy(avSendBuf);
 
-  m_iPMng[comm]->reduce(reduceType, avRecvBuf);
+  m_iPMng[TID][comm]->reduce(reduceType, avRecvBuf);
 
   return MPI_SUCCESS;
 }
