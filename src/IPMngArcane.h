@@ -24,7 +24,7 @@
 
 #define MPA_Comm int
 #define MPA_COMM_WORLD 0
-#define MPA_Request unsigned long
+#define MPA_Request int
 #define MPA_Request_null 0
 
 using namespace Arcane;

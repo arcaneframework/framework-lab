@@ -26,7 +26,7 @@ Init(IParallelMng *iPMng)
   m_iPMng.resize(1);
   m_isInit = true;
 
-  m_requests[0].reset();
+  m_requests[MPA_Request_null].reset();
   m_iPMng[MPA_COMM_WORLD] = makeRef(iPMng);
 
   return MPI_SUCCESS;
@@ -145,18 +145,14 @@ Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_C
 
   ByteArrayView avBuf(sizeof_msg, (Byte*)buf);
 
-  Request arc_request = m_iPMng[comm]->send(avBuf, p2pMsgInfo);
-
   // Pas besoin de save la request si bloquant.
   if(!blocking){
-    m_requests.add(arc_request);
+    m_requests.add(m_iPMng[comm]->send(avBuf, p2pMsgInfo));
     *request = m_requests.size()-1;
   }
-  //else{
-  //  UniqueArray<Request> reqs(1);
-  //  reqs[0] = arc_request;
-  //  m_iPMng[comm]->freeRequests(reqs);
-  //}
+  else{
+    m_iPMng[comm]->send(avBuf, p2pMsgInfo);
+  }
 
   return MPI_SUCCESS;
 }
@@ -184,18 +180,15 @@ Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm 
 
   ByteArrayView avBuf(sizeof_msg, (Byte*)buf);
 
-  Request arc_request = m_iPMng[comm]->receive(avBuf, p2pMsgInfo);
 
   // Pas besoin de save la request si bloquant.
   if(!blocking){
-    m_requests.add(arc_request);
+    m_requests.add(m_iPMng[comm]->receive(avBuf, p2pMsgInfo));
     *request = m_requests.size()-1;
   }
-  //else{
-    //UniqueArray<Request> reqs(1);
-    //reqs[0] = arc_request;
-    //m_iPMng[comm]->freeRequests(reqs);
-  //}
+  else{
+    m_iPMng[comm]->receive(avBuf, p2pMsgInfo);
+  }
 
   return MPI_SUCCESS;
 }

@@ -33,10 +33,10 @@ Init(IParallelMng *iPMng)
   iPMng->barrier();
 
   m_requests[iPMng->commRank()].resize(1);
-  m_requests[iPMng->commRank()][0].reset();
+  m_requests[iPMng->commRank()][MPA_Request_null].reset();
 
   m_iPMng[iPMng->commRank()].resize(1);
-  m_iPMng[iPMng->commRank()][0] = makeRef(iPMng);
+  m_iPMng[iPMng->commRank()][MPA_COMM_WORLD] = makeRef(iPMng);
 
   iPMng->threadMng()->beginCriticalSection();
   m_tids[std::this_thread::get_id()] = iPMng->commRank();
