@@ -421,6 +421,12 @@ using MPA_Status  = Arccore::MessagePassing::MessageId;
 #define MPI_Status MPA_Status
 #define MPI_Comm MPA_Comm
 
+#undef MPI_ANY_SOURCE
+#define MPI_ANY_SOURCE -1
+
+#undef MPI_ANY_TAG
+#define MPI_ANY_TAG -1
+
 #define MPI_Status_sizeof() sizeof(MPA_Status)
 #define MPI_Status_source(a) ((a)->sourceInfo().rank().value())
 #define MPI_Status_error(a) (MPI_SUCCESS)
