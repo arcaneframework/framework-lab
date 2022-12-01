@@ -303,7 +303,15 @@ int MPA_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                   MPI_Comm comm)
 {
   #ifdef PRINT_CALL
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allgather()" << std::endl;
+  int sizeof_sendtype, sizeof_recvtype;
+  MPI_Type_size(sendtype, &sizeof_sendtype);
+  MPI_Type_size(recvtype, &sizeof_recvtype);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allgather("
+            << "sendcount=" << sendcount 
+            << ", sizeof_sendtype=" << sizeof_sendtype 
+            << ", recvcount=" << recvcount 
+            << ", sizeof_recvtype=" << sizeof_recvtype 
+            << ")" << std::endl;
   #endif
 
   return MPI_Allgather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm);
@@ -782,7 +790,16 @@ int MPA_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
   #ifdef PRINT_CALL
   int world_rank;
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allgather()" << std::endl;
+  int sizeof_sendtype, sizeof_recvtype;
+  mpiArcane->Type_size(sendtype, &sizeof_sendtype);
+  mpiArcane->Type_size(recvtype, &sizeof_recvtype);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Allgather("
+            << "sendcount=" << sendcount 
+            << ", sizeof_sendtype=" << sizeof_sendtype 
+            << ", recvcount=" << recvcount 
+            << ", sizeof_recvtype=" << sizeof_recvtype 
+            << ")" << std::endl;
+
   #endif
 
   
