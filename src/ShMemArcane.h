@@ -5,10 +5,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* mpiArcane.h                                                 (C) 2000-2022 */
+/* ShMemArcane.h                                               (C) 2000-2022 */
 /*                                                                           */
-/* Fichier contenant la classe ShMemArcane permettant de faire les appels vers */
-/* Arcane à partir des infos obtenus des fonctions de mpA.h.                 */
+/* Fichier contenant la classe ShMemArcane permettant de faire les appels    */
+/* vers le ParallelMng (SharedMemoryParallelSuperMng) de Arcane à partir des */
+/* infos obtenus des fonctions de mpA.h.                                     */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 

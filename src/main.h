@@ -1,6 +1,7 @@
 // File with MPI examples to test mpA.
 
 #include <iostream>
+#include "mpA.h"
 
 int mMain(int argc, char* argv[])
 {
@@ -788,7 +789,6 @@ int mMain(int argc, char* argv[])
 
 
   // -------------------- 16 -----------------------
-  // (deadlock en shmem)
 
   {
     switch (world_rank)

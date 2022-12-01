@@ -17,7 +17,10 @@
 #include <IPMngArcane.h>
 IPMngArcane* mpiArcane = nullptr;
 
+// Permet l'utilisation de MPI sans Arcane (pour tester).
 //#define useMPI
+
+// Permet d'afficher les appels MPI.
 #define PRINT_CALL
 
 
@@ -35,15 +38,11 @@ int world_rank = -1;
 
 using MPA_Status = MPI_Status;
 
-
+// Macro permettant de récupérer des infos à partir d'un status.
 #define MPI_Status_sizeof() sizeof(MPI_Status)
 #define MPI_Status_source(a) ((a)->MPI_SOURCE)
 #define MPI_Status_error(a) ((a)->MPI_ERROR)
 #define MPI_Status_tag(a) ((a)->MPI_TAG)
-
-MPA_Status* MPA_STATUS;
-
-
 
 
 int MPA_Init(int *argc, char ***argv)
@@ -269,7 +268,12 @@ int MPA_Barrier(MPI_Comm comm)
 int MPA_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm)
 {
   #ifdef PRINT_CALL
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Bcast()" << std::endl;
+  int sizeof_datatype;
+  MPI_Type_size(datatype, &sizeof_datatype);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Bcast("
+            << "count=" << count 
+            << ", sizeof_datatype=" << sizeof_datatype 
+            << ")" << std::endl;
   #endif
 
   return MPI_Bcast(buffer, count, datatype, root, comm);
@@ -280,7 +284,15 @@ int MPA_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                int root, MPI_Comm comm)
 {
   #ifdef PRINT_CALL
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Gather()" << std::endl;
+  int sizeof_sendtype, sizeof_recvtype;
+  MPI_Type_size(sendtype, &sizeof_sendtype);
+  MPI_Type_size(recvtype, &sizeof_recvtype);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Gather("
+            << "sendcount=" << sendcount 
+            << ", sizeof_sendtype=" << sizeof_sendtype 
+            << ", recvcount=" << recvcount 
+            << ", sizeof_recvtype=" << sizeof_recvtype 
+            << ")" << std::endl;
   #endif
 
   return MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
@@ -353,7 +365,15 @@ int MPA_Scatter(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
                MPI_Comm comm)
 {
   #ifdef PRINT_CALL
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Scatter()" << std::endl;
+  int sizeof_sendtype, sizeof_recvtype;
+  MPI_Type_size(sendtype, &sizeof_sendtype);
+  MPI_Type_size(recvtype, &sizeof_recvtype);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Scatter("
+            << "sendcount=" << sendcount 
+            << ", sizeof_sendtype=" << sizeof_sendtype 
+            << ", recvcount=" << recvcount 
+            << ", sizeof_recvtype=" << sizeof_recvtype 
+            << ")" << std::endl;
   #endif
 
   return MPI_Scatter(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, root, comm);
@@ -413,15 +433,18 @@ int MPA_Get_count(const MPI_Status *status, MPI_Datatype datatype, int *count)
 /*---------------------------------------------------------------------------*/
 
 
-
+// Le MPI_Status devient un MessageId.
 using MPA_Status  = Arccore::MessagePassing::MessageId;
 
+// Pour ces deux macros, on doit utiliser une variable
+// globale pour éviter des problèmes aux probes.
 #undef MPI_STATUS_IGNORE
 #define MPI_STATUS_IGNORE MPA_STATUS
 
 #undef MPI_STATUSES_IGNORE
 #define MPI_STATUSES_IGNORE MPA_STATUS
 
+// Ces macros MPA sont dans le fichier IPMngArcane.h.
 #undef MPI_COMM_WORLD
 #define MPI_COMM_WORLD MPA_COMM_WORLD
 
@@ -429,12 +452,15 @@ using MPA_Status  = Arccore::MessagePassing::MessageId;
 #define MPI_Status MPA_Status
 #define MPI_Comm MPA_Comm
 
+// Pour éviter une incompatibilité avec MPICH
+// (vu que ces macros sont récup dans le mpi.h).
 #undef MPI_ANY_SOURCE
 #define MPI_ANY_SOURCE -1
 
 #undef MPI_ANY_TAG
 #define MPI_ANY_TAG -1
 
+// Macros permettant de récupérer des infos à partir d'un MPA_Status.
 #define MPI_Status_sizeof() sizeof(MPA_Status)
 #define MPI_Status_source(a) ((a)->sourceInfo().rank().value())
 #define MPI_Status_error(a) (MPI_SUCCESS)
@@ -466,15 +492,13 @@ int MPA_Finalize(void)
     return MPI_SUCCESS;
   }
 
+  #ifdef PRINT_CALL
   int rank;
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &rank);
-
-  mpiArcane->Barrier(MPA_COMM_WORLD);
-
-  #ifdef PRINT_CALL
   std::cout << "[World Rank " << rank << "] --------------- MPA_Finalize()" << std::endl;
   #endif
 
+  mpiArcane->Barrier(MPA_COMM_WORLD);
   mpiArcane->Finalize();
 
   return MPI_SUCCESS;
@@ -566,6 +590,7 @@ int MPA_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
             << ")" << std::endl;
   #endif
 
+  // Avec "blocking" = true, le MPA_Request n'est pas utilisé.
   MPA_Request req;
   return mpiArcane->Send(buf, count, datatype, dest, tag, comm, &req, true);
 }
@@ -587,6 +612,7 @@ int MPA_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, M
             << ")" << std::endl;
   #endif
 
+  // Avec "blocking" = true, le MPA_Request n'est pas utilisé.
   MPA_Request req;
   return mpiArcane->Recv(buf, count, datatype, source, tag, comm, &req, status, true);
 }
@@ -736,11 +762,16 @@ int MPA_Bcast(void *buffer, int count, MPI_Datatype datatype, int root, MPA_Comm
   #ifdef PRINT_CALL
   int world_rank;
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Bcast()" << std::endl;
+  int sizeof_datatype;
+  mpiArcane->Type_size(datatype, &sizeof_datatype);
+
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Bcast("
+            << "count=" << count 
+            << ", sizeof_datatype=" << sizeof_datatype 
+            << ", comm=" << comm 
+            << ")" << std::endl;
   #endif
 
-
-  
   return mpiArcane->Bcast(buffer, count, datatype, root, comm);
 }
 
@@ -753,7 +784,16 @@ int MPA_Gather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
   #ifdef PRINT_CALL
   int world_rank;
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Gather()" << std::endl;
+  int sizeof_sendtype, sizeof_recvtype;
+  mpiArcane->Type_size(sendtype, &sizeof_sendtype);
+  mpiArcane->Type_size(recvtype, &sizeof_recvtype);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Gather("
+            << "sendcount=" << sendcount 
+            << ", sizeof_sendtype=" << sizeof_sendtype 
+            << ", recvcount=" << recvcount 
+            << ", sizeof_recvtype=" << sizeof_recvtype 
+            << ", comm=" << comm 
+            << ")" << std::endl;
   #endif
 
   return mpiArcane->Gather(
@@ -798,11 +838,11 @@ int MPA_Allgather(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
             << ", sizeof_sendtype=" << sizeof_sendtype 
             << ", recvcount=" << recvcount 
             << ", sizeof_recvtype=" << sizeof_recvtype 
+            << ", comm=" << comm 
             << ")" << std::endl;
 
   #endif
 
-  
   return mpiArcane->Allgather(
     sendbuf, sendcount, sendtype,
     recvbuf, recvcount, recvtype,
@@ -864,7 +904,16 @@ int MPA_Scatter(const void *sendbuf, int sendcount,
   #ifdef PRINT_CALL
   int world_rank;
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
-  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Scatter()" << std::endl;
+  int sizeof_sendtype, sizeof_recvtype;
+  mpiArcane->Type_size(sendtype, &sizeof_sendtype);
+  mpiArcane->Type_size(recvtype, &sizeof_recvtype);
+  std::cout << "[World Rank " << world_rank << "] --------------- MPA_Scatter("
+            << "sendcount=" << sendcount 
+            << ", sizeof_sendtype=" << sizeof_sendtype 
+            << ", recvcount=" << recvcount 
+            << ", sizeof_recvtype=" << sizeof_recvtype 
+            << ", comm=" << comm 
+            << ")" << std::endl;
   #endif
 
   return mpiArcane->Scatter(
@@ -949,6 +998,7 @@ int MPA_Get_count(const MPA_Status *status, MPI_Datatype datatype, int *count)
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
+// On redirige tous les appels MPI vers nos fonctions.
 #define MPI_Init MPA_Init
 #define MPI_Initialized MPA_Initialized
 #define MPI_Finalize MPA_Finalize

@@ -5,10 +5,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //-----------------------------------------------------------------------------
 /*---------------------------------------------------------------------------*/
-/* mpiArcane.h                                                 (C) 2000-2022 */
+/* IPMngArcane.h                                               (C) 2000-2022 */
 /*                                                                           */
-/* Fichier contenant la classe MpiArcane permettant de faire les appels vers */
-/* Arcane à partir des infos obtenus des fonctions de mpA.h.                 */
+/* Interface pour les classes permettant de manipuler le ParallelMng de      */
+/* Arcane.                                                                   */
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
@@ -16,10 +16,6 @@
 #define IPMNGARCANE_H
 
 #include <arccore/message_passing_mpi/StandaloneMpiMessagePassingMng.h>
-#include <arccore/message_passing/IMessagePassingMng.h>
-
-#include <arccore/collections/Array.h>
-
 #include <arcane/IParallelMng.h>
 
 #define MPA_Comm int

@@ -16,8 +16,5 @@
       </generator>
     </mesh>
   </meshes>
- 
-  <say-hello>
-  </say-hello>
- 
+  
 </case>
