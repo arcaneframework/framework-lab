@@ -70,49 +70,44 @@ Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
   int min = m_iPMng[comm]->reduce(ReduceMin, color);
   int max = m_iPMng[comm]->reduce(ReduceMax, color);
 
-  // On regarde si on est dans les min.
-  // Si oui, on met notre rang dans le tableau.
-  // Sinon, on met -1.
+  // On regarde si on est dans les min ou les max.
+  // Si min, on met notre rang dans le tableau.
+  // Sinon, on met notre -(rang+1) dans le tableau.
   UniqueArray<Integer> min_or_max(1);
-  min_or_max[0] = (color == min ? m_iPMng[comm]->commRank() : -1);
+  min_or_max[0] = (color == min ? m_iPMng[comm]->commRank() : -(m_iPMng[comm]->commRank()+1));
 
   // On crée un tableau pour récupérer le résultat du allGather.
   UniqueArray<Integer> all_ranks(m_iPMng[comm]->commSize());
 
   m_iPMng[comm]->allGather(min_or_max, all_ranks);
 
-  // On crée le tableau des min.
+  // On crée le tableau des rangs min et max.
   UniqueArray<Integer> final_min;
-  for(Integer elem : all_ranks){
-    if(elem != -1)
-      final_min.add(elem);
-  }
-
-  // Même chose avec les max.
-  min_or_max[0] = (color == max ? m_iPMng[comm]->commRank() : -1);
-  m_iPMng[comm]->allGather(min_or_max, all_ranks);
-
   UniqueArray<Integer> final_max;
   for(Integer elem : all_ranks){
-    if(elem != -1)
-      final_max.add(elem);
+    if(elem >= 0)
+      final_min.add(elem);
+    else
+      final_max.add(-(elem+1));
   }
 
   Ref<IParallelMng> new_iPMng;
 
   // On garde le iPMng selon si on est min ou max.
   if(color == min){
-    new_iPMng = m_iPMng[comm]->createSubParallelMngRef(final_min);
-    m_iPMng[comm]->createSubParallelMngRef(final_max);
+    if(final_min.size() > 0)
+      m_iPMng.add(m_iPMng[comm]->createSubParallelMngRef(final_min));
+    if(final_max.size() > 0)
+      m_iPMng[comm]->createSubParallelMngRef(final_max);
   }
   else{
-    m_iPMng[comm]->createSubParallelMngRef(final_min);
-    new_iPMng = m_iPMng[comm]->createSubParallelMngRef(final_max);
+    if(final_min.size() > 0)
+      m_iPMng[comm]->createSubParallelMngRef(final_min);
+    if(final_max.size() > 0)
+      m_iPMng.add(m_iPMng[comm]->createSubParallelMngRef(final_max));
   }
 
-  m_iPMng.add(new_iPMng);
   *newcomm = m_iPMng.size() - 1;
-  
   return MPI_SUCCESS;
 }
 
@@ -120,7 +115,18 @@ Comm_split(MPA_Comm comm, int color, int key, MPA_Comm *newcomm)
 int MpiArcane::
 Comm_dup(MPA_Comm comm, MPA_Comm *newcomm)
 {
-  return Comm_split(comm, 0, 0, newcomm);
+  UniqueArray<Integer> my_rank(1);
+  my_rank[0] = m_iPMng[comm]->commRank();
+
+  // On crée un tableau pour récupérer le résultat du allGather.
+  UniqueArray<Integer> all_ranks(m_iPMng[comm]->commSize());
+
+  m_iPMng[comm]->allGather(my_rank, all_ranks);
+
+  m_iPMng.add(m_iPMng[comm]->createSubParallelMngRef(all_ranks));
+  *newcomm = m_iPMng.size() - 1;
+  
+  return MPI_SUCCESS;
 }
 
 
