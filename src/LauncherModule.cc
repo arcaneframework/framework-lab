@@ -17,11 +17,15 @@
 #include <arcane/IParallelMng.h>
 #include <arcane/impl/ArcaneMain.h>
 #include <arcane/utils/ApplicationInfo.h>
+#include <arcane/parallel/mpithread/HybridParallelMng.h>
+#include <arcane/parallel/mpi/MpiParallelMng.h>
 #include "mpA.h"
+#include "HybridArcane.h"
 #include "ShMemArcane.h"
 #include "MpiArcane.h"
 
 using namespace Arcane;
+using namespace Arcane::MessagePassing;
 
 #include "main.h"
 
@@ -31,9 +35,19 @@ beginCompute()
 {
   info() << "MPA_Init()";
 
-  // On choisit le bon mode selon s'il y a des threads ou non.
-  // A changer pour le mode hybride.
-  if(parallelMng()->isThreadImplementation())
+  // On choisit le bon mode.
+  if(parallelMng()->isHybridImplementation())
+  {
+    info() << "Mode Hybride";
+
+    parallelMng()->barrier();
+    if(parallelMng()->commRank() % parallelMng()->messagePassingMng()->commSize() == 0){
+      mpiArcane = new HybridArcane();
+      MPA_STATUS = new MPA_Status();
+    }
+    parallelMng()->barrier();
+  }
+  else if(parallelMng()->isThreadImplementation())
   {
     info() << "Mode ShMem";
     parallelMng()->barrier();

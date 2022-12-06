@@ -3,7 +3,7 @@ project(ParallelMngArcane LANGUAGES CXX C)
 
 find_package(Arcane REQUIRED)
 
-add_executable(ParallelMngArcane main.cc ShMemArcane.cc MpiArcane.cc
+add_executable(ParallelMngArcane main.cc HybridArcane.cc ShMemArcane.cc MpiArcane.cc
   LauncherModule.cc Launcher_axl.h)
 
 arcane_generate_axl(Launcher)
