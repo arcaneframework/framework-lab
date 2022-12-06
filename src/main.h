@@ -401,7 +401,7 @@ int mMain(int argc, char* argv[])
     {
       int buffer[4] = {11, 111, 211, 311};
       printf("Values to scatter from process %d: %d, %d, %d, %d.\n", world_rank, buffer[0], buffer[1], buffer[2], buffer[3]);
-      MPI_Scatter(buffer, 1, MPI_INT, &my_value, 1, MPI_INT, root_rank, MPI_COMM_WORLD);
+      MPI_Scatter(buffer, 4, MPI_INT, &my_value, 1, MPI_INT, root_rank, MPI_COMM_WORLD);
     }
     else
     {
@@ -972,6 +972,26 @@ int mMain(int argc, char* argv[])
     }
   }
 
+
+  // -------------------- 17 -----------------------
+
+  {
+    // Define my value
+    int my_value = world_rank * 100;
+    printf("Process %d, my value = %d.\n", world_rank, my_value);
+
+    if(world_rank == root_rank)
+    {
+      int buffer[4];
+      MPI_Gather(&my_value, 1, MPI_INT, buffer, 4, MPI_INT, root_rank, MPI_COMM_WORLD);
+      printf("Values collected on process %d: %d, %d, %d, %d.\n", world_rank, buffer[0], buffer[1], buffer[2], buffer[3]);
+    }
+
+    else
+    {
+      MPI_Gather(&my_value, 1, MPI_INT, NULL, 0, MPI_INT, root_rank, MPI_COMM_WORLD);
+    }
+  }
 
 
 

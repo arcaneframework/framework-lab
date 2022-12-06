@@ -582,10 +582,14 @@ int MPA_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
   mpiArcane->Comm_rank(comm, &rank);
+  int sizeof_datatype;
+  mpiArcane->Type_size(datatype, &sizeof_datatype);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Send("
             << "source=" << rank
             << ", dest=" << dest
             << ", tag=" << tag 
+            << ", count=" << count 
+            << ", sizeof_datatype=" << sizeof_datatype 
             << ", comm=" << comm 
             << ")" << std::endl;
   #endif
@@ -604,10 +608,14 @@ int MPA_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, M
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
   mpiArcane->Comm_rank(comm, &rank);
+  int sizeof_datatype;
+  mpiArcane->Type_size(datatype, &sizeof_datatype);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Recv("
             << "source=" << source
             << ", dest=" << rank
             << ", tag=" << tag 
+            << ", count=" << count 
+            << ", sizeof_datatype=" << sizeof_datatype 
             << ", comm=" << comm 
             << ")" << std::endl;
   #endif
@@ -628,10 +636,14 @@ int MPA_Isend(const void *buf, int count, MPI_Datatype datatype, int dest, int t
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
   mpiArcane->Comm_rank(comm, &rank);
+  int sizeof_datatype;
+  mpiArcane->Type_size(datatype, &sizeof_datatype);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Isend("
             << "source=" << rank
             << ", dest=" << dest
             << ", tag=" << tag 
+            << ", count=" << count 
+            << ", sizeof_datatype=" << sizeof_datatype 
             << ", comm=" << comm 
             << ")" << std::endl;
   #endif
@@ -648,10 +660,14 @@ int MPA_Irecv(void *buf, int count, MPI_Datatype datatype, int source, int tag, 
   mpiArcane->Comm_rank(MPA_COMM_WORLD, &world_rank);
   int rank;
   mpiArcane->Comm_rank(comm, &rank);
+  int sizeof_datatype;
+  mpiArcane->Type_size(datatype, &sizeof_datatype);
   std::cout << "[World Rank " << world_rank << "] --------------- MPA_Irecv("
             << "source=" << source
             << ", dest=" << rank
             << ", tag=" << tag 
+            << ", count=" << count 
+            << ", sizeof_datatype=" << sizeof_datatype 
             << ", comm=" << comm 
             << ")" << std::endl;
   #endif

@@ -238,9 +238,12 @@ Waitall(int count, MPA_Request *array_of_requests)
 {
   // On récupère les requests dans le tableau des requests
   // selon les positions contenues dans array_of_requests.
-  UniqueArray<Request> arc_reqs(count);
+  UniqueArray<Request> arc_reqs;
   for(int i = 0; i < count; i++){
-    arc_reqs[i] = m_requests[array_of_requests[i]];
+    if(array_of_requests[i] != MPA_Request_null){
+      arc_reqs.add(m_requests[array_of_requests[i]]);
+      array_of_requests[i] = MPA_Request_null;
+    }
   }
   m_iPMng[MPA_COMM_WORLD]->waitAllRequests(arc_reqs);
   return MPI_SUCCESS;
