@@ -1,5 +1,5 @@
 // -*- tab-width: 2; indent-tabs-mode: nil; coding: utf-8-with-signature -*-
- //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // Copyright 2000-2022 CEA (www.cea.fr) IFPEN (www.ifpenergiesnouvelles.com)
 // See the top-level COPYRIGHT file for details.
 // SPDX-License-Identifier: Apache-2.0
@@ -17,8 +17,6 @@
 #include <arcane/IParallelMng.h>
 #include <arcane/impl/ArcaneMain.h>
 #include <arcane/utils/ApplicationInfo.h>
-#include <arcane/parallel/mpithread/HybridParallelMng.h>
-#include <arcane/parallel/mpi/MpiParallelMng.h>
 #include "mpA.h"
 #include "HybridArcane.h"
 #include "ShMemArcane.h"
@@ -29,35 +27,32 @@ using namespace Arcane::MessagePassing;
 
 #include "main.h"
 
-
 void LauncherModule::
 beginCompute()
 {
   info() << "MPA_Init()";
 
   // On choisit le bon mode.
-  if(parallelMng()->isHybridImplementation())
-  {
+  if (parallelMng()->isHybridImplementation()) {
     info() << "Mode Hybride";
 
     parallelMng()->barrier();
-    if(parallelMng()->commRank() % parallelMng()->messagePassingMng()->commSize() == 0){
+    if (parallelMng()->commRank() % parallelMng()->messagePassingMng()->commSize() == 0) {
       mpiArcane = new HybridArcane();
       MPA_STATUS = new MPA_Status();
     }
     parallelMng()->barrier();
   }
-  else if(parallelMng()->isThreadImplementation())
-  {
+  else if (parallelMng()->isThreadImplementation()) {
     info() << "Mode ShMem";
     parallelMng()->barrier();
-    if(parallelMng()->commRank() == 0){
+    if (parallelMng()->commRank() == 0) {
       mpiArcane = new ShMemArcane();
       MPA_STATUS = new MPA_Status();
     }
     parallelMng()->barrier();
   }
-  else{
+  else {
     info() << "Mode Mpi";
     mpiArcane = new MpiArcane();
     MPA_STATUS = new MPA_Status();
@@ -87,19 +82,24 @@ endCompute()
 {
   info() << "MPA_Finalize()";
 
-  if(parallelMng()->isThreadImplementation())
-  {
-    if(parallelMng()->commRank() == 0){
+  if (parallelMng()->isHybridImplementation()) {
+    if (parallelMng()->commRank() % parallelMng()->messagePassingMng()->commSize() == 0) {
       delete mpiArcane;
       delete MPA_STATUS;
     }
   }
-  else{
+  else if (parallelMng()->isThreadImplementation()) {
+    if (parallelMng()->commRank() == 0) {
+      delete mpiArcane;
+      delete MPA_STATUS;
+    }
+  }
+  else {
     delete mpiArcane;
     delete MPA_STATUS;
   }
 
   subDomain()->timeLoopMng()->stopComputeLoop(true);
 }
- 
+
 ARCANE_REGISTER_MODULE_LAUNCHER(LauncherModule);
