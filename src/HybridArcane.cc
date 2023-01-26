@@ -172,10 +172,22 @@ Comm_size(MPA_Comm comm, int* size)
 }
 
 int HybridArcane::
+_Comm_size(MPA_Comm comm)
+{
+  return m_iPMng[TID][comm]->commSize();
+}
+
+int HybridArcane::
 Comm_rank(MPA_Comm comm, int* rank)
 {
   *rank = m_iPMng[TID][comm]->commRank();
   return MPI_SUCCESS;
+}
+
+int HybridArcane::
+_Comm_rank(MPA_Comm comm)
+{
+  return m_iPMng[TID][comm]->commRank();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -184,9 +196,6 @@ Comm_rank(MPA_Comm comm, int* rank)
 int HybridArcane::
 Send(const void* buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_Comm comm, MPA_Request* request, bool blocking)
 {
-  int rank;
-  Comm_rank(comm, &rank);
-
   // Etant donné qu'on envoi qu'en type 'Byte', on détermine la taille du type.
   int sizeof_type;
   int error = Type_size(datatype, &sizeof_type);
@@ -202,8 +211,8 @@ Send(const void* buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_C
 
   // Pas besoin de save la request si bloquant.
   if (!blocking) {
-    m_requests[rank].add(m_iPMng[TID][comm]->send(avBuf, p2pMsgInfo));
-    *request = m_requests[rank].size() - 1;
+    m_requests[TID].add(m_iPMng[TID][comm]->send(avBuf, p2pMsgInfo));
+    *request = m_requests[TID].size() - 1;
   }
   else {
     m_iPMng[TID][comm]->send(avBuf, p2pMsgInfo);
@@ -215,8 +224,7 @@ Send(const void* buf, int count, MPI_Datatype datatype, int dest, int tag, MPA_C
 int HybridArcane::
 Recv(void* buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm comm, MPA_Request* request, MessageId* status, bool blocking)
 {
-  int rank;
-  Comm_rank(comm, &rank);
+  int rank = _Comm_rank(comm);
 
   // Etant donné qu'on reçoit qu'en type 'Byte', on détermine la taille du type.
   int sizeof_type;
@@ -241,8 +249,8 @@ Recv(void* buf, int count, MPI_Datatype datatype, int source, int tag, MPA_Comm 
 
   // Pas besoin de save la request si bloquant.
   if (!blocking) {
-    m_requests[rank].add(m_iPMng[TID][comm]->receive(avBuf, p2pMsgInfo));
-    *request = m_requests[rank].size() - 1;
+    m_requests[TID].add(m_iPMng[TID][comm]->receive(avBuf, p2pMsgInfo));
+    *request = m_requests[TID].size() - 1;
   }
   else {
     m_iPMng[TID][comm]->receive(avBuf, p2pMsgInfo);
@@ -269,15 +277,12 @@ Wait(MPA_Request* request)
 int HybridArcane::
 Waitall(int count, MPA_Request* array_of_requests)
 {
-  int rank;
-  Comm_rank(MPA_COMM_WORLD, &rank);
-
   // On récupère les requests dans le tableau des requests
   // selon les positions contenues dans array_of_requests.
   UniqueArray<Request> arc_reqs;
   for (int i = 0; i < count; i++) {
     if (array_of_requests[i] != MPA_Request_null) {
-      arc_reqs.add(m_requests[rank][array_of_requests[i]]);
+      arc_reqs.add(m_requests[TID][array_of_requests[i]]);
       array_of_requests[i] = MPA_Request_null;
     }
   }
@@ -321,11 +326,9 @@ Test(MPA_Request* request, int* flag)
     *flag = 2;
     return MPI_SUCCESS;
   }
-  int rank;
-  Comm_rank(MPA_COMM_WORLD, &rank);
 
   UniqueArray<Request> arc_reqs(1);
-  arc_reqs[0] = m_requests[rank][*request];
+  arc_reqs[0] = m_requests[TID][*request];
 
   UniqueArray<Integer> done_requests = m_iPMng[TID][MPA_COMM_WORLD]->testSomeRequests(arc_reqs);
 
@@ -355,9 +358,6 @@ Testall(int count, MPA_Request* array_of_requests, int* flag)
   // et les positions des requests du nouveau tableau des requests
   // non null.
 
-  int rank;
-  Comm_rank(MPA_COMM_WORLD, &rank);
-
   Integer num_of_done_requests = 0;
 
   UniqueArray<Request> arc_reqs;
@@ -369,7 +369,7 @@ Testall(int count, MPA_Request* array_of_requests, int* flag)
       num_of_done_requests++;
     }
     else {
-      arc_reqs.add(m_requests[rank][array_of_requests[i]]);
+      arc_reqs.add(m_requests[TID][array_of_requests[i]]);
       pos_to_pos.add(i);
     }
   }
@@ -433,7 +433,7 @@ Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype,
 
   // La taille des messages en Byte.
   int sizeof_sentmsg = sizeof_sendtype * sendcount;
-  int sizeof_recvmsg = sizeof_recvtype * recvcount;
+  int sizeof_recvmsg = sizeof_recvtype * recvcount * _Comm_size(comm);
 
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
@@ -514,7 +514,7 @@ Allgather(const void* sendbuf, int sendcount, MPI_Datatype sendtype,
 
   // La taille des messages en Byte.
   int sizeof_sentmsg = sizeof_sendtype * sendcount;
-  int sizeof_recvmsg = sizeof_recvtype * recvcount;
+  int sizeof_recvmsg = sizeof_recvtype * recvcount * _Comm_size(comm);
 
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
@@ -665,7 +665,7 @@ Scatter(const void* sendbuf, int sendcount, MPI_Datatype sendtype,
     return error;
 
   // La taille des messages en Byte.
-  int sizeof_sentmsg = sizeof_sendtype * sendcount;
+  int sizeof_sentmsg = sizeof_sendtype * sendcount * _Comm_size(comm);
   int sizeof_recvmsg = sizeof_recvtype * recvcount;
 
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);

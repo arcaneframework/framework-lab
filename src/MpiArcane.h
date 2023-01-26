@@ -48,14 +48,12 @@ using namespace Arccore::MessagePassing;
 class MpiArcane : public IPMngArcane
 {
  public:
-
   MpiArcane()
   : m_isInit(false){};
 
   ~MpiArcane() override = default;
 
  public:
-
   int Init(IParallelMng* iMPMng) override;
   int Finalize() override;
   int Abort(MPA_Comm comm, int errorcode) override;
@@ -115,13 +113,14 @@ class MpiArcane : public IPMngArcane
   int Get_count(const MessageId* status, MPI_Datatype datatype, int* count) override;
 
  private:
+  int _Comm_size(MPA_Comm comm);
+  int _Comm_rank(MPA_Comm comm);
 
   template <class T>
   int _allReduce(const T* sendbuf, T* recvbuf, int sizeof_msg,
                  eReduceType op, MPA_Comm comm);
 
  protected:
-
   bool m_isInit;
   UniqueArray<Ref<IParallelMng>> m_iPMng;
   UniqueArray<Request> m_requests;

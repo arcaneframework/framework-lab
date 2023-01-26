@@ -137,10 +137,22 @@ Comm_size(MPA_Comm comm, int* size)
 }
 
 int MpiArcane::
+_Comm_size(MPA_Comm comm)
+{
+  return m_iPMng[comm]->commSize();
+}
+
+int MpiArcane::
 Comm_rank(MPA_Comm comm, int* rank)
 {
   *rank = m_iPMng[comm]->commRank();
   return MPI_SUCCESS;
+}
+
+int MpiArcane::
+_Comm_rank(MPA_Comm comm)
+{
+  return m_iPMng[comm]->commRank();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -390,7 +402,7 @@ Gather(const void* sendbuf, int sendcount, MPI_Datatype sendtype,
 
   // La taille des messages en Byte.
   int sizeof_sentmsg = sizeof_sendtype * sendcount;
-  int sizeof_recvmsg = sizeof_recvtype * recvcount;
+  int sizeof_recvmsg = sizeof_recvtype * recvcount * _Comm_size(comm);
 
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
@@ -471,7 +483,7 @@ Allgather(const void* sendbuf, int sendcount, MPI_Datatype sendtype,
 
   // La taille des messages en Byte.
   int sizeof_sentmsg = sizeof_sendtype * sendcount;
-  int sizeof_recvmsg = sizeof_recvtype * recvcount;
+  int sizeof_recvmsg = sizeof_recvtype * recvcount * _Comm_size(comm);
 
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
   ByteArrayView avRecvBuf(sizeof_recvmsg, (Byte*)recvbuf);
@@ -622,7 +634,7 @@ Scatter(const void* sendbuf, int sendcount, MPI_Datatype sendtype,
     return error;
 
   // La taille des messages en Byte.
-  int sizeof_sentmsg = sizeof_sendtype * sendcount;
+  int sizeof_sentmsg = sizeof_sendtype * sendcount * _Comm_size(comm);
   int sizeof_recvmsg = sizeof_recvtype * recvcount;
 
   ByteArrayView avSendBuf(sizeof_sentmsg, (Byte*)sendbuf);
