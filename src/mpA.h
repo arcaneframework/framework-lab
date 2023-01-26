@@ -35,6 +35,7 @@ int world_rank = -1;
 #endif
 
 using MPA_Status = MPI_Status;
+MPA_Status* MPA_STATUS;
 
 // Macro permettant de récupérer des infos à partir d'un status.
 #define MPI_Status_sizeof() sizeof(MPI_Status)
