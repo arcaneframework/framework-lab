@@ -96,12 +96,12 @@ Comm_split(MPA_Comm comm, int color, int key, MPA_Comm* newcomm)
   // On garde le iPMng selon si on est min ou max.
   if (color == min) {
     m_iPMng.add(m_iPMng[comm]->createSubParallelMngRef(final_min));
-    if (!final_max.empty())
-      m_iPMng[comm]->createSubParallelMngRef(final_max);
+    //if (!final_max.empty())
+    //  m_iPMng[comm]->createSubParallelMngRef(final_max);
   }
   else {
-    if (!final_min.empty())
-      m_iPMng[comm]->createSubParallelMngRef(final_min);
+    //if (!final_min.empty())
+    //  m_iPMng[comm]->createSubParallelMngRef(final_min);
     m_iPMng.add(m_iPMng[comm]->createSubParallelMngRef(final_max));
   }
 
