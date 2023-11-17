@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.18)
-project(ArcanePython LANGUAGES NONE)
+cmake_minimum_required(VERSION 3.21)
+project(ArcanePython LANGUAGES CXX)
 
 find_package(Arcane REQUIRED)
 
