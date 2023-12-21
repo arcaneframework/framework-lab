@@ -22,3 +22,6 @@ configure_file(python_wrapper.sh.in python_wrapper.sh @ONLY)
 
 add_test(NAME test1 COMMAND ./python_wrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/test1.py)
 add_test(NAME test4 COMMAND ./python_wrapper.sh ${CMAKE_CURRENT_SOURCE_DIR}/tests/test4.py)
+
+# Encore en test.
+# add_subdirectory(test_module)
