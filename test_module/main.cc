@@ -1,4 +1,4 @@
-// -*- tab-width: 2; indent-tabs-mode: nil; coding: utf-8-with-signature -*-
+﻿// -*- tab-width: 2; indent-tabs-mode: nil; coding: utf-8-with-signature -*-
 #include <arcane/launcher/ArcaneLauncher.h>
 
 using namespace Arcane;
@@ -10,5 +10,7 @@ main(int argc,char* argv[])
   auto& app_build_info = ArcaneLauncher::applicationBuildInfo();
   app_build_info.setCodeName("ArcanePython");
   app_build_info.setCodeVersion(VersionInfo(1,0,0));
+  auto& dotnet_info = ArcaneLauncher::dotNetRuntimeInitialisationInfo();
+  dotnet_info.setEmbeddedRuntime("coreclr");
   return ArcaneLauncher::run();
 }

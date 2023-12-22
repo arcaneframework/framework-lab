@@ -6,6 +6,7 @@
     <PackageReference Include="Arcane.Main" Version="3.*" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="pythonnet" Version="3.0.3" />
+    <PackageReference Include="pythonnet" Version="3.0.*" />
+    <PackageReference Include="Numpy.Bare" Version="3.11.*" />
   </ItemGroup>
 </Project>

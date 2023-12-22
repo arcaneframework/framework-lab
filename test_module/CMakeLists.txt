@@ -8,7 +8,7 @@ if (NOT DOTNET_EXEC)
 endif()
 
 add_custom_command(OUTPUT Test.dll
-  COMMAND ${DOTNET_EXEC} publish -o ${CMAKE_CURRENT_BINARY_DIR} -v normal ${CMAKE_CURRENT_SOURCE_DIR}/csharp/Test.csproj
+  COMMAND ${DOTNET_EXEC} publish -o ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/csharp/Test.csproj
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/csharp/Test.csproj ${CMAKE_CURRENT_SOURCE_DIR}/csharp/CSharpCallerModule.cs
 )
 add_custom_target(build_dotnet
