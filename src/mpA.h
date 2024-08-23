@@ -435,7 +435,9 @@ using MPA_Status = Arccore::MessagePassing::MessageId;
 
 // Ces macros MPA sont dans le fichier IPMngArcane.h.
 #undef MPI_COMM_WORLD
+#undef MPI_COMM_NULL
 #define MPI_COMM_WORLD MPA_COMM_WORLD
+#define MPI_COMM_NULL MPA_COMM_NULL
 
 #define MPI_Request MPA_Request
 #define MPI_Status MPA_Status

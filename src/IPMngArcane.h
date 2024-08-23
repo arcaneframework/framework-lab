@@ -20,6 +20,8 @@
 
 #define MPA_Comm int
 #define MPA_COMM_WORLD 0
+#define MPA_COMM_NULL -1
+
 #define MPA_Request int
 #define MPA_Request_null 0
 
